@@ -6,6 +6,9 @@ const port = 3000;
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
+// 정적 파일 제공 위치 설정
+app.use(express.static("public"));
+
 // 정적 파일 제공
 app.use(express.static(__dirname + '/public'));
 
