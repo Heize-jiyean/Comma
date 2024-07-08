@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="../../public/css/login/signup.css">
+    <script src="../../public/js/signup.js"></script>
 </head>
 
 <body>
@@ -46,10 +47,29 @@
                 <span class="error" id="nickname_error"></span>
             </span>
 
+            <label for="gender">성별</label>
+            <span>
+                <select id="gender" class="dropdown">
+                    <option value="" disabled selected>성별</option>
+                    <option value="남">남</option>
+                    <option value="여">여</option>
+                </select>
+            </span>
+            
+            <label for="birth-year">나이</label>
+            <span>
+                <select id="birth-year" class="dropdown">
+                    <option value="" disabled selected>출생연도</option>
+                </select>
+            </span>
+
             <label for="role">역할</label>
             <span class="role">
                 <input type="radio" id="doctor" name="role" value="doctor"> <label for="doctor">의사</label>
                 <input type="radio" id="patient" name="role" value="patient"> <label for="patient">환자</label>
+            </span>
+
+            <span id="addtional-info" style="display: none;">
             </span>
 
             <input type="submit" value="가입하기">
