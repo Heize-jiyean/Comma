@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../../public/css/login/signup.css">
-    <script src="../../public/js/signup.js"></script>
+    <title>Comma</title>
+    <link rel="stylesheet" href="/css/login/signup.css">
+    <script src="/js/signup.js"></script>
 </head>
 
 <body>
     <div class="container">
         <h2>회원가입</h2>
-        <form action="/sign-up" method="POST" id="form">
+        <form action="/auth/submit-signup" method="POST" id="form">
             <label for="email">아이디</label>
             <span>
                 <input type="text" id="email" name="email" placeholder="이메일">
@@ -49,7 +49,7 @@
 
             <label for="gender">성별</label>
             <span>
-                <select id="gender" class="dropdown">
+                <select id="gender" class="dropdown" name="gender">
                     <option value="" disabled selected>성별</option>
                     <option value="남">남</option>
                     <option value="여">여</option>
@@ -58,7 +58,7 @@
             
             <label for="birth-year">나이</label>
             <span>
-                <select id="birth-year" class="dropdown">
+                <select id="birth-year" class="dropdown" name="age">
                     <option value="" disabled selected>출생연도</option>
                 </select>
             </span>

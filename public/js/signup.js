@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const patientRadio = document.getElementById('patient');
     const infoContainer = document.getElementById('addtional-info');
 
-    // 추가 필드 생성
-    function addAdditionalFields() {
+    // 추가 필드 생성-의사
+    function addDoctorInfo() {
         infoContainer.style.display = 'block';
         const specialtyLabel = document.createElement('label');
         specialtyLabel.setAttribute('for', 'specialty');
@@ -32,8 +32,25 @@ document.addEventListener('DOMContentLoaded', function() {
         infoContainer.appendChild(specialtyInput);
     }
 
+    // 추가 필드 생성-환자
+    function addPatientInfo() {
+        infoContainer.style.display = 'block';
+        const specialtyLabel = document.createElement('label');
+        specialtyLabel.setAttribute('for', 'job');
+        specialtyLabel.textContent = '직업';
+
+        const specialtyInput = document.createElement('input');
+        specialtyInput.setAttribute('type', 'text');
+        specialtyInput.setAttribute('id', 'job');
+        specialtyInput.setAttribute('name', 'job');
+
+        // 추가 필드를 컨테이너에 추가
+        infoContainer.appendChild(specialtyLabel);
+        infoContainer.appendChild(specialtyInput);
+    }
+
     // 추가 필드 제거
-    function removeAdditionalFields() {
+    function removeInfo() {
         infoContainer.style.display = 'none';
         while (infoContainer.firstChild) {
             infoContainer.removeChild(infoContainer.firstChild);
@@ -43,14 +60,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // 의사 클릭 시
     doctorRadio.addEventListener('change', function() {
         if (doctorRadio.checked) {
-            addAdditionalFields();
+            removeInfo();
+            addDoctorInfo();
         }
     });
 
     // 환자 클릭 시
     patientRadio.addEventListener('change', function() {
         if (patientRadio.checked) {
-            removeAdditionalFields();
+            removeInfo();
+            addPatientInfo()
         }
     });
 });
