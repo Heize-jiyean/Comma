@@ -1,7 +1,45 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const session = require('express-session');
+const dotenv = require('dotenv');
+const mysql = require('mysql2/promise');
 const port = 3000;
+
+require('dotenv').config();
+
+// DB 연결
+exports.connection = async () => {
+  try {
+      const db = await mysql.createPool({
+          host: process.env.DB_HOST,
+          user: process.env.DB_USER,
+          password: process.env.DB_PW,
+          port: process.env.DB_PORT,
+          database: process.env.DB_NAME,
+          waitForConnections: true,
+          insecureAuth: true,
+          connectionLimit: 30,
+          queueLimit: 10
+      });
+      return db; // 연결된 데이터베이스 객체 반환
+  } catch (error) {
+      console.error("데이터베이스 연결 오류:", error);
+      throw error;
+  }
+};
+
+// session 설정
+app.use(session({
+  secret: process.env.SECRET_KEY,
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
 
 // EJS 설정
 app.set('view engine', 'ejs');
