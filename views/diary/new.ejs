@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일기 작성 페이지</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
+  .container { display: flex; justify-content: space-between; margin: auto; max-width: 1280px; }
+  .panel { padding: 20px; width: 50%; }
+  .input, .textarea, button, input[type="file"] { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; }
+  .textarea { height: 250px; resize: none; }
+  button { background-color: black; color: white; border: none; padding: 15px; cursor: pointer; }
+  .checkbox { margin-right: 5px; }
+  label { font-size: 0.9rem; color: #333; }
+</style>
+
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <input type="file" id="fileInput" accept="image/*">
+    <div id="preview" style="margin-top: 20px; border: 1px solid #ccc; height: 400px; border-radius: 5px;"></div>
+  </div>
+  <div class="panel">
+    <input type="text" id="titleInput" class="input" placeholder="제목을 입력하세요">
+    <textarea id="contentInput" class="textarea" placeholder="내용을 입력하세요"></textarea>
+    <div style="display: flex; align-items: center; margin-top: 10px;">
+      <input type="checkbox" id="public" class="checkbox">
+      <label for="public">상담사가 열람하도록 허용</label>
+    </div>
+    <button id="submitButton">작성 완료</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAoZC_XqFl5HIJ1v3NYGWrCc5CH3FEvva0",
+    authDomain: "comma-5a85c.firebaseapp.com",
+    projectId: "comma-5a85c",
+    storageBucket: "comma-5a85c.appspot.com",
+    messagingSenderId: "193588412726",
+    appId: "1:193588412726:web:2c6994dbe833fff855f397"
+};
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+const titleInput = document.getElementById('titleInput');
+const contentInput = document.getElementById('contentInput');
+const submitButton = document.getElementById('submitButton');
+
+fileInput.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.style.backgroundImage = `url(${e.target.result})`;
+            preview.style.backgroundSize = 'cover';
+            preview.style.backgroundPosition = 'center';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+
+submitButton.addEventListener('click', async () => {
+    const title = titleInput.value;
+    const content = contentInput.value;
+    const is_visible = document.getElementById('public').checked;
+    let image_url = null;
+
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        image_url = await uploadImage(file);
+    }
+
+    const diaryData = {
+        patient_id: 1, // 임시 작성자 id
+        title: title,
+        content: content,
+        image_url: image_url,
+        is_visible: is_visible
+    };
+
+    console.log('Data to send:', diaryData);
+    sendDataToServer(diaryData);
+});
+
+async function uploadImage(file) {
+    const storageRef = ref(storage, 'images/' + file.name);
+    try {
+        const snapshot = await uploadBytes(storageRef, file);
+        return await getDownloadURL(snapshot.ref);
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        return null;
+    }
+}
+
+function sendDataToServer(data) {
+    fetch('/diary/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ diaryData: data })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        if (data.success && data.redirect) {
+            window.location.href = data.redirect;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+</script>
+</body>
+</html>

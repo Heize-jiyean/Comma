@@ -10,7 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "firebase-admin": "^12.2.0",
+    "method-override": "^3.0.0",
+    "mysql2": "^3.10.2"
   }
 }
