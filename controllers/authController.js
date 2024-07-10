@@ -7,7 +7,7 @@ module.exports = {
         res.render('login/signup');
     },
 
-    //singup 진행
+    // singup 진행
     singup: async (req, res) => {
         const userData = req.body;
         userData.password = await bcrypt.hash(userData.password, 10); // 비밀번호 해싱
@@ -21,5 +21,19 @@ module.exports = {
         }
 
         res.send(200);
+    },
+
+    // 이메일 중복 확인
+    checkEmail: async (req, res) => {
+        const email = req.body.email;
+
+        const patientUser = await UserModel.getPatientByEmail(email);
+        const counselorUser = await UserModel.getCounselorByEmail(email);
+
+        if (!patientUser && !counselorUser) {
+            return res.status(200).json({ isDuplicate: false });
+        } else {
+            return res.status(200).json({ isDuplicate: true });
+        }
     }
 };

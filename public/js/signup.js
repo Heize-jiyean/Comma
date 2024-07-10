@@ -73,3 +73,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// 이메일 중복 확인
+async function checkEmailDuplicate(email) {
+    const data = { 'email': email };
+
+    const response = await fetch("/auth/check-email", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+    const isDuplicate = await response.json();
+    console.log(isDuplicate.isDuplicate);
+    return isDuplicate.isDuplicate;
+}
+
+// 인증 이메일 보내기
+async function sendAuthEmail() {
+    const email = document.getElementById("email").value;
+    const emailError = document.getElementById("email_error")
+
+    // 이메일 입력 확인
+    if (!email) {
+        emailError.textContent = '이메일을 입력해 주세요.';
+        emailError.style.display = 'inline';
+        return false;
+    }
+
+    // 이메일 중복 확인
+    if (await checkEmailDuplicate(email)) {
+        emailError.textContent = '사용 중인 이메일입니다.';
+        emailError.style.display = 'inline';
+        return false;
+    }
+
+}
