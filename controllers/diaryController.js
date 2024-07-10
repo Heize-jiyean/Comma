@@ -29,14 +29,60 @@ exports.register = async (req, res) => {
     }
 }
 
+exports.view = async (req, res) => {
+    try {
+        const diaryId = req.params.diaryId;
+        let diary = await diaryModel.findById(diaryId); // const
+        // 회원정보 불러오기 profileModel.findById(diary.patient_id);
+        console.log(diary);
+
+        if (diary) {
+            // 유저 확인 
+            if (diary.is_visible) {
+                // 작성한 회원 본인 && 상담사들
+            } else {
+                // 작성한 회원 본인
+            }
+
+            // 기본이미지 설정
+            if (diary.image_url == null) diary.image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd"
+
+            // 임시 감정 분석 수치
+            diary.joy = 10.00; diary.surprise = 20.00; diary.anger = 30.00; 
+            diary.anxiety = 10.00; diary.hurt = 10.00; diary.sadness = 20.00;
+
+
+            res.render('diary/view', {diary});
+        }
+    } catch (error) {
+        console.error("viewDiary 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+exports.toggleVisibility = async (req, res) => {
+    try {
+        const diaryId = req.params.diaryId;
+
+        // 유저 확인 (게시글 작성 유저 == 요청 유저)
+
+        await diaryModel.toggleVisibility(diaryId);
+
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error("registerDiary 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
 exports.delete = async (req, res) => {
     try {
-        const diaryID = req.params.diaryID;
+        const diaryId = req.params.diaryId;
 
         // 로그인 여부 확인 && 유저 확인
 
         // 스토리지 이미지 삭제
-        const imageUrl = await diaryModel.findImageUrlById(diaryID);
+        const imageUrl = await diaryModel.findImageUrlById(diaryId);
         if (imageUrl) {
             // URL parsing
             const parsedUrl = new URL(imageUrl);
@@ -48,7 +94,7 @@ exports.delete = async (req, res) => {
             const file = bucket.file(filePath);
 
             try {
-                await file.delete();  // 파일 삭제 실행
+                await file.delete();  // 파일 삭제
             } catch (error) {
                 console.error("Failed to delete file", error);
                 res.status(500).send({ error: "Failed to delete file: " + error.message });
@@ -56,7 +102,7 @@ exports.delete = async (req, res) => {
         }
         
         // DB diary 삭제
-        await diaryModel.delete(diaryID);
+        await diaryModel.delete(diaryId);
 
         // redirect
         return res.status(200).send("삭제 성공");
