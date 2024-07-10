@@ -72,6 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
             addPatientInfo()
         }
     });
+
+    // 닉네임 입력 시 유효성 검사 진행
+    document.getElementById('nickname').addEventListener('blur', checkNickname);
 });
 
 // 이메일 중복 확인
@@ -86,7 +89,6 @@ async function checkEmailDuplicate(email) {
         body: JSON.stringify(data)
     })
     const isDuplicate = await response.json();
-    console.log(isDuplicate.isDuplicate);
     return isDuplicate.isDuplicate;
 }
 
@@ -109,4 +111,39 @@ async function sendAuthEmail() {
         return false;
     }
 
+}
+
+// 닉네임 중복 확인
+async function checkNicknameDuplicate(nickname) {
+    const data = { 'nickname': nickname };
+
+    const response = await fetch("/auth/check-nickname", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+    const isDuplicate = await response.json();
+    return isDuplicate.isDuplicate;
+}
+
+// 닉네임 유효성 검사
+async function checkNickname() {
+    const nickname = document.getElementById("nickname").value;
+    const nicknameError = document.getElementById("nickname_error")
+
+    // 닉네임 입력 확인
+    if (!nickname) {
+        nicknameError.textContent = '닉네임을 입력해 주세요.';
+        nicknameError.style.display = 'inline';
+        return false;
+    }
+
+    // 닉네임 중복 확인
+    if (await checkNicknameDuplicate(nickname)) {
+        nicknameError.textContent = '사용 중인 닉네임입니다.';
+        nicknameError.style.display = 'inline';
+        return false;
+    }
 }

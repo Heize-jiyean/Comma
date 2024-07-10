@@ -35,5 +35,20 @@ module.exports = {
         } else {
             return res.status(200).json({ isDuplicate: true });
         }
-    }
+    },
+
+    // 닉네임 중복 확인
+    checkNickname: async (req, res) => {
+        const nickname = req.body.nickname;
+        console.log(nickname);
+
+        const patientUser = await UserModel.getPatientByNickname(nickname);
+        const counselorUser = await UserModel.getCounselorByNickname(nickname);
+
+        if (!patientUser && !counselorUser) {
+            return res.status(200).json({ isDuplicate: false });
+        } else {
+            return res.status(200).json({ isDuplicate: true });
+        }
+    },
 };

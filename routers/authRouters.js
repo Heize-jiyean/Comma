@@ -23,6 +23,7 @@ router.get('/logout', (req, res) => {
 router.get('/signup', authController.singupLoad);
 router.post('/submit-signup', authController.singup);
 router.post('/check-email', authController.checkEmail);
+router.post('/check-nickname', authController.checkNickname);
 
 router.get('/')
 
