@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
 const port = 3000;
 const bodyParser = require('body-parser');
+const layouts = require("express-ejs-layouts");
 
 
 require('dotenv').config();
@@ -49,6 +50,9 @@ app.set('views', path.join(__dirname, 'views'));
 
 // 정적 파일 제공
 app.use(express.static(path.join(__dirname, 'public')));
+
+//layouts 사용
+app.use(layouts);
 
 // form 데이터 파싱 설정
 app.use(bodyParser.urlencoded({ extended: true }));
