@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', async function (event) {
         console.log("되고있나요?")
         event.preventDefault(); // 기본 동작(페이지 새로고침)을 막습니다.
-    
+
         const passwordValid = checkPassword();
         const eamilValid = await sendAuthEmail();
         const nicknameValid = await checkNickname();
@@ -89,9 +89,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const genderValid = checkgender();
         const ageValid = checkAge();
         const roleValid = checkrole();
-    
+
         if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid && ageValid && roleValid) {
-            form.submit();
+            alert('회원가입이 완료되었습니다.');
+            form.submit()
+            window.location.href = '/auth/login';
         }
     });
 });
