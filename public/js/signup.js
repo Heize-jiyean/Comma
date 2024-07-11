@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 출생연도에 1950년 이후 넣기
     const birthYearSelect = document.getElementById('birth-year');
     const currentYear = new Date().getFullYear();
-    for (let year = 1950; year <= currentYear; year++) {
+    for (let year = 1; year <= currentYear; year++) {
         const option = document.createElement('option');
         option.value = year;
         option.textContent = year;
@@ -87,8 +87,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const nicknameValid = await checkNickname();
         const nameValid = checkName();
         const genderValid = checkgender();
+        const ageValid = checkAge();
     
-        if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid) {
+        if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid && ageValid) {
             console.log("됐다~")
             // form.submit();
         }
@@ -238,7 +239,7 @@ function checkgender() {
     const gender = document.getElementById('gender').value;
     const genderError = document.getElementById("gender_error")
 
-    // 이름 입력 확인
+    // 성별 입력 확인
     if (!gender) {
         genderError.textContent = '성별을 선택해 주세요.'
         genderError.style.display = 'inline';
@@ -246,6 +247,22 @@ function checkgender() {
     }
     else {
         genderError.style.display = 'none';
+        return true
+    }
+}
+
+function checkAge() {
+    const age = document.getElementById('birth-year').value;
+    const ageError = document.getElementById("age_error")
+
+    // 나이 입력 확인
+    if (!age) {
+        ageError.textContent = '출생연도를 선택해 주세요.'
+        ageError.style.display = 'inline';
+        return false;
+    }
+    else {
+        ageError.style.display = 'none';
         return true
     }
 }
