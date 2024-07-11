@@ -20,7 +20,7 @@ module.exports = {
             UserModel.createPatient(userData);
         }
 
-        res.send(200);
+        res.redirect("/auth/login");
     },
 
     // 이메일 중복 확인

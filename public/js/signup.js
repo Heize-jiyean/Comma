@@ -93,7 +93,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid && ageValid && roleValid) {
             alert('회원가입이 완료되었습니다.');
             form.submit()
-            window.location.href = '/auth/login';
         }
     });
 });
@@ -169,7 +168,11 @@ async function checkNickname() {
         nicknameError.style.display = 'inline';
         return false;
     }
-
+    else if (nickname.length > 10){
+        nicknameError.textContent = '닉네임은 10자 이하로 입력해 주세요.';
+        nicknameError.style.display = 'inline';
+        return false;
+    }
     // 닉네임 중복 확인
     else if (await checkNicknameDuplicate(nickname)) {
         nicknameError.textContent = '사용 중인 닉네임입니다.';
