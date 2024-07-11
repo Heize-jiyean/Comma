@@ -8,7 +8,6 @@ const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
 
-
 require('dotenv').config();
 
 // DB 연결
@@ -34,15 +33,11 @@ exports.connection = async () => {
 
 // session 설정
 app.use(session({
-  secret: process.env.SECRET_KEY,
+  secret: process.env.SECRET_KEY || 'fallback_secret_key',
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: { secure: false }
 }));
-
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  next();
-});
 
 // EJS 설정
 app.set('view engine', 'ejs');
@@ -58,13 +53,12 @@ app.use(layouts);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// user 변수 설정을 위한 미들웨어
+// user 변수 설정을 위한 미들웨어 (통합)
 app.use((req, res, next) => {
-  res.locals.user = null; // 현재는 항상 null로 설정
+  res.locals.user = req.session.user || null;
   next();
 });
 
-/////////////////////////////////////////
 // 라우트 설정
 const authRouter = require('./routers/authRouters');
 
@@ -73,7 +67,6 @@ app.get('/', (req, res) => {
 });
 
 app.use("/auth", authRouter);
-
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

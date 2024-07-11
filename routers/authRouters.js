@@ -2,29 +2,25 @@ const express = require('express');
 const authController = require('../controllers/authController');
 const router = express.Router();
 
-router.get('/login', (req, res) => {
-    res.render('login/login');
-});
+// 로그인 페이지 렌더링
+router.get('/login', authController.loginLoad);
 
-router.post('/login', (req, res) => {
-    // 로그인 로직 구현 (다음 단계에서 처리)
-});
+// 로그인 처리
+router.post('/login', authController.login);
 
-router.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if(err) {
-            console.log(err);
-        } else {
-            res.redirect('/');
-        }
-    });
-});
+// 로그아웃 처리
+router.get('/logout', authController.logout);
 
+// 회원가입 페이지 렌더링
 router.get('/signup', authController.singupLoad);
-router.post('/submit-signup', authController.singup);
-router.post('/check-email', authController.checkEmail);
-router.post('/check-nickname', authController.checkNickname);
 
-router.get('/')
+// 회원가입 처리
+router.post('/submit-signup', authController.singup);
+
+// 이메일 중복 확인
+router.post('/check-email', authController.checkEmail);
+
+// 닉네임 중복 확인
+router.post('/check-nickname', authController.checkNickname);
 
 module.exports = router;

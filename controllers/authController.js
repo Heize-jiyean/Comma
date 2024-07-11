@@ -51,4 +51,49 @@ module.exports = {
             return res.status(200).json({ isDuplicate: true });
         }
     },
+
+    // 로그인 페이지 로드
+    loginLoad: (req, res) => {
+        res.render('login/login');
+    },
+
+    // 로그인 처리
+    login: async (req, res) => {
+        const { email, password, role } = req.body;
+        try {
+            let user;
+            if (role === 'patient') {
+                user = await UserModel.loginPatient(email, password);
+            } else if (role === 'counselor') {
+                user = await UserModel.loginCounselor(email, password);
+            }
+
+            if (user) {
+                req.session.user = {
+                    id: user.patient_id || user.counselor_id,
+                    email: user.email,
+                    nickname: user.nickname,
+                    role: role
+                };
+                res.json({ success: true });
+            } else {
+                res.status(400).json({ success: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' });
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            res.status(500).json({ success: false, error: '서버 오류가 발생했습니다.' });
+        }
+    },
+
+    // 로그아웃
+    logout: (req, res) => {
+        req.session.destroy((err) => {
+            if (err) {
+                console.error("Logout error:", err);
+                res.status(500).json({ success: false, error: '로그아웃 중 오류가 발생했습니다.' });
+            } else {
+                res.json({ success: true });
+            }
+        });
+    }
 };
