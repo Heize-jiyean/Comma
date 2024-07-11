@@ -85,8 +85,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const passwordValid = checkPassword();
         const eamilValid = await sendAuthEmail();
         const nicknameValid = await checkNickname();
+        const nameValid = checkName();
     
-        if (passwordValid && eamilValid && nicknameValid) {
+        if (passwordValid && eamilValid && nicknameValid && nameValid) {
             console.log("됐다~")
             // form.submit();
         }
@@ -185,21 +186,49 @@ function checkPassword() {
     const confirm_password = document.getElementById("confirm_password").value;
     const confirm_passwordError = document.getElementById("password_confirm_error");
 
+    const hasMinLength = password.length >= 8 && password.length <= 16;
+    const hasNumber = /\d/.test(password);
+    const hasLetter = /[a-zA-Z]/.test(password);
+
     // 비밀번호 입력 확인
     if (!password) {
         passwordError.textContent = '비밀번호를 입력해 주세요.'
         passwordError.style.display = 'inline';
         return false;
     }
+    // 비밀번호 형식 확인
+    else if (!(hasMinLength && hasNumber && hasLetter)) {
+        passwordError.textContent = '8~16자의 영문 대/소문자, 숫자, 특수문자를 사용해 주세요.'
+        passwordError.style.display = 'inline';
+        return false;
+    }
     // 비밀번호 재확인 입력 확인
     else if (password != confirm_password) {
         confirm_passwordError.textContent = '비밀번호가 일치하지 않습니다.'
+        passwordError.style.display = 'none';
         confirm_passwordError.style.display = 'inline';
         return false
     }
     else {
         passwordError.style.display = 'none';
         confirm_passwordError.style.display = 'none';
+        return true
+    }
+}
+
+// 나머지 항목 유효성 검사
+function checkName() {
+    const name = document.getElementById("name").value;
+    const nameError = document.getElementById("name_error")
+
+    // 이름 입력 확인
+    if (!name) {
+        nameError.textContent = '이름을 입력해 주세요.'
+        nameError.style.display = 'inline';
+        return false;
+    }
+    else {
+        nameError.style.display = 'none';
         return true
     }
 }
