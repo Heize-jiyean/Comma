@@ -40,7 +40,6 @@ module.exports = {
     // 닉네임 중복 확인
     checkNickname: async (req, res) => {
         const nickname = req.body.nickname;
-        console.log(nickname);
 
         const patientUser = await UserModel.getPatientByNickname(nickname);
         const counselorUser = await UserModel.getCounselorByNickname(nickname);

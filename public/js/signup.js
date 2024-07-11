@@ -84,8 +84,9 @@ document.addEventListener('DOMContentLoaded', function () {
     
         const passwordValid = checkPassword();
         const eamilValid = await sendAuthEmail();
+        const nicknameValid = await checkNickname();
     
-        if (passwordValid && eamilValid) {
+        if (passwordValid && eamilValid && nicknameValid) {
             console.log("됐다~")
             // form.submit();
         }
@@ -165,10 +166,15 @@ async function checkNickname() {
     }
 
     // 닉네임 중복 확인
-    if (await checkNicknameDuplicate(nickname)) {
+    else if (await checkNicknameDuplicate(nickname)) {
         nicknameError.textContent = '사용 중인 닉네임입니다.';
         nicknameError.style.display = 'inline';
         return false;
+    }
+
+    else {
+        nicknameError.style.display = 'none';
+        return true;
     }
 }
 
