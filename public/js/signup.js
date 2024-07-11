@@ -88,10 +88,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const nameValid = checkName();
         const genderValid = checkgender();
         const ageValid = checkAge();
+        const roleValid = checkrole();
     
-        if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid && ageValid) {
-            console.log("됐다~")
-            // form.submit();
+        if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid && ageValid && roleValid) {
+            form.submit();
         }
     });
 });
@@ -263,6 +263,22 @@ function checkAge() {
     }
     else {
         ageError.style.display = 'none';
+        return true
+    }
+}
+
+function checkrole() {
+    const selectedRole = document.querySelector('input[name="role"]:checked');
+    const roleError = document.getElementById("role_error")
+
+    // 포지션 입력 확인
+    if (!selectedRole) {
+        roleError.textContent = '포지션을 선택해 주세요.'
+        roleError.style.display = 'inline';
+        return false;
+    }
+    else {
+        roleError.style.display = 'none';
         return true
     }
 }
