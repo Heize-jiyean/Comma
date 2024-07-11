@@ -12,7 +12,7 @@ module.exports = {
         const userData = req.body;
         userData.password = await bcrypt.hash(userData.password, 10); // 비밀번호 해싱
         // gender 값을 변환
-        userData.gender = userData.gender === '남' ? 'male' : userData.gender === '여' ? 'female' : '';
+        userData.gender = userData.gender === '남' ? 'male' : userData.gender === '여' ? 'female' : userData.gender === '기타' ? 'other' : '';
 
         if (userData.role == 'doctor') {
             UserModel.createCounselor(userData);

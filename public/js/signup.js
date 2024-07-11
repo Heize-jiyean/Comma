@@ -86,8 +86,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const eamilValid = await sendAuthEmail();
         const nicknameValid = await checkNickname();
         const nameValid = checkName();
+        const genderValid = checkgender();
     
-        if (passwordValid && eamilValid && nicknameValid && nameValid) {
+        if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid) {
             console.log("됐다~")
             // form.submit();
         }
@@ -229,6 +230,22 @@ function checkName() {
     }
     else {
         nameError.style.display = 'none';
+        return true
+    }
+}
+
+function checkgender() {
+    const gender = document.getElementById('gender').value;
+    const genderError = document.getElementById("gender_error")
+
+    // 이름 입력 확인
+    if (!gender) {
+        genderError.textContent = '성별을 선택해 주세요.'
+        genderError.style.display = 'inline';
+        return false;
+    }
+    else {
+        genderError.style.display = 'none';
         return true
     }
 }
