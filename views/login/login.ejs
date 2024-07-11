@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>Comma - 로그인</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-body {
+            margin-bottom: 20px;
+        }
+        .login-footer {
+            text-align: center;
+        }
+        .login-footer a {
+            color: #007bff;
+        }
+        .btn-custom {
+            background-color: #5FD068;
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #4FBF58;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="login-container">
+            <div class="login-header">
+                <h2>로그인</h2>
+            </div>
+            <div class="login-body">
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">이메일</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="이메일을 입력하세요" required>
+                        <div id="email-error" class="text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">비밀번호</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="비밀번호를 입력하세요" required>
+                        <div id="password-error" class="text-danger"></div>
+                    </div>
+                    <button type="submit" class="btn btn-custom w-100">로그인</button>
+                </form>
+            </div>
+            <div class="login-footer">
+                <p>계정이 없으신가요? <a href="/auth/signup">회원가입</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // 에러 메시지 초기화
+            document.getElementById('email-error').innerText = '';
+            document.getElementById('password-error').innerText = '';
+
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (result.field === 'email') {
+                    document.getElementById('email-error').innerText = result.error;
+                } else if (result.field === 'password') {
+                    document.getElementById('password-error').innerText = result.error;
+                }
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+            } else {
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/css/login/signup.css">
+    <script src="/js/signup.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>회원가입</h2>
+        <form action="/auth/submit-signup" method="POST" id="form">
+            <label for="email">아이디</label>
+            <span>
+                <input type="text" id="email" name="email" placeholder="이메일">
+                <button type="button" class="email_btn" id="email_btn" onclick="sendAuthEmail()">인증번호 받기</button>
+                <span class="error" id="email_error"></span>
+                <input type="text" id="check_email" name="check_email" placeholder="인증번호를 입력하세요" disabled>
+                <button type="button" class="check_email_btn" id="check_email_btn">인증번호 확인</button>
+                <span class="error" id="email_check_error"></span>
+            </span>
+
+            <label for="password">비밀번호</label>
+            <span>
+                <input type="password" id="password" name="password" placeholder="비밀번호">
+                <span class="error" id="password_error"></span>
+            </span>
+
+            <label for="confirm_password">비밀번호 재확인</label>
+            <span>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="비밀번호 재확인">
+                <span class="error" id="password_confirm_error"></span>
+            </span>
+
+            <label for="name">이름</label>
+            <span>
+                <input type="text" id="name" name="name" placeholder="이름">
+                <span class="error" id="name_error"></span>
+            </span>
+
+            <label for="nickname">닉네임</label>
+            <span>
+                <input type="text" id="nickname" name="nickname" placeholder="닉네임">
+                <span class="error" id="nickname_error"></span>
+            </span>
+
+            <label for="gender">성별</label>
+            <span>
+                <select id="gender" class="dropdown" name="gender">
+                    <option value="" disabled selected>성별</option>
+                    <option value="남">남</option>
+                    <option value="여">여</option>
+                    <option value="기타">기타</option>
+                </select>
+                <span class="error" id="gender_error"></span>
+            </span>
+            
+            <label for="birth-year">나이</label>
+            <span>
+                <select id="birth-year" class="dropdown" name="age">
+                    <option value="" disabled selected>출생연도</option>
+                </select>
+                <span class="error" id="age_error"></span>
+            </span>
+
+            <label for="role">포지션</label>
+            <span class="role">
+                <input type="radio" id="doctor" name="role" value="doctor"> <label for="doctor">의사</label>
+                <input type="radio" id="patient" name="role" value="patient"> <label for="patient">환자</label>
+                <span class="error" id="role_error"></span>
+            </span>
+
+            <span id="addtional-info" style="display: none;">
+            </span>
+
+            <input type="submit" value="가입하기">
+        </form>
+    </div>
+
+</body>
+
+</html>
