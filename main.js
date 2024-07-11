@@ -4,14 +4,11 @@ const methodOverride = require("method-override");
 const app = express();
 const path = require('path');
 const session = require('express-session');
-const dotenv = require('dotenv');
-const mysql = require('mysql2/promise');
 const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
 
 require('dotenv').config();
-
 // DB 연결
 exports.connection = async () => {
   try {
