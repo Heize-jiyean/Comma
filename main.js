@@ -1,15 +1,14 @@
 const express = require('express');
+const mysql = require('mysql2/promise');
+const methodOverride = require("method-override");
 const app = express();
 const path = require('path');
 const session = require('express-session');
-const dotenv = require('dotenv');
-const mysql = require('mysql2/promise');
 const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
 
 require('dotenv').config();
-
 // DB 연결
 exports.connection = async () => {
   try {
@@ -39,6 +38,15 @@ app.use(session({
   cookie: { secure: false }
 }));
 
+
+// Firebase SDK 설정
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json');  // 서비스 계정 키 파일의 경로
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
 // EJS 설정
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -62,10 +70,15 @@ app.use((req, res, next) => {
 // 라우트 설정
 const authRouter = require('./routers/authRouters');
 
+app.use(methodOverride("_method"));
+
 app.get('/', (req, res) => {
   res.render('main');
 });
 
+//router
+const diaryRouter = require('./routers/diaryRouter');
+app.use("/diary", diaryRouter);
 app.use("/auth", authRouter);
 
 app.listen(port, () => {
