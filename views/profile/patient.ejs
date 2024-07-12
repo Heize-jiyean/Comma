@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>환자 프로필 페이지</title>
-    <link rel="stylesheet" href="/styles/main.css"> <!-- 스타일시트 링크 -->
+    <link rel="stylesheet" href="/styles/main.css">
     <style>
         body {
             font-family: 'Pretendard-Regular', sans-serif;
-            background: #f4f4f4;
+            background-color: #F4F5F8;
             margin: 0;
             padding: 0;
         }
@@ -15,43 +15,27 @@
             display: flex;
             max-width: 1200px;
             margin: auto;
+            background-color: yellow; /* 예시 배경색 */
         }
         .profile-container {
-            flex: 1;
+            flex: none;
+            width: 360px;
             padding: 20px;
-            max-width: 300px;
-            background: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            background: pink; /* 프로필 배경색 */
             height: fit-content;
             position: sticky;
-            top: 20px; /* Adjust based on header height */
+            top: 120px; /* 스크롤 시 상단에 고정 */
         }
         .content-container {
             flex: 3;
             padding: 20px;
-        }
-        .profile-card {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-        }
-        .profile-image {
-            width: 100px;
-            height: 100px;
-            background: url('https://i.imgur.com/3beQH5s.jpeg') no-repeat center center;
-            background-size: cover;
-            border-radius: 50%;
-            margin-right: 20px;
-        }
-        .profile-details {
-            display: flex;
-            flex-direction: column;
+            background-color: aquamarine; /* 콘텐츠 배경색 */
+            overflow-y: auto; /* 스크롤 가능 설정 */
         }
         .chart-container, .diary-entries, .message-book {
-            background: #FFFFFF;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: #fff;
             border-radius: 10px;
+            border: 1px solid #D6D7DA;
             padding: 20px;
             margin-bottom: 20px;
         }
