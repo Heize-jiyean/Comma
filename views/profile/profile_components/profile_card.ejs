@@ -4,7 +4,7 @@
         background: #fff;
         border-radius: 20px;
         border: 1px solid #D6D7DA;
-        padding: 20px;
+        padding: 40px;
     }
     
     .profile-image {
@@ -42,10 +42,35 @@
 <div class="profile-card">
     <div class="profile-image"></div>
     <div class="profile-details">
-        <h2>홍길동</h2> <!-- 사용자 이름 -->
-        <p>gildong</p> <!-- 사용자 닉네임 -->
+        <!-- 이름 -->
+        <h2>
+            <% if (type === 'patient') { %>
+                <%- patientUser.name %>
+            <% } else { %>
+                <%- counselorUser.name %>
+            <% } %>
+        </h2>
+        <!-- 닉네임 -->
+        <p>
+            <% if (type === 'patient') { %>
+                <%- patientUser.nickname %>
+            <% } else { %>
+                <%- counselorUser.nickname %>
+            <% } %>
+        </p>
+        
+        <!-- TODO: 환자or상담사 구분 배지 필요 -->
     </div>
     <div class="profile-bio"">
-        <p>안녕하세요 저는 홍길동입니다. 안녕하세요 저는 홍길동입니다. 안녕하세요 저는 홍길동입니다. </p>   <!-- 사용자 바이오 -->
+        <!-- 바이오 -->
+        <p>
+            <% if (type === 'patient') { %>
+                <%- patientUser.bio %>
+            <% } else { %>
+                <%- counselorUser.bio %>
+            <% } %>
+        </p>
+
+        <!-- TODO: 관심 환자or상담사 등록 버튼 필요 -->
     </div>
 </div>
