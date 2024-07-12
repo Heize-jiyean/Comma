@@ -32,13 +32,14 @@
             background-color: aquamarine; /* 콘텐츠 배경색 */
             overflow-y: auto; /* 스크롤 가능 설정 */
         }
-        .chart-container, .diary-entries, .message-book {
+        .chart-container, .diary-container, .guestbook-container {
             background: #fff;
-            border-radius: 10px;
+            border-radius: 20px;
             border: 1px solid #D6D7DA;
             padding: 20px;
             margin-bottom: 20px;
         }
+
     </style>
 </head>
 <body>
@@ -51,23 +52,23 @@
                 <h2>나의 감정 차트</h2>
                 <img src="https://i.imgur.com/Q6rwO2A.png" alt="감정 차트" style="width:100%;">
             </div>
-            <div class="diary-entries">
+            <div class="diary-container">
                 <h2>일기 목록</h2>
-                <div class="entry">
+                <div class="diary">
                     <h3>오늘의 일기 1</h3>
                     <p>오늘은 마음이 많이 편안한 날이었습니다.</p>
                 </div>
-                <div class="entry">
+                <div class="diary">
                     <h3>오늘의 일기 2</h3>
                     <p>오늘은 행복한 일이 많았습니다.</p>
                 </div>
             </div>
-            <div class="message-book">
+            <div class="guestbook-container">
                 <h2>상담사 방명록</h2>
-                <div class="message">
+                <div class="guestbook">
                     <p>구체적인 상담내용 세부사항 기재</p>
                 </div>
-                <div class="message">
+                <div class="guestbook">
                     <p>구체적인 상담내용 세부사항 기재</p>
                 </div>
             </div>
