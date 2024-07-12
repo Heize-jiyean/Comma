@@ -29,9 +29,20 @@ document.addEventListener('DOMContentLoaded', function () {
         specialtyInput.setAttribute('id', 'specialty');
         specialtyInput.setAttribute('name', 'specialty');
 
+        const experienceLabel = document.createElement('label');
+        experienceLabel.setAttribute('for', 'experience');
+        experienceLabel.textContent = '경력';
+
+        const experienceInput = document.createElement('input');
+        experienceInput.setAttribute('type', 'text');
+        experienceInput.setAttribute('id', 'experience');
+        experienceInput.setAttribute('name', 'experience');
+
         // 추가 필드를 컨테이너에 추가
         infoContainer.appendChild(specialtyLabel);
         infoContainer.appendChild(specialtyInput);
+        infoContainer.appendChild(experienceLabel);
+        infoContainer.appendChild(experienceInput);
     }
 
     // 추가 필드 생성-환자
@@ -54,9 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 추가 필드 제거
     function removeInfo() {
         infoContainer.style.display = 'none';
-        while (infoContainer.firstChild) {
-            infoContainer.removeChild(infoContainer.firstChild);
-        }
+        infoContainer.innerHTML = '';
     }
 
     // 의사 클릭 시
@@ -194,6 +203,7 @@ function checkAuthCode() {
     // 인증번호 확인 로직
     // checkEmail은 string이고 authNum은 int타입이라 == 사용
     if (checkEmail == authNum) {
+        alert('인증번호 확인이 완료되었습니다.');
         emailCheckError.style.display = 'none';
         return true;
     } else {
