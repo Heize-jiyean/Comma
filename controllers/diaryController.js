@@ -20,6 +20,9 @@ exports.register = async (req, res) => {
         console.log(diaryData);
 
         // 감정분석
+        // 임시 감정 분석 수치
+        diaryData.joy = 10.00; diaryData.surprise = 20.00; diaryData.anger = 30.00; 
+        diaryData.anxiety = 10.00; diaryData.hurt = 10.00; diaryData.sadness = 20.00;
 
         const savedDiaryId = await diaryModel.register(diaryData);
         return res.json({ success: true, redirect: `/diary/${savedDiaryId}` });
@@ -46,11 +49,6 @@ exports.view = async (req, res) => {
 
             // 기본이미지 설정
             diary.image_url = setDefaultImage(diary.image_url);
-
-            // 임시 감정 분석 수치
-            diary.joy = 10.00; diary.surprise = 20.00; diary.anger = 30.00; 
-            diary.anxiety = 10.00; diary.hurt = 10.00; diary.sadness = 20.00;
-
 
             res.render('diary/view', {diary});
         }
