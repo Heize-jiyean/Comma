@@ -1,4 +1,5 @@
 const UserModel = require('../models/User');
+const DiaryModel = require('../models/Diary')
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -7,12 +8,18 @@ exports.patientProfilePage = async (req, res) => {
     const patientNickname = req.params.patientNickname;
 
     try {
+        // 환자 정보 가져오기
         const patientUser = await UserModel.getPatientByNickname(patientNickname);
         if (!patientUser) {
             res.render("/");    // TODO: 없는 환자인 경우 띄울 페이지
             return;
         }
-        res.render("profile/patient.ejs", { patientUser: patientUser, type: 'patient'})
+
+        // 작성한 일기 가져오기
+        const diaries = await DiaryModel.findAllByPatientId(patientUser.patient_id);
+
+        // 렌더링
+        res.render("profile/patient.ejs", { patientUser: patientUser, type: 'patient', diaries: diaries})
     } catch {
         console.error("환자 프로필 반환 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");

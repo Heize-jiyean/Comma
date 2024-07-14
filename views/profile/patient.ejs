@@ -50,7 +50,7 @@
         </div>
         <div class="content-container">
             <%- include('./profile_components/chart') %>
-            <%- include('./profile_components/diary_preview') %>
+            <%- include('./profile_components/diary_preview', { diaries: diaries }) %>
             <%- include('./profile_components/guestbook_preview') %>
         </div>
     </div>

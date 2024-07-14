@@ -21,6 +21,24 @@
     }
     .diary {
         margin-top: 10px;
+        border-bottom: 1px solid #D6D7DA;
+    }
+    .diary-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .diary-title h3 {
+        margin: 8px 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+    .diary-title span {
+        font-size: 20px;
+        color: #888;
+    }
+    .diary p {
+        font-size: 20px;
     }
     .write-diary-button {
         padding: 10px 20px;
@@ -52,15 +70,19 @@
     <div class="diary-container-header">
         <h2>일기 목록</h2>
         <button class="write-diary-button">일기 작성</button>
-        <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
     </div>
-    <div class="diary">
-        <h3>오늘의 일기 1</h3>
-        <p>오늘은 마음이 많이 편안한 날이었습니다.</p>
-    </div>
-    <div class="diary">
-        <h3>오늘의 일기 2</h3>
-        <p>오늘은 행복한 일이 많았습니다.</p>
-    </div>
+    <% if (diaries && diaries.length > 0) { %>
+        <% diaries.forEach(diary => { %>
+        <div class="diary">
+            <div class="diary-title">
+                <h3><%= diary.title %></h3>
+                <span><%= new Date(diary.created_at).toLocaleDateString() %></span>
+            </div>
+            <p><%= diary.content %></p>
+        </div>
+        <% }) %>
+    <% } else { %>
+        <p>일기가 없습니다.</p>
+    <% } %>
     <button class="view-all-button">전체보기</button>
 </div>
