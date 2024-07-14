@@ -6,19 +6,54 @@
         padding: 40px;
         margin-bottom: 20px;
     }
+    .diary-container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #D6D7DA;
+    }
     .diary-container h2 {
         font-weight: 700;
         font-size: 28px;
         color: black;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #D6D7DA;
+        margin: 0;
     }
     .diary {
         margin-top: 10px;
     }
+    .write-diary-button {
+        padding: 10px 20px;
+        background-color: #5FD068;
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 20px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .view-all-button {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        background-color: #E9F8EA;
+        color: #4B8673;
+        border: none;
+        border-radius: 16px;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 40px;
+    }
 </style>
+
 <div class="diary-container">
-    <h2>일기 목록</h2>
+    <div class="diary-container-header">
+        <h2>일기 목록</h2>
+        <button class="write-diary-button">일기 작성</button>
+        <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
+    </div>
     <div class="diary">
         <h3>오늘의 일기 1</h3>
         <p>오늘은 마음이 많이 편안한 날이었습니다.</p>
@@ -27,4 +62,5 @@
         <h3>오늘의 일기 2</h3>
         <p>오늘은 행복한 일이 많았습니다.</p>
     </div>
+    <button class="view-all-button">전체보기</button>
 </div>

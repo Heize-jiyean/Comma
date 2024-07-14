@@ -27,6 +27,26 @@
         color: black;
         margin-bottom: 4px;
     }
+
+    .badge {
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 16px;
+        margin-left: 8px;
+    }
+
+    .badge-patient {
+        background-color: #FFE8E3; /* 환자 배경색 */
+        color: #EA5533; /* 환자 텍스트 색 */
+        border: 1px solid #EA5533; /* 환자 배지 테두리 색 */
+    }
+
+    .badge-counselor {
+        background-color: #F5E8FF; /* 상담사 배경색 */
+        color: #9933EA; /* 상담사 텍스트 색 */
+        border: 1px solid #9933EA; /* 상담사 배지 테두리 색 */
+    }
+
     .profile-details p {
         font-weight: 500;
         font-size: 16px;
@@ -36,6 +56,21 @@
     .profile-bio {
         margin-top: 8px;
         font-size: 16px;
+    }
+
+    .interest-button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: white;
+        color: black;
+        border: 1px solid #D6D7DA;
+        border-radius: 16px;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 40px;
     }
 
 </style>
@@ -49,7 +84,19 @@
             <% } else { %>
                 <%- counselorUser.name %>
             <% } %>
-        </h2>
+            <!-- 배지 추가 -->
+            <div class="badge 
+                <% if (type === 'patient') { %>
+                    badge-patient
+                <% } else { %>
+                    badge-counselor
+                <% } %>">
+                <% if (type === 'patient') { %>
+                    환자
+                <% } else { %>
+                    상담사
+                <% } %>
+            </div>
         <!-- 닉네임 -->
         <p>
             <% if (type === 'patient') { %>
@@ -59,7 +106,6 @@
             <% } %>
         </p>
         
-        <!-- TODO: 환자or상담사 구분 배지 필요 -->
     </div>
     <div class="profile-bio"">
         <!-- 바이오 -->
@@ -70,7 +116,14 @@
                 <%- counselorUser.bio %>
             <% } %>
         </p>
-
-        <!-- TODO: 관심 환자or상담사 등록 버튼 필요 -->
     </div>
+    <!-- 관심 등록 버튼 -->
+    <button class="interest-button">
+        <% if (type === 'patient') { %>
+            관심 환자로 등록하기
+        <% } else { %>
+            관심 상담사로 등록하기
+        <% } %>
+    </button>
+    <!-- TODO: 세션에 저장된 사용자 타입에 따라 다르게 뜨드록 처리해야 함 -->
 </div>
