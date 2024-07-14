@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>환자 프로필 페이지</title>
-    <link rel="stylesheet" href="/styles/main.css"> <!-- 스타일시트 링크 -->
+    <link rel="stylesheet" href="/styles/main.css">
     <style>
         body {
             font-family: 'Pretendard-Regular', sans-serif;
-            background: #f4f4f4;
+            background-color: #F4F5F8;
             margin: 0;
             padding: 0;
         }
@@ -15,78 +15,43 @@
             display: flex;
             max-width: 1200px;
             margin: auto;
+            background-color: yellow;
         }
         .profile-container {
-            flex: 1;
+            flex: none;
+            width: 360px;
             padding: 20px;
-            max-width: 300px;
-            background: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            background: pink;
             height: fit-content;
             position: sticky;
-            top: 20px; /* Adjust based on header height */
+            top: 120px; /* 스크롤 시 상단에 고정 */
         }
         .content-container {
             flex: 3;
             padding: 20px;
+            background-color: aquamarine;
+            overflow-y: auto; /* 스크롤 가능 설정 */
         }
-        .profile-card {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-        }
-        .profile-image {
-            width: 100px;
-            height: 100px;
-            background: url('https://i.imgur.com/3beQH5s.jpeg') no-repeat center center;
-            background-size: cover;
-            border-radius: 50%;
-            margin-right: 20px;
-        }
-        .profile-details {
-            display: flex;
-            flex-direction: column;
-        }
-        .chart-container, .diary-entries, .message-book {
-            background: #FFFFFF;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+        .chart-container, .diary-container, .guestbook-container {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #D6D7DA;
             padding: 20px;
             margin-bottom: 20px;
         }
+
     </style>
 </head>
 <body>
     <div class="main-container">
         <div class="profile-container">
+            <!-- TODO: 확인용 (나중에 지워주기) -->
             <%- include('./profile_components/profile_card') %>
         </div>
         <div class="content-container">
-            <div class="chart-container">
-                <h2>나의 감정 차트</h2>
-                <img src="https://i.imgur.com/Q6rwO2A.png" alt="감정 차트" style="width:100%;">
-            </div>
-            <div class="diary-entries">
-                <h2>일기 목록</h2>
-                <div class="entry">
-                    <h3>오늘의 일기 1</h3>
-                    <p>오늘은 마음이 많이 편안한 날이었습니다.</p>
-                </div>
-                <div class="entry">
-                    <h3>오늘의 일기 2</h3>
-                    <p>오늘은 행복한 일이 많았습니다.</p>
-                </div>
-            </div>
-            <div class="message-book">
-                <h2>상담사 방명록</h2>
-                <div class="message">
-                    <p>구체적인 상담내용 세부사항 기재</p>
-                </div>
-                <div class="message">
-                    <p>구체적인 상담내용 세부사항 기재</p>
-                </div>
-            </div>
+            <%- include('./profile_components/chart') %>
+            <%- include('./profile_components/diary_preview') %>
+            <%- include('./profile_components/guestbook_preview') %>
         </div>
     </div>
 </body>
