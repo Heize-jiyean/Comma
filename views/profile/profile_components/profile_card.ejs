@@ -1,0 +1,76 @@
+<!-- profile_card.ejs -->
+<style>
+    .profile-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #D6D7DA;
+        padding: 40px;
+    }
+    
+    .profile-image {
+        width: 240px;
+        height: 240px;
+        border-radius: 50%; /* 원형 이미지 */
+        margin: 0 auto;
+        background: url('https://i.imgur.com/3beQH5s.jpeg') no-repeat center center; /* TODO: 이미지 받아서 수정해주기 */
+        background-size: cover; /* 이미지가 컨테이너를 꽉 채우도록 */
+        border: 2px solid #D6D7DA;
+    }
+
+    .profile-details {
+        margin-top: 24px;
+    }
+
+    .profile-details h2 {
+        font-weight: 700;
+        font-size: 28px;
+        color: black;
+        margin-bottom: 4px;
+    }
+    .profile-details p {
+        font-weight: 500;
+        font-size: 16px;
+        color: black;
+        margin: 0;  /* 기본으로 설정되어 있는 마진을 0으로 */
+    }
+    .profile-bio {
+        margin-top: 8px;
+        font-size: 16px;
+    }
+
+</style>
+<div class="profile-card">
+    <div class="profile-image"></div>
+    <div class="profile-details">
+        <!-- 이름 -->
+        <h2>
+            <% if (type === 'patient') { %>
+                <%- patientUser.name %>
+            <% } else { %>
+                <%- counselorUser.name %>
+            <% } %>
+        </h2>
+        <!-- 닉네임 -->
+        <p>
+            <% if (type === 'patient') { %>
+                <%- patientUser.nickname %>
+            <% } else { %>
+                <%- counselorUser.nickname %>
+            <% } %>
+        </p>
+        
+        <!-- TODO: 환자or상담사 구분 배지 필요 -->
+    </div>
+    <div class="profile-bio"">
+        <!-- 바이오 -->
+        <p>
+            <% if (type === 'patient') { %>
+                <%- patientUser.bio %>
+            <% } else { %>
+                <%- counselorUser.bio %>
+            <% } %>
+        </p>
+
+        <!-- TODO: 관심 환자or상담사 등록 버튼 필요 -->
+    </div>
+</div>

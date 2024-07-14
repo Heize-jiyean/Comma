@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>상담사 프로필 페이지</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        body {
+            font-family: 'Pretendard-Regular', sans-serif;
+            background-color: #F4F5F8;
+            margin: 0;
+            padding: 0;
+        }
+        .main-container {
+            display: flex;
+            max-width: 1200px;
+            margin: auto;
+            background-color: yellow; /* 예시 배경색 */
+        }
+        .profile-container {
+            flex: none;
+            width: 360px;
+            padding: 20px;
+            background: pink; /* 프로필 배경색 */
+            height: fit-content;
+            position: sticky;
+            top: 120px; /* 스크롤 시 상단에 고정 */
+        }
+        .content-container {
+            flex: 3;
+            padding: 20px;
+            background-color: aquamarine; /* 콘텐츠 배경색 */
+            overflow-y: auto; /* 스크롤 가능 설정 */
+        }
+        .guestbook-container {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #D6D7DA;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="profile-container">
+            <%- include('./profile_components/profile_card') %>
+        </div>
+        <div class="content-container">
+            <div class="guestbook-container">
+                <h2>방명록 목록</h2>
+                <div class="guestbook">
+                    <h3>방명록 1</h3>
+                    <p>잠을 많이 자세요</p>
+                </div>
+                <div class="guestbook">
+                    <h3>방명록 2</h3>
+                    <p>잠을 많이 자렴</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

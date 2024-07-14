@@ -30,8 +30,8 @@ exports.createCounselor = async (user) => {
     try {
         const db = await require('../main').connection();
         let sql = `
-            INSERT INTO counselor (email, password, nickname, name, age, gender, specialty) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            INSERT INTO counselor (email, password, nickname, name, age, gender, specialty, experience) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
         const [result] = await db.query(sql, [
             user.email,
             user.password,
@@ -40,6 +40,7 @@ exports.createCounselor = async (user) => {
             user.age,
             user.gender,
             user.specialty,
+            user.experience,
         ]);
 
         if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }

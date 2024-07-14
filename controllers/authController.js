@@ -1,5 +1,11 @@
 const bcrypt = require('bcrypt');
 const UserModel = require('../models/User');
+const smtpTransport = require('../email');
+
+// 랜덤 인증번호 생성 코드
+const generateRandomNumber = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
 
 module.exports = {
     // singup페이지 로드
@@ -35,6 +41,29 @@ module.exports = {
         } else {
             return res.status(200).json({ isDuplicate: true });
         }
+    },
+
+    // 이메일 인증 번호 보내기
+    emailAuth: async (req, res) => {
+        const number = generateRandomNumber(111111, 999999);
+        const email = req.body.email;
+
+        const mailOptions = {
+            from: "team.ive.comma@gmail.com",
+            to: email,
+            subject: "Comma 인증 메일 입니다.",
+            html: '<h1>인증번호를 입력해주세요 \n\n\n\n\n\n</h1>' + number
+        };
+
+        smtpTransport.sendMail(mailOptions, (err, response) => {
+            if (err) {
+                res.status(500).json({ ok: false });
+            } else {
+                res.json({ ok: true , authNum: number });
+            }
+            res.set('Cache-Control', 'no-store');
+            smtpTransport.close(); // 전송 종료
+        });
     },
 
     // 닉네임 중복 확인

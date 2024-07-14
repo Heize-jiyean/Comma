@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>환자 프로필 페이지</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        body {
+            font-family: 'Pretendard-Regular', sans-serif;
+            background-color: #F4F5F8;
+            margin: 0;
+            padding: 0;
+        }
+        .main-container {
+            display: flex;
+            max-width: 1200px;
+            margin: auto;
+            background-color: yellow;
+        }
+        .profile-container {
+            flex: none;
+            width: 360px;
+            padding: 20px;
+            background: pink;
+            height: fit-content;
+            position: sticky;
+            top: 120px; /* 스크롤 시 상단에 고정 */
+        }
+        .content-container {
+            flex: 3;
+            padding: 20px;
+            background-color: aquamarine;
+            overflow-y: auto; /* 스크롤 가능 설정 */
+        }
+        .chart-container, .diary-container, .guestbook-container {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #D6D7DA;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="profile-container">
+            <!-- TODO: 확인용 (나중에 지워주기) -->
+            <%- include('./profile_components/profile_card') %>
+        </div>
+        <div class="content-container">
+            <%- include('./profile_components/chart') %>
+            <%- include('./profile_components/diary_preview') %>
+            <%- include('./profile_components/guestbook_preview') %>
+        </div>
+    </div>
+</body>
+</html>
