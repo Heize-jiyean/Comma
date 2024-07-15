@@ -97,3 +97,23 @@ exports.toggleVisibility = async (diaryId) => {
         console.error("Diary.findImageUrlById() 쿼리 실행 중 오류:", error);
     }
 };
+
+exports.findAllByPatientId = async(patientId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+        SELECT *
+        FROM diary
+        WHERE patient_id = ?`;
+
+        const [rows, fields] = await db.query(sql, [patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows;
+
+    } catch (error) {
+        console.log("Diary.findAllByPatientId() 쿼리 실행 중 오류: ", error)
+    }
+}
