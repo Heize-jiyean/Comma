@@ -1,0 +1,34 @@
+body {
+    font-family: 'Pretendard-Regular', sans-serif;
+    background-color: #F4F5F8;
+    margin: 0;
+    padding: 0;
+}
+.main-container {
+    display: flex;
+    max-width: 1280px;
+    margin: auto;
+    background-color: yellow;
+}
+.profile-container {
+    flex: none;
+    width: 360px;
+    padding: 20px;
+    background: pink;
+    height: fit-content;
+    position: sticky;
+    top: 120px; /* 스크롤 시 상단에 고정 */
+}
+.content-container {
+    flex: 3;
+    padding: 20px;
+    background-color: aquamarine;
+    overflow-y: auto; /* 스크롤 가능 설정 */
+}
+.chart-container, .diary-container, .guestbook-container {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid #D6D7DA;
+    padding: 20px;
+    margin-bottom: 20px;
+}
