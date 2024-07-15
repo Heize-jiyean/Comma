@@ -12,8 +12,8 @@
         height: 180px;
         border-radius: 50%; /* 원형 이미지 */
         margin: auto;
-        background: url('https://i.imgur.com/3beQH5s.jpeg') no-repeat center center; /* TODO: 이미지 받아서 수정해주기 */
         background-size: cover; /* 이미지가 컨테이너를 꽉 채우도록 */
+        overflow: hidden;
         border: 2px solid #D6D7DA;
 
         display: flex; /* Flexbox 사용 */
@@ -81,7 +81,7 @@
 </style>
 <div class="profile-card">
     <div class="profile-image">
-        <!-- <%- patientUser.profile_picture %> --> 
+        <img src="<%= patientUser.profile_picture %>">
     </div>
     <div class="profile-details">
         <!-- 이름 -->

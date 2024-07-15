@@ -15,7 +15,7 @@ body {
     padding: 30px;
     height: fit-content;
     position: sticky;
-    top: 120px; /* 스크롤 시 상단에 고정 */
+    top: 130px; /* 스크롤 시 상단에 고정 */
 }
 .content-container {
     flex: 3;
