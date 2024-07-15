@@ -87,8 +87,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// 라우트 설정
-const authRouter = require('./routers/authRouters');
+
 
 app.use(methodOverride("_method"));
 
@@ -100,12 +99,19 @@ app.get('/', (req, res) => {
   res.render('main');
 });
 
+// 라우트 설정
+const authRouter = require('./routers/authRouters');
+app.use("/auth", authRouter);
+
 const profileRouter = require('./routers/profileRouter');
 app.use('/profile', profileRouter);
-//router
+
 const diaryRouter = require('./routers/diaryRouter');
 app.use("/diary", diaryRouter);
-app.use("/auth", authRouter);
+
+const guestbookRouter = require('./routers/guestbookRouter');
+app.use("/guestbook", guestbookRouter);
+
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
