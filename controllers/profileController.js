@@ -1,9 +1,5 @@
 const UserModel = require('../models/User');
-<<<<<<< HEAD
-const diaryModel = require('../models/Diary');
-=======
 const DiaryModel = require('../models/Diary')
->>>>>>> 2afb84a991d17e879bc7053dbf2500653155d5db
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -61,9 +57,9 @@ exports.listAllDiaries = async (req, res) => {
         }
 
         // 일기
-        const totalPages = Math.ceil( await diaryModel.countOfFindAll() / 9);
+        const totalPages = Math.ceil( await DiaryModel.countOfFindAll() / 9);
         let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-        let Previews = await diaryModel.findAll(currentPage);
+        let Previews = await DiaryModel.findAll(currentPage);
 
         Previews.forEach(preview => {
             preview.image_url = setDefaultImage(preview.image_url);

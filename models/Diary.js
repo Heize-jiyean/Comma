@@ -98,7 +98,6 @@ exports.toggleVisibility = async (diaryId) => {
     }
 };
 
-<<<<<<< HEAD
 exports.findAll = async (page) => {
     try {
         const db = await require('../main').connection(); 
@@ -148,7 +147,6 @@ exports.countOfFindAll = async (page) => {
         console.error("Diary.countOfFindAll() 쿼리 실행 중 오류:", error);
     }
 };
-=======
 exports.findAllByPatientId = async(patientId) => {
     try {
         const db = await require('../main').connection();
@@ -168,4 +166,3 @@ exports.findAllByPatientId = async(patientId) => {
         console.log("Diary.findAllByPatientId() 쿼리 실행 중 오류: ", error)
     }
 }
->>>>>>> 2afb84a991d17e879bc7053dbf2500653155d5db

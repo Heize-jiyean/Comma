@@ -1,2 +1,19 @@
-<%- include('./profile_components/profile_card') %>
-<%- include('../diary/diaries') %>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>환자 일기 페이지</title>
+    <link rel="stylesheet" href="/css/profile/dashboard.css">
+</head>
+<body>
+    <div class="main-container">
+        <div class="profile-container">
+            <%- include('./profile_components/profile_card') %>
+        </div>
+        <div class="content-container">
+            <%- include('../diary/diaries') %>
+        </div>
+    </div>
+</body>
+</html>
+
