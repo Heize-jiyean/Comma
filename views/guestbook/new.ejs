@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>방명록 작성</title>
+    <style>
+        body {
+            font-family: 'Pretendard-Regular', sans-serif;
+            background-color: #F4F5F8;
+            margin: 0;
+            padding: 0;
+        }
+        .guestbook-container {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #B3B4B9;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .guestbook-container h2 {
+            font-weight: 700;
+            font-size: 28px;
+            color: black;
+            margin-bottom: 16px;
+        }
+        .guestbook-container form {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .guestbook-container input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #B3B4B9;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .guestbook-container textarea {
+            resize: none;
+            height: 200px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #B3B4B9;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .submit-button-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: auto; /* 여유 공간을 밀어 올리기 */
+        }
+        #submit-button {
+            padding: 10px 20px;
+            background-color: #5FD068;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+    <script src="/js/signup.js"></script>
+</head>
+<body>
+    <div class="guestbook-container">
+        <h2>방명록 작성</h2>
+        <form id="guestbook-form">
+            <input type="text" id="titleInput" name="title" placeholder="제목을 입력하세요" required>
+            <textarea id="contentInput" name="content" placeholder="내용을 입력하세요" required></textarea>
+            <div class="submit-button-container">
+                <button id="submit-button" type="button">작성 완료</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+
+<script type="module">
+    const submitButton = document.getElementById('submit-button');
+    
+    submitButton.addEventListener('click', async () => {
+        event.preventDefault();
+        const title = titleInput.value;
+        const content = contentInput.value;
+    
+        const guestbookData = {
+            title: title,
+            content: content,
+        };
+    
+        console.log('Data to send:', guestbookData);
+        sendDataToServer(guestbookData);
+    });
+    
+    function sendDataToServer(data) {
+        fetch('/guestbook/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ guestbookData: data })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            if (data.success && data.redirect) {
+                window.location.href = data.redirect;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
+    </script>
+
+</html>
