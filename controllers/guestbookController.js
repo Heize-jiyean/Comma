@@ -1,9 +1,13 @@
 const GuestbookModel = require('../models/Guestbook');
+const UserModel = require('../models/User'); // 필요한 경우
 
 // 방명록 작성 페이지 반환
 exports.new = async (req, res) => {
     try {
-        res.render('guestbook/new.ejs');
+        const patientNickname = req.params.patientNickname; // URL에서 환자 닉네임 가져오기
+        const patientUser = await UserModel.getPatientByNickname(patientNickname); // 환자 정보 가져오기
+
+        res.render('guestbook/new.ejs', { patientUser: patientUser });
     } catch (error) {
         console.error("일기 작성 페이지 반환 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -16,11 +20,13 @@ exports.register = async (req, res) => {
         const { guestbookData } = req.body;
         console.log(guestbookData);
 
-        const patientId = 2;    // TODO: 실제 값으로 바꿔주기
+        const patientNickname = req.params.patientNickname; // URL에서 환자 닉네임 가져오기
+        const patientUser = await UserModel.getPatientByNickname(patientNickname);
+
         const counselorId = 1;  // TODO: 실제 값으로 바꿔주기
 
         newGuestbookData = {
-            patient_id: patientId,
+            patient_id: patientUser.patient_id,
             counselor_id: counselorId,
             ...guestbookData
         }

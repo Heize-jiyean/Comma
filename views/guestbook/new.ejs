@@ -68,7 +68,7 @@
 </head>
 <body>
     <div class="guestbook-container">
-        <h2>방명록 작성</h2>
+        <h2><%= patientUser.name %> 환자에게 방명록 작성</h2>
         <form id="guestbook-form">
             <input type="text" id="titleInput" name="title" placeholder="제목을 입력하세요" required>
             <textarea id="contentInput" name="content" placeholder="내용을 입력하세요" required></textarea>
@@ -93,12 +93,12 @@
             content: content,
         };
     
-        console.log('Data to send:', guestbookData);
         sendDataToServer(guestbookData);
     });
     
     function sendDataToServer(data) {
-        fetch('/guestbook/register', {
+        const patientNickname = '<%= patientUser.nickname %>';
+        fetch(`/guestbook/register/${patientNickname}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
