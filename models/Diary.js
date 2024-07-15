@@ -98,6 +98,7 @@ exports.toggleVisibility = async (diaryId) => {
     }
 };
 
+<<<<<<< HEAD
 exports.findAll = async (page) => {
     try {
         const db = await require('../main').connection(); 
@@ -147,3 +148,24 @@ exports.countOfFindAll = async (page) => {
         console.error("Diary.countOfFindAll() 쿼리 실행 중 오류:", error);
     }
 };
+=======
+exports.findAllByPatientId = async(patientId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+        SELECT *
+        FROM diary
+        WHERE patient_id = ?`;
+
+        const [rows, fields] = await db.query(sql, [patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows;
+
+    } catch (error) {
+        console.log("Diary.findAllByPatientId() 쿼리 실행 중 오류: ", error)
+    }
+}
+>>>>>>> 2afb84a991d17e879bc7053dbf2500653155d5db
