@@ -134,12 +134,34 @@ async function sendAuthEmail() {
         emailError.style.display = 'inline';
         return false;
     }
-    // 인증 이메일 전송 (이메일 전송 현재 미 구현)
+    // 인증 이메일 전송
     else {
-        emailError.style.display = 'none';
-        return true;
+        try {
+            const response = await fetch('/auth/send-auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email }),
+            });
+            const data = await response.json();
+            if (data.ok) {
+                alert('인증 이메일이 전송되었습니다.');
+                document.getElementById('check_email').disabled = false;
+                emailError.style.display = 'none';
+                return true;
+            } else {
+                emailError.textContent = '이메일 전송에 실패했습니다.';
+                emailError.style.display = 'inline';
+                return false;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            emailError.textContent = '서버 오류가 발생했습니다.';
+            emailError.style.display = 'inline';
+            return false;
+        }
     }
-
 }
 
 // 닉네임 중복 확인
