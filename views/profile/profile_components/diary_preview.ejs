@@ -76,7 +76,11 @@
         <% diaries.forEach(diary => { %>
         <div class="diary">
             <div class="diary-title">
-                <h3><%= diary.title %></h3>
+                <h3>
+                    <a href="/diary/<%= diary.diary_id %>" style="text-decoration: none; color: inherit;">
+                        <%= diary.title %>
+                    </a>
+                </h3>
                 <span><%= new Date(diary.created_at).toLocaleDateString() %></span>
             </div>
             <p><%= diary.content %></p>
