@@ -112,6 +112,8 @@ exports.delete = async (req, res) => {
 
 exports.listAllDiaries = async (req, res) => {
     try {
+        // 예외 처리 
+        
         const totalPages = Math.ceil( await diaryModel.countOfFindAll() / 9);
         let currentPage = req.query.page ? parseInt(req.query.page) : 1;
         let Previews = await diaryModel.findAll(currentPage);
