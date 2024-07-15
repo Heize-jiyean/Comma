@@ -25,10 +25,3 @@ body {
     background-color: aquamarine;
     overflow-y: auto; /* 스크롤 가능 설정 */
 }
-.chart-container, .diary-container, .guestbook-container {
-    background: #fff;
-    border-radius: 20px;
-    border: 1px solid #D6D7DA;
-    padding: 20px;
-    margin-bottom: 20px;
-}
