@@ -19,7 +19,7 @@ exports.register = async (diary) => {
             // diary.sadness
         ]);
 
-        if (db && db.end) db.end()
+        if (db && db.end) db.end();
         return result.insertId;
 
     } catch (error) {
@@ -36,7 +36,7 @@ exports.delete = async (diaryId) => {
             WHERE diary_id = ?`;
         await db.query(sql, [diaryId]);
         
-        if (db && db.end) db.end()
+        if (db && db.end) db.end();
         return diaryId;
 
     } catch (error) {
@@ -54,7 +54,7 @@ exports.findImageUrlById = async (diaryId) => {
             WHERE diary_id = ?`; 
         const [rows, fields] = await db.query(sql, [diaryId]);
         
-        if (db && db.end) db.end()
+        if (db && db.end) db.end();
         return rows.length > 0 ? rows[0].image_url : null;
 
     } catch (error) {
@@ -72,7 +72,7 @@ exports.findById = async (diaryId) => {
             WHERE diary_id = ?`; 
         const [rows, fields] = await db.query(sql, [diaryId]);
         
-        if (db && db.end) db.end()
+        if (db && db.end) db.end();
         return rows.length > 0 ? rows[0] : null;
 
     } catch (error) {
@@ -90,7 +90,7 @@ exports.toggleVisibility = async (diaryId) => {
             WHERE diary_id = ?;`; 
         const [rows, fields] = await db.query(sql, [diaryId]);
         
-        if (db && db.end) db.end()
+        if (db && db.end) db.end();
         return;
 
     } catch (error) {
@@ -98,6 +98,55 @@ exports.toggleVisibility = async (diaryId) => {
     }
 };
 
+exports.findAll = async (page) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        const pageSize = 9;
+        let offset = pageSize * (page - 1);
+
+        let sql = `
+            SELECT 
+                d.*,
+                p.nickname,
+                p.profile_picture
+            FROM 
+                diary d 
+            JOIN 
+                patient p ON d.patient_id = p.patient_id
+            ORDER BY d.created_at DESC LIMIT ? OFFSET ?
+            `;
+
+        const [rows, fields] = await db.query(sql, [pageSize, offset]);
+        
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows : null;
+
+    } catch (error) {
+        console.error("Diary.findImageUrlById() 쿼리 실행 중 오류:", error);
+    }
+};
+
+exports.countOfFindAll = async (page) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            SELECT 
+                COUNT(*) AS total
+            FROM 
+                diary d 
+            `;
+
+        const [rows, fields] = await db.query(sql);
+        
+        if (db && db.end) db.end();
+        return rows[0].total;
+
+    } catch (error) {
+        console.error("Diary.countOfFindAll() 쿼리 실행 중 오류:", error);
+    }
+};
 exports.findAllByPatientId = async(patientId) => {
     try {
         const db = await require('../main').connection();

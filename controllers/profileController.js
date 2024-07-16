@@ -45,3 +45,36 @@ exports.counselorProfilePage = async (req, res) => {
     }
 }
 
+// 환자 일기 모아보기
+exports.listAllDiaries = async (req, res) => {
+    try {
+        // 예외 처리
+        const patientNickname = req.params.patientNickname;
+        const patientUser = await UserModel.getPatientByNickname(patientNickname);
+        if (!patientUser) {
+            res.render("/");    // TODO: 없는 환자인 경우 띄울 페이지
+            return;
+        }
+
+        // 일기
+        const totalPages = Math.ceil( await DiaryModel.countOfFindAll() / 9);
+        let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+        let Previews = await DiaryModel.findAll(currentPage);
+
+        Previews.forEach(preview => {
+            preview.image_url = setDefaultImage(preview.image_url);
+            // preview.profile_picture = 프로필 기본이미지 설정
+        });
+
+        res.render('profile/diary', {patientUser: patientUser, type: 'patient', 
+                                        Previews, currentPage, totalPages});
+    } catch (error) {
+        console.error("listAllDiaries 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+function setDefaultImage(image_url) {
+    if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
+    return image_url;
+}

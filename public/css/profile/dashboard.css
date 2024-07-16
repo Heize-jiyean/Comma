@@ -8,20 +8,17 @@ body {
     display: flex;
     max-width: 1280px;
     margin: auto;
-    background-color: yellow;
 }
 .profile-container {
     flex: none;
-    width: 360px;
-    padding: 20px;
-    background: pink;
+    width: 320px;
+    padding: 30px;
     height: fit-content;
     position: sticky;
-    top: 120px; /* 스크롤 시 상단에 고정 */
+    top: 130px; /* 스크롤 시 상단에 고정 */
 }
 .content-container {
     flex: 3;
-    padding: 20px;
-    background-color: aquamarine;
+    padding: 30px;
     overflow-y: auto; /* 스크롤 가능 설정 */
 }
