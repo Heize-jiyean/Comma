@@ -41,6 +41,29 @@ exports.findAllByPatientId = async (patientId) => {
     }
 }
 
+// 환자에게 작성된 최신 4개의 방명록 찾기
+exports.findLatestByPatientId = async (patientId) => {
+    try {
+        const db = await require("../main").connection();
+
+        let sql = `
+        SELECT *
+        FROM guestbook
+        WHERE patient_id = ?
+        ORDER BY created_at DESC
+        LIMIT 4`;
+
+        const [rows, fields] = await db.query(sql, [patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows;
+
+    } catch (error) {
+        console.log("Guestbook.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
+    }
+}
+
 // 상담사 아이디로 방명록 찾기
 exports.findAllByCounselorId = async (counselorId) => {
     try {

@@ -19,10 +19,10 @@ exports.patientProfilePage = async (req, res) => {
         }
 
         // 환자가 작성한 일기 가져오기
-        const diaries = await DiaryModel.findAllByPatientId(patientUser.patient_id);
+        const diaries = await DiaryModel.findLatestByPatientId(patientUser.patient_id);
 
         // 환자에게 작성된 방명록 가져오기
-        const guestbooks = await GuestbookModel.findAllByPatientId(patientUser.patient_id);
+        const guestbooks = await GuestbookModel.findLatestByPatientId(patientUser.patient_id);
         
         // 각 방명록 항목에 대해 상담사의 닉네임 가져오기
         for (let guestbook of guestbooks) {
