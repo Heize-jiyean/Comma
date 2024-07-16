@@ -15,7 +15,6 @@
         background-size: cover; /* 이미지가 컨테이너를 꽉 채우도록 */
         overflow: hidden;
         border: 2px solid #D6D7DA;
-
         display: flex; /* Flexbox 사용 */
         justify-content: center; /* 수평 가운데 정렬 */
     }
@@ -56,7 +55,8 @@
         font-weight: 500;
         font-size: 16px;
         color: black;
-        margin-bottom: 15px;  /* 기본으로 설정되어 있는 마진을 0으로 */
+        margin-top: 8px;
+        margin-bottom: 15px;
     }
     .profile-bio {
         margin-top: 8px;
@@ -71,7 +71,7 @@
         color: black;
         border: 1px solid #D6D7DA;
         border-radius: 16px;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 700;
         text-align: center;
         cursor: pointer;
@@ -81,7 +81,11 @@
 </style>
 <div class="profile-card">
     <div class="profile-image">
-        <img src="<%= patientUser.profile_picture %>">
+        <% if (type === 'patient') { %>
+            <img src="<%= patientUser.profile_picture %>" alt="Patient Profile Picture">
+        <% } else { %>
+            <img src="<%= counselorUser.profile_picture %>" alt="Counselor Profile Picture">
+        <% } %>
     </div>
     <div class="profile-details">
         <!-- 이름 -->
