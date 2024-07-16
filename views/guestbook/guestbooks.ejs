@@ -38,29 +38,31 @@
     }
 </style>
 
-<!-- 방명록 목록 -->
-<% if (guestbooks && guestbooks.length > 0) { %>
-    <% guestbooks.forEach(guestbook => { %>
-    <div class="guestbook">
-        <!-- 방명록 내용 -->
-        <div class="guestbook-title">
-            <h3>
-                <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
-                    <%= guestbook.title %>
-                </a>
-            </h3>
-            <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
+<div class="diaries">
+    <!-- 방명록 목록 -->
+    <% if (guestbooks && guestbooks.length > 0) { %>
+        <% guestbooks.forEach(guestbook => { %>
+        <div class="guestbook">
+            <!-- 방명록 내용 -->
+            <div class="guestbook-title">
+                <h3>
+                    <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
+                        <%= guestbook.title %>
+                    </a>
+                </h3>
+                <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
+            </div>
+            <p><%= guestbook.content %></p>
+            <!-- 방명록 작성자 -->
+            <% if (showCounselorInfo) { %>
+            <div class="counselor-info">
+                <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
+                <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
+            </div>
+            <% } %>
         </div>
-        <p><%= guestbook.content %></p>
-        <!-- 방명록 작성자 -->
-        <% if (showCounselorInfo) { %>
-        <div class="counselor-info">
-            <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
-            <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
-        </div>
-        <% } %>
-    </div>
-    <% }) %>
-<% } else { %>
-    <p>방명록이 없습니다.</p>
-<% } %>
+        <% }) %>
+    <% } else { %>
+        <p>방명록이 없습니다.</p>
+    <% } %>
+</div>

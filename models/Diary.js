@@ -167,8 +167,8 @@ exports.findAllByPatientId = async(patientId) => {
     }
 }
 
-// 환자가 작성한 최신 4개의 일기 가져오기
-exports.findLatestByPatientId = async (patientId) => {
+// 환자의 아이디로 환자가 작성한 최신 4개의 일기 가져오기
+exports.findLatestFourByPatientId = async (patientId) => {
     try {
         const db = await require("../main").connection();
 

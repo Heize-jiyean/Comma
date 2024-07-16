@@ -29,7 +29,8 @@ exports.findAllByPatientId = async (patientId) => {
         let sql = `
         SELECT *
         FROM guestbook
-        WHERE patient_id =?`;
+        WHERE patient_id =?
+        ORDER BY created_at DESC`;
 
         const [rows, fields] = await db.query(sql, [patientId]);
 
@@ -41,8 +42,8 @@ exports.findAllByPatientId = async (patientId) => {
     }
 }
 
-// 환자에게 작성된 최신 4개의 방명록 찾기
-exports.findLatestByPatientId = async (patientId) => {
+// 환자의 아이디로 환자에게 작성된 최신 4개의 방명록 찾기
+exports.findLatestFourByPatientId = async (patientId) => {
     try {
         const db = await require("../main").connection();
 
@@ -72,7 +73,8 @@ exports.findAllByCounselorId = async (counselorId) => {
         let sql = `
         SELECT *
         FROM guestbook
-        WHERE counselor_id = ?`;
+        WHERE counselor_id = ?
+        ORDER BY created_at DESC`;
 
         const [rows, fields] = await db.query(sql, [counselorId]);
 
