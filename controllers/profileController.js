@@ -1,5 +1,6 @@
 const UserModel = require('../models/User');
 const DiaryModel = require('../models/Diary')
+const GuestbookModel = require('../models/Guestbook');
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -10,6 +11,8 @@ exports.patientProfilePage = async (req, res) => {
     try {
         // 환자 정보 가져오기
         const patientUser = await UserModel.getPatientByNickname(patientNickname);
+
+        // 없는 환자일 경우
         if (!patientUser) {
             res.render("/");    // TODO: 없는 환자인 경우 띄울 페이지
             return;
@@ -18,8 +21,23 @@ exports.patientProfilePage = async (req, res) => {
         // 작성한 일기 가져오기
         const diaries = await DiaryModel.findAllByPatientId(patientUser.patient_id);
 
+        // 환자에게 작성된 방명록 가져오기
+        const guestbooks = await GuestbookModel.findAllByPatientId(patientUser.patient_id);
+        
+        // 각 방명록 항목에 대해 상담사의 닉네임 가져오기
+        for (let guestbook of guestbooks) {
+            const counselor = await UserModel.getCounselorById(guestbook.counselor_id);
+            guestbook.counselor_name = counselor ? counselor.name : "Unknown";
+            guestbook.counselor_profile_picture = counselor ? counselor.profile_picture : null;
+        }
+
         // 렌더링
-        res.render("profile/patient.ejs", { patientUser: patientUser, type: 'patient', diaries: diaries})
+        res.render("profile/patient.ejs", { 
+            patientUser: patientUser, 
+            type: 'patient', 
+            diaries: diaries, 
+            guestbooks: guestbooks
+        });
     } catch {
         console.error("환자 프로필 반환 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -38,7 +56,12 @@ exports.counselorProfilePage = async (req, res) => {
             res.render("/");
             return;
         }
-        res.render("profile/counselor.ejs", { counselorUser: counselorUser, type: 'counselor' });
+
+        // 렌더링
+        res.render("profile/counselor.ejs", { 
+            counselorUser: counselorUser, 
+            type: 'counselor' 
+        });
     } catch {
         console.log("상담사 프로필 반환 오류", error);
         res.status(500).send("서버 오류가 발생했습니다.")

@@ -20,3 +20,23 @@ exports.register = async (guestbook) => {
         console.error("Guestbook.resgister() 쿼리 실행 중 오류:", error);
     }
 }
+
+// 환자아이디로 방명록 찾기
+exports.findAllByPatientId = async (patientId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+        SELECT *
+        FROM guestbook
+        WHERE patient_id =?`;
+
+        const [rows, fields] = await db.query(sql, [patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows;
+     } catch (error) {
+        console.log("Guestbook.findAllByPatientId() 쿼리 실행 중 오류: ", error)
+    }
+}
