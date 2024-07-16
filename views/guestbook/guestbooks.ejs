@@ -1,0 +1,66 @@
+<style>
+    .guestbook {
+        margin-top: 10px;
+        border-bottom: 1px solid #D6D7DA;
+    }
+    .guestbook-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .guestbook-title h3 {
+        margin: 8px 0;
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .guestbook-title span {
+        font-size: 18px;
+        color: #888;
+    }
+    .guestbook p {
+        font-size: 18px;
+    }
+    .counselor-info {
+        display: flex;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .counselor-info img {
+        border-radius: 50%;
+        border: 1px solid #D6D7DA;
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+    }
+    .counselor-info .counselor-name {
+        font-size: 18px;
+        font-weight: bold;
+    }
+</style>
+
+<!-- 방명록 목록 -->
+<% if (guestbooks && guestbooks.length > 0) { %>
+    <% guestbooks.forEach(guestbook => { %>
+    <div class="guestbook">
+        <!-- 방명록 내용 -->
+        <div class="guestbook-title">
+            <h3>
+                <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
+                    <%= guestbook.title %>
+                </a>
+            </h3>
+            <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
+        </div>
+        <p><%= guestbook.content %></p>
+        <!-- 방명록 작성자 -->
+        <% if (showCounselorInfo) { %>
+        <div class="counselor-info">
+            <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
+            <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
+        </div>
+        <% } %>
+    </div>
+    <% }) %>
+<% } else { %>
+    <p>방명록이 없습니다.</p>
+<% } %>

@@ -37,11 +37,11 @@
             }
             .guestbook-title h3 {
                 margin: 8px 0;
-                font-size: 24px;
+                font-size: 20px;
                 font-weight: 700;
             }
             .guestbook-title span {
-                font-size: 20px;
+                font-size: 18px;
                 color: #888;
             }
             .guestbook p {
@@ -60,7 +60,7 @@
                 margin-right: 10px;
             }
             .counselor-info .counselor-name {
-                font-size: 20px;
+                font-size: 18px;
                 font-weight: bold;
             }
             .write-guestbook-button {
@@ -89,29 +89,9 @@
                     <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
                 </div>
                 <!-- 방명록 목록 -->
-                <% if (guestbooks && guestbooks.length > 0) { %>
-                    <% guestbooks.forEach(guestbook => { %>
-                    <div class="guestbook">
-                        <!-- 방명록 내용 -->
-                        <div class="guestbook-title">
-                            <h3>
-                                <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
-                                    <%= guestbook.title %>
-                                </a>
-                            </h3>
-                            <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
-                        </div>
-                        <p><%= guestbook.content %></p>
-                        <!-- 방명록 작성자 -->
-                        <div class="counselor-info">
-                            <img src="<%= guestbook.counselor_profile_picture  %>" alt="Counselor Profile Picture">
-                            <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
-                        </div>
-                    </div>
-                    <% }) %>
-                <% } else { %>
-                    <p>방명록이 없습니다.</p>
-                <% } %>
+                <div class="guestbook-list">
+                    <%- include('../guestbook/guestbooks', { guestbooks: guestbooks, showCounselorInfo: true }) %>
+                </div>
             </div>
         </div>
     </div>

@@ -38,7 +38,7 @@ exports.patientProfilePage = async (req, res) => {
             diaries: diaries, 
             guestbooks: guestbooks
         });
-    } catch {
+    } catch (error) {
         console.error("환자 프로필 반환 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     };
@@ -60,12 +60,16 @@ exports.counselorProfilePage = async (req, res) => {
             return;
         }
 
+        // 상담사가 작성한 방명록 가져오기
+        const guestbooks = await GuestbookModel.findAllByCounselorId(counselorUser.counselor_id);
+
         // 렌더링
         res.render("profile/counselor.ejs", { 
             counselorUser: counselorUser, 
-            type: 'counselor' 
+            type: 'counselor',
+            guestbooks: guestbooks
         });
-    } catch {
+    } catch (error) {
         console.log("상담사 프로필 반환 오류", error);
         res.status(500).send("서버 오류가 발생했습니다.")
     }

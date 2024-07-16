@@ -21,7 +21,7 @@ exports.register = async (guestbook) => {
     }
 }
 
-// 환자아이디로 방명록 찾기
+// 환자 아이디로 방명록 찾기
 exports.findAllByPatientId = async (patientId) => {
     try {
         const db = await require('../main').connection();
@@ -37,6 +37,27 @@ exports.findAllByPatientId = async (patientId) => {
 
         return rows;
      } catch (error) {
-        console.log("Guestbook.findAllByPatientId() 쿼리 실행 중 오류: ", error)
+        console.log("Guestbook.findAllByPatientId() 쿼리 실행 중 오류: ", error);
     }
+}
+
+// 상담사 아이디로 방명록 찾기
+exports.findAllByCounselorId = async (counselorId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+        SELECT *
+        FROM guestbook
+        WHERE counselor_id = ?`;
+
+        const [rows, fields] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows;
+    } catch (error) {
+        console.log("Guestbook.findAllByCounselorId() 쿼리 실행 중 오류: ", error);
+    }
+    
 }

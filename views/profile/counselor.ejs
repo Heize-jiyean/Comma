@@ -7,10 +7,24 @@
     <style>
         .guestbook-container {
             background: #fff;
-            border-radius: 10px;
+            border-radius: 20px;
             border: 1px solid #D6D7DA;
-            padding: 20px;
+            padding: 40px;
             margin-bottom: 20px;
+            position: relative;
+        }
+        .guestbook-container-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #D6D7DA;
+        }
+        .guestbook-container h2 {
+            font-weight: 700;
+            font-size: 28px;
+            color: black;
+            margin: 0;
         }
     </style>
 </head>
@@ -20,7 +34,16 @@
             <%- include('./profile_components/profile_card') %>
         </div>
         <div class="content-container">
-            <%- include('./profile_components/guestbook_list') %>
+            <div class="guestbook-container">
+                <!-- 방명록 헤더 -->
+                <div class="guestbook-container-header">
+                    <h2><%= counselorUser.name %> 상담사가 쓴 방명록</h2>
+                </div>
+                <!-- 방명록 목록 -->
+                <div class="guestbook-list">
+                    <%- include('../guestbook/guestbooks', { guestbooks: guestbooks, showCounselorInfo: false }) %>
+                </div>
+            </div>
         </div>
     </div>
 </body>
