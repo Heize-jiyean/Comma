@@ -6,10 +6,10 @@ const GuestbookModel = require('../models/Guestbook');
 exports.patientProfilePage = async (req, res) => {
     const loginId = "dain09";  // TODO: 세션 처리
     res.locals.loginId = loginId;
-    const patientNickname = req.params.patientNickname;
 
     try {
         // 환자 정보 가져오기
+        const patientNickname = req.params.patientNickname;
         const patientUser = await UserModel.getPatientByNickname(patientNickname);
 
         // 없는 환자일 경우
@@ -18,7 +18,7 @@ exports.patientProfilePage = async (req, res) => {
             return;
         }
 
-        // 작성한 일기 가져오기
+        // 환자가 작성한 일기 가져오기
         const diaries = await DiaryModel.findAllByPatientId(patientUser.patient_id);
 
         // 환자에게 작성된 방명록 가져오기
@@ -48,10 +48,13 @@ exports.patientProfilePage = async (req, res) => {
 exports.counselorProfilePage = async (req, res) => {
     const loginId = "eunwoo";
     res.locals.loginId = loginId;
-    const counselorNickname = req.params.counselorNickname;
 
     try {
+        // 상담사 정보 가져오기
+        const counselorNickname = req.params.counselorNickname;
         const counselorUser = await UserModel.getCounselorByNickname(counselorNickname);
+
+        // 없는 상담사일 경우
         if (!counselorUser) {
             res.render("/");
             return;
@@ -68,7 +71,7 @@ exports.counselorProfilePage = async (req, res) => {
     }
 }
 
-// 환자 일기 모아보기
+// 환자 일기 모아보기 페이지 반환
 exports.listAllDiaries = async (req, res) => {
     try {
         // 예외 처리
@@ -100,4 +103,42 @@ exports.listAllDiaries = async (req, res) => {
 function setDefaultImage(image_url) {
     if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
     return image_url;
+}
+
+// 환자 일기 방명록 모아보기 페이지 반환
+exports.listAllGuestbooks = async (req, res) => {
+    try {
+        // 환자 정보 가져오기
+        const patientNickname = req.params.patientNickname;
+        const patientUser = await UserModel.getPatientByNickname(patientNickname);
+
+        // 없는 환자일 경우
+        if (!patientUser) {
+            res.render("/");    // TODO: 없는 환자인 경우 띄울 페이지
+            return;
+        }
+
+        // 환자에게 작성된 방명록 가져오기
+        const guestbooks = await GuestbookModel.findAllByPatientId(patientUser.patient_id);
+        
+        // 각 방명록 항목에 대해 상담사의 닉네임 가져오기
+        for (let guestbook of guestbooks) {
+            const counselor = await UserModel.getCounselorById(guestbook.counselor_id);
+            guestbook.counselor_name = counselor ? counselor.name : "Unknown";
+            guestbook.counselor_profile_picture = counselor ? counselor.profile_picture : null;
+        }
+
+        // 렌더링
+        res.render("profile/guestbook.ejs", { 
+            patientUser: patientUser, 
+            type: 'patient', 
+            guestbooks: guestbooks
+        });
+
+
+    } catch (error) {
+        console.log("listAllGuestbooks 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+
 }

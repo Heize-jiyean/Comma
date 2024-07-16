@@ -21,6 +21,7 @@
     }
     .guestbook {
         margin-top: 10px;
+        border-bottom: 1px solid #D6D7DA;
     }
     .guestbook-title {
         display: flex;
@@ -82,14 +83,17 @@
 </style>
 
 <div class="guestbook-container">
+    <!-- 방명록 헤더 -->
     <div class="guestbook-container-header">
-        <h2>상담사 방명록</h2>
+        <h2>방명록</h2>
         <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
         <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
     </div>
+    <!-- 방명록 목록 -->
     <% if (guestbooks && guestbooks.length > 0) { %>
         <% guestbooks.forEach(guestbook => { %>
-        <div class="diary">
+        <div class="guestbook">
+            <!-- 방명록 내용 -->
             <div class="guestbook-title">
                 <h3>
                     <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
@@ -99,6 +103,7 @@
                 <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
             </div>
             <p><%= guestbook.content %></p>
+            <!-- 방명록 작성자 -->
             <div class="counselor-info">
                 <img src="<%= guestbook.counselor_profile_picture  %>" alt="Counselor Profile Picture">
                 <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
@@ -108,7 +113,7 @@
     <% } else { %>
         <p>방명록이 없습니다.</p>
     <% } %>
-    <button class="view-all-button">전체보기</button>
+    <button class="view-all-button" id="viewAllButton">전체보기</button>
 
 </div>
 
@@ -116,5 +121,9 @@
     document.getElementById('writeGuestbookButton').addEventListener('click', function() {
         const patientNickname = '<%= patientUser.nickname %>';
         window.location.href = `/guestbook/new/${patientNickname}`;
+    });
+    document.getElementById('viewAllButton').addEventListener('click', function() {
+        const patientNickname = '<%= patientUser.nickname %>';
+        window.location.href = `/profile/patient/${patientNickname}/guestbooks`;
     });
 </script>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>방명록 페이지</title>
+    <link rel="stylesheet" href="/css/profile/dashboard.css">
+    <style>
+            .guestbook-container {
+                background: #fff;
+                border-radius: 20px;
+                border: 1px solid #D6D7DA;
+                padding: 40px;
+                margin-bottom: 20px;
+                position: relative;
+            }
+            .guestbook-container-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding-bottom: 16px;
+                border-bottom: 1px solid #D6D7DA;
+            }
+            .guestbook-container h2 {
+                font-weight: 700;
+                font-size: 28px;
+                color: black;
+                margin: 0;
+            }
+            .guestbook {
+                margin-top: 10px;
+                border-bottom: 1px solid #D6D7DA;
+            }       
+            .guestbook-title {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .guestbook-title h3 {
+                margin: 8px 0;
+                font-size: 24px;
+                font-weight: 700;
+            }
+            .guestbook-title span {
+                font-size: 20px;
+                color: #888;
+            }
+            .guestbook p {
+                font-size: 20px;
+            }
+            .counselor-info {
+                display: flex;
+                align-items: center;
+                margin: 20px 0;
+            }
+            .counselor-info img {
+                border-radius: 50%;
+                border: 1px solid #D6D7DA;
+                width: 50px;
+                height: 50px;
+                margin-right: 10px;
+            }
+            .counselor-info .counselor-name {
+                font-size: 20px;
+                font-weight: bold;
+            }
+            .write-guestbook-button {
+                padding: 10px 20px;
+                background-color: #5FD068;
+                color: white;
+                border: none;
+                border-radius: 16px;
+                font-size: 20px;
+                font-weight: 700;
+                cursor: pointer;
+            }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="profile-container">
+            <%- include('./profile_components/profile_card') %>
+        </div>
+        <div class="content-container">
+            <div class="guestbook-container">
+                <!-- 방명록 헤더 -->
+                <div class="guestbook-container-header">
+                    <h2>방명록 전체보기</h2>
+                    <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
+                    <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
+                </div>
+                <!-- 방명록 목록 -->
+                <% if (guestbooks && guestbooks.length > 0) { %>
+                    <% guestbooks.forEach(guestbook => { %>
+                    <div class="guestbook">
+                        <!-- 방명록 내용 -->
+                        <div class="guestbook-title">
+                            <h3>
+                                <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
+                                    <%= guestbook.title %>
+                                </a>
+                            </h3>
+                            <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
+                        </div>
+                        <p><%= guestbook.content %></p>
+                        <!-- 방명록 작성자 -->
+                        <div class="counselor-info">
+                            <img src="<%= guestbook.counselor_profile_picture  %>" alt="Counselor Profile Picture">
+                            <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
+                        </div>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <p>방명록이 없습니다.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
