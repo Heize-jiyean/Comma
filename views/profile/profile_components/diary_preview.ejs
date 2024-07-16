@@ -91,11 +91,15 @@
     <% } else { %>
         <p>일기가 없습니다.</p>
     <% } %>
-    <button class="view-all-button">전체보기</button>
+    <button class="view-all-button" id="viewAllDiariesButton">전체보기</button>
 </div>
 
 <script>
     document.getElementById('writeDiaryButton').addEventListener('click', function() {
         window.location.href = `/diary/new`;
     });
+    document.getElementById('viewAllDiariesButton').addEventListener('click', function() {
+        const patientNickname = '<%= patientUser.nickname %>';
+        window.location.href = `/profile/patient/${patientNickname}/diaries`;
+    })
 </script>

@@ -113,7 +113,7 @@
     <% } else { %>
         <p>방명록이 없습니다.</p>
     <% } %>
-    <button class="view-all-button" id="viewAllButton">전체보기</button>
+    <button class="view-all-button" id="viewAllGuestbooksButton">전체보기</button>
 
 </div>
 
@@ -122,7 +122,7 @@
         const patientNickname = '<%= patientUser.nickname %>';
         window.location.href = `/guestbook/new/${patientNickname}`;
     });
-    document.getElementById('viewAllButton').addEventListener('click', function() {
+    document.getElementById('viewAllGuestbooksButton').addEventListener('click', function() {
         const patientNickname = '<%= patientUser.nickname %>';
         window.location.href = `/profile/patient/${patientNickname}/guestbooks`;
     });
