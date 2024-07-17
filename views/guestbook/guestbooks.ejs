@@ -50,6 +50,12 @@
         background-color: #4B8673; 
         border-color: #4B8673; 
     }
+    .clickable {
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        align-items: center;
+    }
 
 </style>
 
@@ -58,23 +64,25 @@
     <% if (guestbooks && guestbooks.length > 0) { %>
         <% guestbooks.forEach(guestbook => { %>
         <div class="guestbook-item">
-            <!-- 방명록 내용 -->
-            <div class="guestbook-title">
-                <h3>
-                    <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
+            <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
+                <!-- 방명록 내용 -->
+                <div class="guestbook-title">
+                    <h3>
                         <%= guestbook.title %>
+                    </h3>
+                    <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
+                </div>
+                <p><%= guestbook.content %></p>
+                <!-- 방명록 작성자 -->
+                <% if (showCounselorInfo) { %>
+                <div class="counselor-info">
+                    <a href="/profile/counselor/<%= guestbook.counselor_nickname %>" class="clickable" style="text-decoration: none; color: inherit;">
+                        <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
+                        <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
                     </a>
-                </h3>
-                <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
-            </div>
-            <p><%= guestbook.content %></p>
-            <!-- 방명록 작성자 -->
-            <% if (showCounselorInfo) { %>
-            <div class="counselor-info">
-                <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
-                <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
-            </div>
-            <% } %>
+                </div>
+                <% } %>
+            </a>
         </div>
         <% }) %>
     <% } else { %>

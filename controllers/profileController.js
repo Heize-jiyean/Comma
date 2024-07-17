@@ -28,6 +28,7 @@ exports.patientProfilePage = async (req, res) => {
         for (let guestbook of guestbooks) {
             const counselor = await UserModel.getCounselorById(guestbook.counselor_id);
             guestbook.counselor_name = counselor ? counselor.name : "Unknown";
+            guestbook.counselor_nickname = counselor ? counselor.nickname : "Unknown";
             guestbook.counselor_profile_picture = counselor ? counselor.profile_picture : null;
         }
 

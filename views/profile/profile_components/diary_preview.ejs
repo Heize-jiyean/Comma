@@ -78,15 +78,15 @@
     <% if (diaries && diaries.length > 0) { %>
         <% diaries.forEach(diary => { %>
         <div class="diary-item">
-            <div class="diary-title">
-                <h3>
-                    <a href="/diary/<%= diary.diary_id %>" style="text-decoration: none; color: inherit;">
+            <a href="/diary/<%= diary.diary_id %>" style="text-decoration: none; color: inherit;">
+                <div class="diary-title">
+                    <h3>
                         <%= diary.title %>
-                    </a>
-                </h3>
-                <span><%= new Date(diary.created_at).toLocaleDateString() %></span>
-            </div>
-            <p><%= diary.content %></p>
+                    </h3>
+                    <span><%= new Date(diary.created_at).toLocaleDateString() %></span>
+                </div>
+                <p><%= diary.content %></p>
+            </a>
         </div>
         <% }) %>
     <% } else { %>
