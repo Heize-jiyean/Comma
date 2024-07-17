@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const mysql = require('mysql2/promise');
 const methodOverride = require("method-override");
@@ -7,8 +9,13 @@ const session = require('express-session');
 const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
+const hospitalRouter = require('./routers/hospitalRouters');
 
-require('dotenv').config();
+// 지도 API 미들웨어
+app.use((req, res, next) => {
+  res.locals.naverMapClientId = process.env.NAVER_MAP_CLIENT_ID;
+  next();
+});
 
 // DB 연결
 exports.connection = async () => {
@@ -46,26 +53,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-// DB connection
-require('dotenv').config();
-exports.connection = async () => {
-  try {
-      const db = await mysql.createPool({
-          host: process.env.DB_HOST,
-          user: process.env.DB_USER,
-          password: process.env.DB_PW,
-          port: process.env.DB_PORT,
-          database: process.env.DB_NAME,
-          waitForConnections: true,
-          insecureAuth: true,
-      });
-      return db;
-  } catch (error) {
-      console.error("데이터베이스 연결 오류:", error);
-      throw error;
-  }
-};
-
 // EJS 설정
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -97,13 +84,13 @@ app.use((req, res, next) => {
 
 app.use(methodOverride("_method"));
 
-//layouts 사용
-app.use(layouts);
-
 // 페이지 라우팅
 app.get('/', (req, res) => {
   res.render('main');
 });
+
+//hospital 라우팅
+app.use("/hospital", hospitalRouter);
 
 // 라우트 설정
 const authRouter = require('./routers/authRouters');
