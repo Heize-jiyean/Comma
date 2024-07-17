@@ -23,4 +23,7 @@ router.post('/check-email', authController.checkEmail);
 // 닉네임 중복 확인
 router.post('/check-nickname', authController.checkNickname);
 
+// 이메일 인증 전송
+router.post('/send-auth', authController.emailAuth);
+
 module.exports = router;
