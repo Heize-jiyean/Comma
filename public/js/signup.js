@@ -1,9 +1,11 @@
+let authNum;
+
 document.addEventListener('DOMContentLoaded', function () {
 
     // 출생연도에 1950년 이후 넣기
     const birthYearSelect = document.getElementById('birth-year');
     const currentYear = new Date().getFullYear();
-    for (let year = 1; year <= currentYear; year++) {
+    for (let year = 1950; year <= currentYear; year++) {
         const option = document.createElement('option');
         option.value = year;
         option.textContent = year;
@@ -27,9 +29,20 @@ document.addEventListener('DOMContentLoaded', function () {
         specialtyInput.setAttribute('id', 'specialty');
         specialtyInput.setAttribute('name', 'specialty');
 
+        const experienceLabel = document.createElement('label');
+        experienceLabel.setAttribute('for', 'experience');
+        experienceLabel.textContent = '경력';
+
+        const experienceInput = document.createElement('input');
+        experienceInput.setAttribute('type', 'text');
+        experienceInput.setAttribute('id', 'experience');
+        experienceInput.setAttribute('name', 'experience');
+
         // 추가 필드를 컨테이너에 추가
         infoContainer.appendChild(specialtyLabel);
         infoContainer.appendChild(specialtyInput);
+        infoContainer.appendChild(experienceLabel);
+        infoContainer.appendChild(experienceInput);
     }
 
     // 추가 필드 생성-환자
@@ -52,9 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 추가 필드 제거
     function removeInfo() {
         infoContainer.style.display = 'none';
-        while (infoContainer.firstChild) {
-            infoContainer.removeChild(infoContainer.firstChild);
-        }
+        infoContainer.innerHTML = '';
     }
 
     // 의사 클릭 시
@@ -79,19 +90,24 @@ document.addEventListener('DOMContentLoaded', function () {
     // 폼 제출 시 유효성 검사 진행
     const form = document.getElementById('form');
     form.addEventListener('submit', async function (event) {
-        console.log("되고있나요?")
         event.preventDefault(); // 기본 동작(페이지 새로고침)을 막습니다.
 
         const passwordValid = checkPassword();
-        const eamilValid = await sendAuthEmail();
+        const eamilValid = checkAuthCode();
         const nicknameValid = await checkNickname();
         const nameValid = checkName();
         const genderValid = checkgender();
         const ageValid = checkAge();
         const roleValid = checkrole();
 
-        if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid && ageValid && roleValid) {
+        if (passwordValid && emailValid && nicknameValid && nameValid && genderValid && ageValid && roleValid) {
             alert('회원가입이 완료되었습니다.');
+
+            // email입력 부분도 form데이터로 전송하기 위해 disabled 제거
+            const emailInput = document.getElementById("email")
+            emailInput.disabled = false;
+
+            // 최종 제출
             form.submit()
         }
     });
@@ -114,9 +130,13 @@ async function checkEmailDuplicate(email) {
 
 // 인증 이메일 보내기
 async function sendAuthEmail() {
+    const emailInput = document.getElementById("email")
     const email = document.getElementById("email").value;
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const emailError = document.getElementById("email_error")
+
+    const emailCheckInput = document.getElementById("check_email");
+    const checkEmailBtn = document.getElementById("check_email_btn");
 
     // 이메일 입력 확인
     if (!email) {
@@ -136,31 +156,60 @@ async function sendAuthEmail() {
     }
     // 인증 이메일 전송
     else {
+        emailError.style.display = 'none';
+
         try {
-            const response = await fetch('/auth/send-auth', {
-                method: 'POST',
+            const data = { 'email': email };
+            const response = await fetch("/auth/send-auth", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ email: email }),
-            });
-            const data = await response.json();
-            if (data.ok) {
-                alert('인증 이메일이 전송되었습니다.');
-                document.getElementById('check_email').disabled = false;
-                emailError.style.display = 'none';
-                return true;
+                body: JSON.stringify(data)
+            })
+
+            const result = await response.json();
+            if (result.ok) {
+                alert("인증번호가 발송되었습니다.");
+                authNum = result.authNum;
+
+                emailInput.disabled = true;
+                emailCheckInput.disabled = false;
+                checkEmailBtn.classList.remove("disabled-button");
+                checkEmailBtn.style.pointerEvents = 'auto';
             } else {
-                emailError.textContent = '이메일 전송에 실패했습니다.';
-                emailError.style.display = 'inline';
-                return false;
+                emailError.textContent = result.msg;
             }
-        } catch (error) {
-            console.error('Error:', error);
-            emailError.textContent = '서버 오류가 발생했습니다.';
-            emailError.style.display = 'inline';
-            return false;
+        } catch (err) {
+            alert("인증번호 발송에 실패하였습니다.");
         }
+        
+    }
+
+}
+
+// 인증번호 유효성 검사
+function checkAuthCode() {
+    const checkEmail = document.getElementById("check_email").value;
+    const emailCheckError = document.getElementById("email_check_error")
+
+    // 인증번호가 입력되었는지 확인
+    if (!checkEmail) {
+        emailCheckError.textContent = "인증번호를 입력해주세요.";
+        emailCheckError.style.display = 'inline';
+        return false;
+    }
+
+    // 인증번호 확인 로직
+    // checkEmail은 string이고 authNum은 int타입이라 == 사용
+    if (checkEmail == authNum) {
+        alert('인증번호 확인이 완료되었습니다.');
+        emailCheckError.style.display = 'none';
+        return true;
+    } else {
+        emailCheckError.textContent = '인증번호를 다시 확인해주세요.';
+        emailCheckError.style.display = 'inline';
+        return false;
     }
 }
 
@@ -190,7 +239,7 @@ async function checkNickname() {
         nicknameError.style.display = 'inline';
         return false;
     }
-    else if (nickname.length > 10){
+    else if (nickname.length > 10) {
         nicknameError.textContent = '닉네임은 10자 이하로 입력해 주세요.';
         nicknameError.style.display = 'inline';
         return false;

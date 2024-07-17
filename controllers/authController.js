@@ -7,7 +7,6 @@ const generateRandomNumber = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
 
-
 module.exports = {
     // singup페이지 로드
     singupLoad: (req, res) => {
@@ -44,28 +43,7 @@ module.exports = {
         }
     },
 
-    // 이메일 인증 번호 보내기
-    emailAuth: async (req, res) => {
-        const number = generateRandomNumber(111111, 999999);
-        const email = req.body.email;
-
-        const mailOptions = {
-            from: "team.ive.comma@gmail.com",
-            to: email,
-            subject: "Comma 인증 메일 입니다.",
-            html: '<h1>인증번호를 입력해주세요 \n\n\n\n\n\n</h1>' + number
-        };
-
-        smtpTransport.sendMail(mailOptions, (err, response) => {
-            if (err) {
-                res.status(500).json({ ok: false });
-            } else {
-                res.json({ ok: true , authNum: number });
-            }
-            res.set('Cache-Control', 'no-store');
-            smtpTransport.close(); // 전송 종료
-        });
-    },
+   
 
     // 이메일 인증 번호 보내기
     emailAuth: async (req, res) => {
