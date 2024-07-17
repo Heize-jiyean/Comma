@@ -81,7 +81,11 @@
 </style>
 <div class="profile-card">
     <div class="profile-image">
-        <img src="<%= patientUser.profile_picture %>">
+            <% if (type === 'patient') { %>
+                <img src="<%= patientUser.profile_picture %>">
+            <% } else { %>
+                <img src="<%= counselorUser.profile_picture %>">
+            <% } %>
     </div>
     <div class="profile-details">
         <!-- 이름 -->

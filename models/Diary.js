@@ -1,3 +1,5 @@
+const { options } = require('../email');
+
 exports.register = async (diary) => {
     try {
         const db = await require('../main').connection(); 
@@ -98,7 +100,8 @@ exports.toggleVisibility = async (diaryId) => {
     }
 };
 
-exports.findAll = async (page) => {
+// 상담사 메인화면용
+exports.PreviewfindAll = async (page, option, counselorId) => {
     try {
         const db = await require('../main').connection(); 
 
@@ -114,11 +117,38 @@ exports.findAll = async (page) => {
                 diary d 
             JOIN 
                 patient p ON d.patient_id = p.patient_id
-            ORDER BY d.created_at DESC LIMIT ? OFFSET ?
+            WHERE 
+                d.is_visible = TRUE
             `;
+        switch(option) {
+            case('all'): break;
+            case('commented'):
+                sql += `
+                    AND
+                    p.patient_id IN ( 
+                        SELECT patient_id
+                        FROM guestbook
+                        WHERE counselor_id = ?
+                    )
+                `;
+                break;
+            case('scrapted'):
+                sql += `
+                    AND
+                    p.patient_id IN ( 
+                        SELECT patient_id
+                        FROM scrap
+                        WHERE counselor_id = ?
+                    )
+                `;
+                break;
+        }
+        sql += `ORDER BY d.created_at DESC LIMIT ? OFFSET ?;`
 
-        const [rows, fields] = await db.query(sql, [pageSize, offset]);
-        
+        let rows, fields;
+        if (option == 'all') { [rows, fields] = await db.query(sql, [pageSize, offset]); }
+        else { [rows, fields] = await db.query(sql, [counselorId, pageSize, offset]); }
+
         if (db && db.end) db.end();
         return rows.length > 0 ? rows : null;
 
@@ -126,8 +156,7 @@ exports.findAll = async (page) => {
         console.error("Diary.findImageUrlById() 쿼리 실행 중 오류:", error);
     }
 };
-
-exports.countOfFindAll = async (page) => {
+exports.countOfFindAll = async (option, counselorId) => {
     try {
         const db = await require('../main').connection(); 
 
@@ -136,9 +165,36 @@ exports.countOfFindAll = async (page) => {
                 COUNT(*) AS total
             FROM 
                 diary d 
+            JOIN 
+                patient p ON d.patient_id = p.patient_id
+            WHERE 
+                d.is_visible = TRUE
             `;
+        switch(option) {
+            case('all'): break;
+            case('commented'):
+                sql += `
+                    AND
+                    p.patient_id IN ( 
+                        SELECT patient_id
+                        FROM guestbook
+                        WHERE counselor_id = ?
+                    )
+                `;
+                break;
+            case('scrapted'):
+                sql += `
+                    AND
+                    p.patient_id IN ( 
+                        SELECT patient_id
+                        FROM scrap
+                        WHERE counselor_id = ?
+                    )
+                `;
+                break;
+        }
 
-        const [rows, fields] = await db.query(sql);
+        const [rows, fields] = await db.query(sql, [counselorId]);
         
         if (db && db.end) db.end();
         return rows[0].total;
@@ -147,6 +203,64 @@ exports.countOfFindAll = async (page) => {
         console.error("Diary.countOfFindAll() 쿼리 실행 중 오류:", error);
     }
 };
+
+// 환자 프로필 용
+exports.PreviewfindByPatientId = async (page, patientId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        const pageSize = 9;
+        let offset = pageSize * (page - 1);
+
+        let sql = `
+            SELECT 
+                d.*,
+                p.nickname,
+                p.profile_picture
+            FROM 
+                diary d 
+            JOIN 
+                patient p ON d.patient_id = p.patient_id
+            WHERE 
+                d.patient_id = ?
+            ORDER BY d.created_at DESC LIMIT ? OFFSET ?;
+            `;
+        
+        const [rows, fields] = await db.query(sql, [patientId, pageSize, offset]);
+
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows : null;
+
+    } catch (error) {
+        console.error("Diary.PreviewfindByPatientId() 쿼리 실행 중 오류:", error);
+    }
+};
+exports.countOfFindByPatientId = async (patientId, is_visible) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            SELECT 
+                COUNT(*) AS total
+            FROM 
+                diary d 
+            WHERE 
+                WHERE patient_id = ?
+            `;
+        
+        const [rows, fields] = await db.query(sql, [patientId]);
+
+        if (db && db.end) db.end();
+        return rows[0].total;
+
+    } catch (error) {
+        console.error("Diary.PreviewfindByPatientId() 쿼리 실행 중 오류:", error);
+    }
+};
+
+
+
+
 exports.findAllByPatientId = async(patientId) => {
     try {
         const db = await require('../main').connection();
