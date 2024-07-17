@@ -19,7 +19,7 @@
         color: black;
         margin: 0;
     }
-    .diary {
+    .diary-item {
         margin-top: 10px;
         border-bottom: 1px solid #D6D7DA;
     }
@@ -37,7 +37,7 @@
         font-size: 18px;
         color: #888;
     }
-    .diary p {
+    .diary-item p {
         font-size: 18px;
     }
     .write-diary-button {
@@ -74,9 +74,10 @@
         <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
     </div>
     <!-- 일기 목록 -->
+    <div class="diary-list">
     <% if (diaries && diaries.length > 0) { %>
         <% diaries.forEach(diary => { %>
-        <div class="diary">
+        <div class="diary-item">
             <div class="diary-title">
                 <h3>
                     <a href="/diary/<%= diary.diary_id %>" style="text-decoration: none; color: inherit;">
@@ -91,6 +92,7 @@
     <% } else { %>
         <p>일기가 없습니다.</p>
     <% } %>
+    </div>
     <button class="view-all-button" id="viewAllDiariesButton">전체보기</button>
 </div>
 

@@ -1,5 +1,5 @@
 <style>
-    .guestbook {
+    .guestbook-item {
         margin-top: 10px;
         border-bottom: 1px solid #D6D7DA;
     }
@@ -17,7 +17,7 @@
         font-size: 18px;
         color: #888;
     }
-    .guestbook p {
+    .guestbook-item p {
         font-size: 18px;
     }
     .counselor-info {
@@ -36,13 +36,28 @@
         font-size: 18px;
         font-weight: bold;
     }
+    .pagination { 
+        display: flex; 
+        list-style: none; 
+        justify-content: center; 
+        margin-top: 60px;
+    }
+    .pagination .page-link { 
+        color: black; 
+        text-decoration: none; 
+    }
+    .pagination .page-item.active .page-link { 
+        background-color: #4B8673; 
+        border-color: #4B8673; 
+    }
+
 </style>
 
-<div class="diaries">
-    <!-- 방명록 목록 -->
+<!-- 방명록 목록 -->
+<div class="guestbooks">
     <% if (guestbooks && guestbooks.length > 0) { %>
         <% guestbooks.forEach(guestbook => { %>
-        <div class="guestbook">
+        <div class="guestbook-item">
             <!-- 방명록 내용 -->
             <div class="guestbook-title">
                 <h3>
@@ -66,3 +81,43 @@
         <p>방명록이 없습니다.</p>
     <% } %>
 </div>
+
+<!-- 페이지네이션 버튼 -->
+<nav aria-label="Guestbook pagination">
+    <ul class="pagination">
+        <% 
+            const maxPagesToShow = 10; // 한 번에 보여줄 최대 페이지 수
+            const startPage = Math.floor((currentPage - 1) / maxPagesToShow) * maxPagesToShow + 1;
+            const endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
+        %>
+        <% if (startPage > 1) { %>
+            <li class="page-item">
+                <a class="page-link" data-page="<%= startPage - 1 %>">Previous</a>
+            </li>
+        <% } %>
+        <% for(let i = startPage; i <= endPage; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                <a class="page-link" data-page="<%= i %>"><%= i %></a>
+            </li>
+        <% } %>
+        <% if (endPage < totalPages) { %>
+            <li class="page-item">
+                <a class="page-link" data-page="<%= endPage + 1 %>">Next</a>
+            </li>
+        <% } %>
+    </ul>
+</nav>
+
+<script>
+// 쿼리 스트링 처리
+document.addEventListener('DOMContentLoaded', function() {
+    const paginationLinks = document.querySelectorAll('.pagination .page-link');
+
+    paginationLinks.forEach(link => {
+        const page = link.getAttribute('data-page');
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('page', page);
+        link.href = `${window.location.pathname}?${urlParams.toString()}`;
+    });
+});
+</script>

@@ -51,9 +51,9 @@
                     <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
                     <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
                 </div>
-                <!-- 방명록 목록 -->
+                <!-- 방명록 목록 + 페이지네이션 -->
                 <div class="guestbook-list">
-                    <%- include('../guestbook/guestbooks', { guestbooks: guestbooks, showCounselorInfo: true }) %>
+                    <%- include('../guestbook/guestbooks', { guestbooks: guestbooks, showCounselorInfo: true, currentPage: currentPage }) %>
                 </div>
             </div>
         </div>

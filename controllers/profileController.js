@@ -24,7 +24,7 @@ exports.patientProfilePage = async (req, res) => {
         // 환자에게 작성된 방명록 가져오기
         const guestbooks = await GuestbookModel.findLatestFourByPatientId(patientUser.patient_id);
         
-        // 각 방명록 항목에 대해 상담사의 닉네임 가져오기
+        // 각 방명록 항목에 대해 상담사의 닉네임, 이미지 가져오기
         for (let guestbook of guestbooks) {
             const counselor = await UserModel.getCounselorById(guestbook.counselor_id);
             guestbook.counselor_name = counselor ? counselor.name : "Unknown";
@@ -60,14 +60,21 @@ exports.counselorProfilePage = async (req, res) => {
             return;
         }
 
-        // 상담사가 작성한 방명록 가져오기
-        const guestbooks = await GuestbookModel.findAllByCounselorId(counselorUser.counselor_id);
+        // 페이지네이션 처리
+        const limit = 10; // 한 페이지에 보여줄 방명록 수
+        const totalGuestbooks = await GuestbookModel.countByPatientId(counselorUser.counselor_id);
+        const totalPages = Math.ceil(totalGuestbooks / limit);
+
+        let currentPage = req.query.page ? parseInt(req.query.page) : 1;   // URL의 쿼리 매개변수 중 page 값을 가져옴 
+        const guestbooks = await GuestbookModel.findAllByCounselorIdWithPagination(counselorUser.counselor_id, currentPage, limit);
 
         // 렌더링
         res.render("profile/counselor.ejs", { 
             counselorUser: counselorUser, 
             type: 'counselor',
-            guestbooks: guestbooks
+            guestbooks: guestbooks,
+            currentPage: currentPage,
+            totalPages: totalPages,
         });
     } catch (error) {
         console.log("상담사 프로필 반환 오류", error);
@@ -109,7 +116,7 @@ function setDefaultImage(image_url) {
     return image_url;
 }
 
-// 환자 일기 방명록 모아보기 페이지 반환
+// 환자 방명록 모아보기 페이지 반환
 exports.listAllGuestbooks = async (req, res) => {
     try {
         // 환자 정보 가져오기
@@ -122,10 +129,16 @@ exports.listAllGuestbooks = async (req, res) => {
             return;
         }
 
-        // 환자에게 작성된 방명록 가져오기
-        const guestbooks = await GuestbookModel.findAllByPatientId(patientUser.patient_id);
-        
-        // 각 방명록 항목에 대해 상담사의 닉네임 가져오기
+        // 페이지네이션 처리
+        const limit = 10; // 한 페이지에 보여줄 방명록 수
+        const totalGuestbooks = await GuestbookModel.countByPatientId(patientUser.patient_id);
+        const totalPages = Math.ceil(totalGuestbooks / limit);
+
+        let currentPage = req.query.page ? parseInt(req.query.page) : 1;   // URL의 쿼리 매개변수 중 page 값을 가져옴 
+        const guestbooks = await GuestbookModel.findAllByPatientIdWithPagination(patientUser.patient_id, currentPage, limit);
+
+
+        // 각 방명록 항목에 대해 상담사의 닉네임, 프로필 이미지 가져오기
         for (let guestbook of guestbooks) {
             const counselor = await UserModel.getCounselorById(guestbook.counselor_id);
             guestbook.counselor_name = counselor ? counselor.name : "Unknown";
@@ -136,7 +149,9 @@ exports.listAllGuestbooks = async (req, res) => {
         res.render("profile/guestbook.ejs", { 
             patientUser: patientUser, 
             type: 'patient', 
-            guestbooks: guestbooks
+            guestbooks: guestbooks,
+            currentPage: currentPage,
+            totalPages: totalPages,
         });
 
 
