@@ -108,7 +108,8 @@
                         </h3>
                         <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
                     </div>
-                    <p><%= guestbook.content %></p>
+                    <p><%= guestbook.content.length > 60 ? guestbook.content.substring(0, 60) + '...' : guestbook.content %></p>
+                    
                 <!-- 방명록 작성자 -->
                 <% if (showCounselorInfo) { %>
                     <div class="counselor-info">

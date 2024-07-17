@@ -85,7 +85,7 @@
                     </h3>
                     <span><%= new Date(diary.created_at).toLocaleDateString() %></span>
                 </div>
-                <p><%= diary.content %></p>
+                <p><%= diary.content.length > 60 ? diary.content.substring(0, 60) + '...' : diary.content %></p>
             </a>
         </div>
         <% }) %>
