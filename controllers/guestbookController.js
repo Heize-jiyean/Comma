@@ -1,11 +1,11 @@
 const GuestbookModel = require('../models/Guestbook');
-const UserModel = require('../models/User'); // 필요한 경우
+const UserModel = require('../models/User'); 
 
 // 방명록 작성 페이지 반환
 exports.new = async (req, res) => {
     try {
-        const patientNickname = req.params.patientNickname; // URL에서 환자 닉네임 가져오기
-        const patientUser = await UserModel.getPatientByNickname(patientNickname); // 환자 정보 가져오기
+        const patientNickname = req.params.patientNickname; 
+        const patientUser = await UserModel.getPatientByNickname(patientNickname); 
 
         res.render('guestbook/new.ejs', { patientUser: patientUser });
     } catch (error) {
@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
         const { guestbookData } = req.body;
         console.log(guestbookData);
 
-        const patientNickname = req.params.patientNickname; // URL에서 환자 닉네임 가져오기
+        const patientNickname = req.params.patientNickname; 
         const patientUser = await UserModel.getPatientByNickname(patientNickname);
 
         const counselorId = 1;  // TODO: 실제 값으로 바꿔주기
@@ -32,10 +32,31 @@ exports.register = async (req, res) => {
         }
 
         const savedGuestbookId = await GuestbookModel.register(newGuestbookData);
-        // return res.json({ success: true, redirect: `/guestbook/${savedGuestbookId}` }); // TODO: 방명록 상세 페이지로 이동
         return res.json({ success: true, redirect: `/` });
     } catch (error) {
         console.error("registerGuestbook 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+// 방명록 상세조회
+exports.view = async (req, res) => {
+    try {
+        const guestbookId = req.params.guestbookId; 
+        let guestbook = await GuestbookModel.findById(guestbookId); 
+        
+        if (guestbook) {
+            let profile = await GuestbookModel.getCounselorID(guestbook.counselor_id);
+            
+            guestbook.author_name = profile.name + ' 상담사';
+            guestbook.author_profile_image = profile.profile_picture; // 프로필 이미지 추가
+
+            res.render('guestbook/view', { guestbook });
+        } else {
+            res.status(404).send("방명록을 찾을 수 없습니다.");
+        }
+    } catch (error) {
+        console.error("viewGuestbook 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
