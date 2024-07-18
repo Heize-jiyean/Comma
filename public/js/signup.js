@@ -84,8 +84,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // 닉네임 입력 시 유효성 검사 진행
-    document.getElementById('nickname').addEventListener('blur', checkNickname);
+    // 아이디 입력 시 유효성 검사 진행
+    document.getElementById('id').addEventListener('blur', checkId);
 
     // 폼 제출 시 유효성 검사 진행
     const form = document.getElementById('form');
@@ -94,13 +94,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const passwordValid = checkPassword();
         const emailValid = checkAuthCode();
-        const nicknameValid = await checkNickname();
-        const nameValid = checkName();
+        const idValid = await checkId();
+        const nicknameValid = checkNickname();
         const genderValid = checkgender();
         const ageValid = checkAge();
         const roleValid = checkrole();
 
-        if (passwordValid && emailValid && nicknameValid && nameValid && genderValid && ageValid && roleValid) {
+        if (passwordValid && emailValid && idValid && nicknameValid && genderValid && ageValid && roleValid) {
             alert('회원가입이 완료되었습니다.');
 
             // email입력 부분도 form데이터로 전송하기 위해 disabled 제거
@@ -218,11 +218,11 @@ function checkAuthCode() {
 
 }
 
-// 닉네임 중복 확인
-async function checkNicknameDuplicate(nickname) {
-    const data = { 'nickname': nickname };
+// 아이디 중복 확인
+async function checkIdDuplicate(id) {
+    const data = { 'id': id };
 
-    const response = await fetch("/auth/check-nickname", {
+    const response = await fetch("/auth/check-id", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -233,31 +233,37 @@ async function checkNicknameDuplicate(nickname) {
     return isDuplicate.isDuplicate;
 }
 
-// 닉네임 유효성 검사
-async function checkNickname() {
-    const nickname = document.getElementById("nickname").value;
-    const nicknameError = document.getElementById("nickname_error")
+// 아이디 유효성 검사
+async function checkId() {
+    const id = document.getElementById("id").value;
+    const idError = document.getElementById("id_error")
+    const idPattern = /^[a-zA-Z0-9_]+$/;
 
-    // 닉네임 입력 확인
-    if (!nickname) {
-        nicknameError.textContent = '닉네임을 입력해 주세요.';
-        nicknameError.style.display = 'inline';
+    // 아이디 입력 확인
+    if (!id) {
+        idError.textContent = '아이디를 입력해 주세요.';
+        idError.style.display = 'inline';
         return false;
     }
-    else if (nickname.length > 10) {
-        nicknameError.textContent = '닉네임은 10자 이하로 입력해 주세요.';
-        nicknameError.style.display = 'inline';
+    else if (id.length > 10) {
+        idError.textContent = '아이디는 10자 이하로 입력해 주세요.';
+        idError.style.display = 'inline';
         return false;
     }
-    // 닉네임 중복 확인
-    else if (await checkNicknameDuplicate(nickname)) {
-        nicknameError.textContent = '사용 중인 닉네임입니다.';
-        nicknameError.style.display = 'inline';
+    else if (!idPattern.test(id)) {
+        idError.textContent = '아이디는 영어, 숫자, 언더바만 사용 가능합니다.';
+        idError.style.display = 'inline';
+        return false;
+    }
+    // 아이디 중복 확인
+    else if (await checkIdDuplicate(id)) {
+        idError.textContent = '사용 중인 아이디입니다.';
+        idError.style.display = 'inline';
         return false;
     }
 
     else {
-        nicknameError.style.display = 'none';
+        idError.style.display = 'none';
         return true;
     }
 }
@@ -300,18 +306,23 @@ function checkPassword() {
 }
 
 // 나머지 항목 유효성 검사
-function checkName() {
-    const name = document.getElementById("name").value;
-    const nameError = document.getElementById("name_error")
+function checkNickname() {
+    const nickname = document.getElementById("nickname").value;
+    const nicknameError = document.getElementById("nickname_error")
 
     // 이름 입력 확인
-    if (!name) {
-        nameError.textContent = '이름을 입력해 주세요.'
-        nameError.style.display = 'inline';
+    if (!nickname) {
+        nicknameError.textContent = '닉네임을 입력해 주세요.'
+        nicknameError.style.display = 'inline';
+        return false;
+    }
+    else if (nickname.length > 12) {
+        idError.textContent = '닉네임은 12자 이하로 입력해 주세요.';
+        idError.style.display = 'inline';
         return false;
     }
     else {
-        nameError.style.display = 'none';
+        nicknameError.style.display = 'none';
         return true
     }
 }
