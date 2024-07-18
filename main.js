@@ -53,6 +53,26 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
+// DB connection
+require('dotenv').config();
+exports.connection = async () => {
+  try {
+      const db = await mysql.createPool({
+          host: process.env.DB_HOST,
+          user: process.env.DB_USER,
+          password: process.env.DB_PW,
+          port: process.env.DB_PORT,
+          database: process.env.DB_NAME,
+          waitForConnections: true,
+          insecureAuth: true,
+      });
+      return db;
+  } catch (error) {
+      console.error("데이터베이스 연결 오류:", error);
+      throw error;
+  }
+};
+
 // EJS 설정
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -84,6 +104,9 @@ app.use((req, res, next) => {
 
 
 app.use(methodOverride("_method"));
+
+//layouts 사용
+app.use(layouts);
 
 // 페이지 라우팅
 app.get('/', (req, res) => {

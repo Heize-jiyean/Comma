@@ -211,6 +211,7 @@ function checkAuthCode() {
         emailCheckError.style.display = 'inline';
         return false;
     }
+
 }
 
 // 닉네임 중복 확인

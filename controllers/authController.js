@@ -43,11 +43,8 @@ module.exports = {
         }
     },
 
-   
-
     // 이메일 인증 번호 보내기
     emailAuth: async (req, res) => {
-        console.log('Email auth request received:', req.body);
         const number = generateRandomNumber(111111, 999999);
         const email = req.body.email;
 
@@ -60,10 +57,8 @@ module.exports = {
 
         smtpTransport.sendMail(mailOptions, (err, response) => {
             if (err) {
-                console.error('Email sending error:', err);
                 res.status(500).json({ ok: false });
             } else {
-                console.log('Email sent successfully');
                 res.json({ ok: true , authNum: number });
             }
             res.set('Cache-Control', 'no-store');
