@@ -73,30 +73,30 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // 에러 메시지 초기화
-            document.getElementById('email-error').innerText = '';
-            document.getElementById('password-error').innerText = '';
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
 
-            const response = await fetch('/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
+                const result = await response.json();
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                if (result.field === 'email') {
-                    document.getElementById('email-error').innerText = result.error;
-                } else if (result.field === 'password') {
-                    document.getElementById('password-error').innerText = result.error;
+                if (!response.ok) {
+                    if (result.field === 'email') {
+                        document.getElementById('email-error').innerText = result.error;
+                    } else if (result.field === 'password') {
+                        document.getElementById('password-error').innerText = result.error;
+                    }
+                    document.getElementById('email').value = '';
+                    document.getElementById('password').value = '';
+                } else {
+                    window.location.href = '/';
                 }
-                document.getElementById('email').value = '';
-                document.getElementById('password').value = '';
-            } else {
-                window.location.href = '/';
+            } catch (error) {
+                console.error('Login error:', error);
             }
         });
     </script>
