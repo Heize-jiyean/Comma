@@ -73,17 +73,14 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // 에러 메시지 초기화
-            document.getElementById('email-error').innerText = '';
-            document.getElementById('password-error').innerText = '';
-
-            const response = await fetch('/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
 
             const result = await response.json();
 

@@ -20,7 +20,12 @@ router.post('/submit-signup', authController.singup);
 // 이메일 중복 확인
 router.post('/check-email', authController.checkEmail);
 
+// 이메일 인증 전송
+router.post('/send-auth', authController.emailAuth);
+
 // 닉네임 중복 확인
 router.post('/check-nickname', authController.checkNickname);
+
+
 
 module.exports = router;
