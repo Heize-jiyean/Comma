@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
         }
 
         const savedGuestbookId = await GuestbookModel.register(newGuestbookData);
-        return res.json({ success: true, redirect: `/` });
+        return res.json({ success: true, redirect: `/guestbook/${savedGuestbookId}` });
     } catch (error) {
         console.error("registerGuestbook 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
