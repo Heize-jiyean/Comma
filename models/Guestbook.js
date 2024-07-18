@@ -1,4 +1,4 @@
-// 방명록 등록
+//방명록 등록
 exports.register = async (guestbook) => {
     try {
         const db = await require('../main').connection(); 
@@ -13,14 +13,52 @@ exports.register = async (guestbook) => {
             guestbook.content,
         ]);
 
-        if (db && db.end) db.end()
+        if (db && db.end) db.end();
         return result.insertId;
 
     } catch (error) {
-        console.error("Guestbook.resgister() 쿼리 실행 중 오류:", error);
+        console.error("Guestbook.register() 쿼리 실행 중 오류:", error);
     }
 }
 
+//방명록 상세조회
+exports.findById = async (guestbookId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            SELECT * 
+            FROM guestbook
+            WHERE guestbook_id = ?`; 
+        const [rows, fields] = await db.query(sql, [guestbookId]);
+        
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows[0] : null;
+
+    } catch (error) {
+        console.error("Guestbook.findById() 쿼리 실행 중 오류:", error);
+    }
+}
+
+
+//방명록 작성자ID 구하기
+exports.getCounselorID = async (counselorId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            SELECT * 
+            FROM counselor
+            WHERE counselor_id = ?`;
+        const [rows, fields] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows[0] : null;
+
+    } catch (error) {
+        console.error("Guestbook.getCounselorID() 쿼리 실행 중 오류:", error);
+    }
+};
 // 환자 아이디로 한자에게 작성된 방명록 찾기
 exports.findAllByPatientId = async (patientId) => {
     try {

@@ -10,6 +10,7 @@ router.get('/new/:patientNickname', guestbookController.new);
 // [POST] 방명록 작성
 router.post('/register/:patientNickname', guestbookController.register);
 
+// [GET] 방명록 상세조회 /Guestbook/:GuestbookID
+router.get('/:guestbookId', guestbookController.view);
 
-
-module.exports = router;
+module.exports = router;  
