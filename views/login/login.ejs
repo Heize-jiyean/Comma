@@ -82,18 +82,21 @@
                     body: JSON.stringify({ email, password })
                 });
 
-            const result = await response.json();
+                const result = await response.json();
 
-            if (!response.ok) {
-                if (result.field === 'email') {
-                    document.getElementById('email-error').innerText = result.error;
-                } else if (result.field === 'password') {
-                    document.getElementById('password-error').innerText = result.error;
+                if (!response.ok) {
+                    if (result.field === 'email') {
+                        document.getElementById('email-error').innerText = result.error;
+                    } else if (result.field === 'password') {
+                        document.getElementById('password-error').innerText = result.error;
+                    }
+                    document.getElementById('email').value = '';
+                    document.getElementById('password').value = '';
+                } else {
+                    window.location.href = '/';
                 }
-                document.getElementById('email').value = '';
-                document.getElementById('password').value = '';
-            } else {
-                window.location.href = '/';
+            } catch (error) {
+                console.error('Login error:', error);
             }
         });
     </script>
