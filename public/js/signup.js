@@ -197,18 +197,21 @@ function checkAuthCode() {
     if (!checkEmail) {
         emailCheckError.textContent = "인증번호를 입력해주세요.";
         emailCheckError.style.display = 'inline';
+        emailCheckError.style.color = '#f86550';
         return false;
     }
 
     // 인증번호 확인 로직
     // checkEmail은 string이고 authNum은 int타입이라 == 사용
     if (checkEmail == authNum) {
-        alert('인증번호 확인이 완료되었습니다.');
-        emailCheckError.style.display = 'none';
+        emailCheckError.textContent = "인증번호 확인이 완료되었습니다.";
+        emailCheckError.style.display = 'inline';
+        emailCheckError.style.color = 'blue';
         return true;
     } else {
         emailCheckError.textContent = '인증번호를 다시 확인해주세요.';
         emailCheckError.style.display = 'inline';
+        emailCheckError.style.color = '#f86550';
         return false;
     }
 
