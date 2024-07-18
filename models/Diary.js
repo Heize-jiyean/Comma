@@ -235,7 +235,7 @@ exports.PreviewfindByPatientId = async (page, patientId) => {
         console.error("Diary.PreviewfindByPatientId() 쿼리 실행 중 오류:", error);
     }
 };
-exports.countOfFindByPatientId = async (patientId, is_visible) => {
+exports.countOfFindByPatientId = async (patientId) => {
     try {
         const db = await require('../main').connection(); 
 
@@ -245,7 +245,7 @@ exports.countOfFindByPatientId = async (patientId, is_visible) => {
             FROM 
                 diary d 
             WHERE 
-                WHERE patient_id = ?
+                patient_id = ?
             `;
         
         const [rows, fields] = await db.query(sql, [patientId]);
