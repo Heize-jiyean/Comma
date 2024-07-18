@@ -93,14 +93,14 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault(); // 기본 동작(페이지 새로고침)을 막습니다.
 
         const passwordValid = checkPassword();
-        const eamilValid = checkAuthCode();
+        const emailValid = checkAuthCode();
         const nicknameValid = await checkNickname();
         const nameValid = checkName();
         const genderValid = checkgender();
         const ageValid = checkAge();
         const roleValid = checkrole();
 
-        if (passwordValid && eamilValid && nicknameValid && nameValid && genderValid && ageValid && roleValid) {
+        if (passwordValid && emailValid && nicknameValid && nameValid && genderValid && ageValid && roleValid) {
             alert('회원가입이 완료되었습니다.');
 
             // email입력 부분도 form데이터로 전송하기 위해 disabled 제거

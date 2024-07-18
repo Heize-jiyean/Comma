@@ -85,26 +85,27 @@ module.exports = {
         res.render('login/login');
     },
 
-    // 로그인 처리
+    //login함수-로깅추가
     login: async (req, res) => {
-        const { email, password, role } = req.body;
+        console.log('Login attempt:', req.body);
+        const { email, password } = req.body;
         try {
-            let user;
-            if (role === 'patient') {
-                user = await UserModel.loginPatient(email, password);
-            } else if (role === 'counselor') {
+            let user = await UserModel.loginPatient(email, password);
+            if (!user) {
                 user = await UserModel.loginCounselor(email, password);
             }
-
+    
             if (user) {
+                console.log('Login successful for user:', user.email);
                 req.session.user = {
                     id: user.patient_id || user.counselor_id,
                     email: user.email,
                     nickname: user.nickname,
-                    role: role
+                    role: user.patient_id ? 'patient' : 'counselor'
                 };
-                res.json({ success: true });
+                res.json({ success: true, message: '로그인 성공' });
             } else {
+                console.log('Login failed: Invalid credentials');
                 res.status(400).json({ success: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' });
             }
         } catch (error) {
