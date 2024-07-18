@@ -129,7 +129,7 @@ exports.getCounselorByNickname = async (nickname) => {
     }
 };
 
-// 상담사 정보 ID로 가져오기
+// 의사 정보 아이디로 가져오기
 exports.getCounselorById = async (counselorId) => {
     try {
         const db = await require('../main').connection();
@@ -137,6 +137,7 @@ exports.getCounselorById = async (counselorId) => {
             SELECT *
             FROM counselor
             WHERE counselor_id = ?`;
+
         const [result] = await db.query(sql, [counselorId]);
 
         if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }

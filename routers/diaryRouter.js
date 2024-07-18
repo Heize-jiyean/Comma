@@ -5,7 +5,7 @@ const diaryController = require('../controllers/diaryController');
 router.use(express.json());
 
 //상담사 메인화면 임시 라우터
-router.get('/', diaryController.listAllDiaries);
+router.get('/', diaryController.listOfDiaries);
 
 router.get('/new', diaryController.new);
 router.post('/register', diaryController.register);

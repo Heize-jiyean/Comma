@@ -12,6 +12,13 @@
             padding: 20px;
             margin-bottom: 20px;
         }
+        .content-container {
+            display: flex;
+            gap: 20px;
+        }
+        .content-column {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -20,9 +27,12 @@
             <%- include('./profile_components/profile_card') %>
         </div>
         <div class="content-container">
-            <!-- TODO: 차트 넣기 -->
-            <%- include('./profile_components/diary_preview', { diaries: diaries }) %>
-            <%- include('./profile_components/guestbook_preview') %>
+            <div class="content-column">
+                <%- include('./profile_components/diary_preview', { diaries: diaries }) %>
+            </div>
+            <div class="content-column">
+                <%- include('./profile_components/guestbook_preview', { guestbooks: guestbooks, showCounselorInfo: true }) %>
+            </div>
         </div>
     </div>
 </body>

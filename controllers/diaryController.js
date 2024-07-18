@@ -78,7 +78,7 @@ exports.delete = async (req, res) => {
         const diaryId = req.params.diaryId;
 
         // 로그인 여부 확인 && 유저 확인
-89
+
         // 스토리지 이미지 삭제
         const imageUrl = await diaryModel.findImageUrlById(diaryId);
         if (imageUrl) {
@@ -110,19 +110,24 @@ exports.delete = async (req, res) => {
     }
 }
 
-exports.listAllDiaries = async (req, res) => {
+exports.listOfDiaries = async (req, res) => {
     try {
         // 예외 처리 
-        
-        const totalPages = Math.ceil( await diaryModel.countOfFindAll() / 9);
+
+
+        const option = req.query.option ? req.query.option : "all";
         let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-        let Previews = await diaryModel.findAll(currentPage);
 
-        Previews.forEach(preview => {
-            preview.image_url = setDefaultImage(preview.image_url);
-            // preview.profile_picture = 프로필 기본이미지 설정
-        });
+        const totalPages = Math.ceil( await diaryModel.countOfFindAll(option, 1) / 9);
+        let Previews = await diaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
 
+        if (Previews) {
+            Previews.forEach(preview => {
+                preview.image_url = setDefaultImage(preview.image_url);
+                // preview.profile_picture = 프로필 기본이미지 설정
+            });
+        }
+        
         res.render('main-counselor', {Previews, currentPage, totalPages});
     } catch (error) {
         console.error("listAllDiaries 오류:", error);
