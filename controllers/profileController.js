@@ -95,7 +95,7 @@ exports.listAllDiaries = async (req, res) => {
         }
 
         // 일기
-        const totalPages = Math.ceil( await DiaryModel.findAllByPatientId(patientUser.patient_id) / 9);
+        const totalPages = Math.ceil( await DiaryModel.countOfFindByPatientId(patientUser.patient_id) / 9);
         let currentPage = req.query.page ? parseInt(req.query.page) : 1;
         let Previews = await DiaryModel.PreviewfindByPatientId(currentPage, patientUser.patient_id);
 
