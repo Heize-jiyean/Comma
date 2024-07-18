@@ -1,88 +1,50 @@
-<div>프로필 상담사 !!!</div>
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>상담사 프로필 페이지</title>
-    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/css/profile/dashboard.css">
     <style>
-        body {
-            font-family: 'Pretendard-Regular', sans-serif;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .main-container {
-            display: flex;
-            max-width: 768px;
-            margin: auto;
+        .guestbook-container {
             background: #fff;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        .profile-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
+            border-radius: 20px;
+            border: 1px solid #D6D7DA;
+            padding: 40px;
             margin-bottom: 20px;
+            position: relative;
         }
-        .profile-image {
-            width: 150px;
-            height: 150px;
-            background: url('https://i.imgur.com/3beQH5s.jpeg') no-repeat center center; /* 이미지 URL 변경 필요 */
-            background-size: cover;
-            border-radius: 50%;
-            border: 5px solid #fff; /* 배경과 같은 색으로 테두리를 줘서 마치 matting 효과 */
+        .guestbook-container-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #D6D7DA;
         }
-        .profile-details {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .profile-name {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .profile-bio {
-            font-size: 16px;
-            color: #666;
-        }
-        .messages-container {
-            width: 100%;
-        }
-        .message {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-top: 10px;
-            border-radius: 8px;
+        .guestbook-container h2 {
+            font-weight: 700;
+            font-size: 28px;
+            color: black;
+            margin: 0;
         }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <div class="profile-card">
-            <div class="profile-image"></div>
-            <div class="profile-details">
-                <h2 class="profile-name">오은영</h2>
-                <p class="profile-bio">안녕하세요. 저는 오은영입니다. 심리학 전문가로 활동하고 있습니다.</p>
-            </div>
+        <div class="profile-container">
+            <%- include('./profile_components/profile_card') %>
         </div>
-        <div class="messages-container">
-            <h3>오은영 상담사님에게 남긴 방명록</h3>
-            <div class="message">
-                <p>구체적인 상담내용 세부사항 기재</p>
+        <div class="content-container">
+            <div class="guestbook-container">
+                <!-- 방명록 헤더 -->
+                <div class="guestbook-container-header">
+                    <h2><%= counselorUser.name %> 상담사가 쓴 방명록</h2>
+                </div>
+                <!-- 방명록 목록 -->
+                <div class="guestbook-list">
+                    <!-- TODO: 수정해주기 -->
+                    <%- include('../guestbook/guestbooks', { guestbooks: guestbooks, showCounselorInfo: false, currentPage: currentPage }) %>
+                </div>
             </div>
-            <div class="message">
-                <p>구체적인 상담내용 세부사항 기재</p>
-            </div>
-            <div class="message">
-                <p>구체적인 상담내용 세부사항 기재</p>
-            </div>
-            <!-- 여기에 추가 메시지가 계속 들어갈 수 있습니다 -->
         </div>
     </div>
 </body>

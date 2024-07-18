@@ -20,6 +20,9 @@ exports.register = async (req, res) => {
         console.log(diaryData);
 
         // 감정분석
+        // 임시 감정 분석 수치
+        diaryData.joy = 10.00; diaryData.surprise = 20.00; diaryData.anger = 30.00; 
+        diaryData.anxiety = 10.00; diaryData.hurt = 10.00; diaryData.sadness = 20.00;
 
         const savedDiaryId = await diaryModel.register(diaryData);
         return res.json({ success: true, redirect: `/diary/${savedDiaryId}` });
@@ -45,12 +48,7 @@ exports.view = async (req, res) => {
             }
 
             // 기본이미지 설정
-            if (diary.image_url == null) diary.image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd"
-
-            // 임시 감정 분석 수치
-            diary.joy = 10.00; diary.surprise = 20.00; diary.anger = 30.00; 
-            diary.anxiety = 10.00; diary.hurt = 10.00; diary.sadness = 20.00;
-
+            diary.image_url = setDefaultImage(diary.image_url);
 
             res.render('diary/view', {diary});
         }
@@ -110,4 +108,34 @@ exports.delete = async (req, res) => {
         console.error("deleteDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
+}
+
+exports.listOfDiaries = async (req, res) => {
+    try {
+        // 예외 처리 
+
+
+        const option = req.query.option ? req.query.option : "all";
+        let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+
+        const totalPages = Math.ceil( await diaryModel.countOfFindAll(option, 1) / 9);
+        let Previews = await diaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
+
+        if (Previews) {
+            Previews.forEach(preview => {
+                preview.image_url = setDefaultImage(preview.image_url);
+                // preview.profile_picture = 프로필 기본이미지 설정
+            });
+        }
+        
+        res.render('main-counselor', {Previews, currentPage, totalPages});
+    } catch (error) {
+        console.error("listAllDiaries 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+function setDefaultImage(image_url) {
+    if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
+    return image_url;
 }

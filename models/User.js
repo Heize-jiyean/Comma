@@ -129,6 +129,27 @@ exports.getCounselorByNickname = async (nickname) => {
     }
 };
 
+// 의사 정보 아이디로 가져오기
+exports.getCounselorById = async (counselorId) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            SELECT *
+            FROM counselor
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result.length > 0 ? result[0] : null;
+    } catch (error) {
+        console.error('UserModel.getCounselorById 오류:', error);
+        throw error;
+    }
+};
+
+
 // 비밀번호 검증
 exports.verifyPassword = async (plainPassword, hashedPassword) => {
     return await bcrypt.compare(plainPassword, hashedPassword);

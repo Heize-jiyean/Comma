@@ -1,0 +1,67 @@
+<head>
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #F4F5F8; }
+    .diaries { display: flex; flex-direction: column; justify-content: space-between; align-items: center; margin: auto; 
+        max-width: 1080px; margin-bottom: 16px; }
+    .card { border-radius: 30px; overflow: hidden; }
+
+    .card-img-container { height: 280px; overflow: hidden; }
+    .card-link { text-decoration: none; color: black; }
+    .card-link:hover { color: #4B8673; }
+    .card-body { margin: 10px; height: 180px;}
+    .text-muted { padding-right: 12px; }
+</style>
+</head>
+
+<div class="diaries">
+    <% if (!Previews || Previews.length === 0) { %>
+        <p>No posts found.</p>
+    <% } else { %>
+        <div class="row">
+            <% Previews.forEach(Preview => { %>
+                <div class="col-md-4 mb-3">
+                <a href="/diary/<%= Preview.diary_id %>" class="card-link">
+                <div class="card">
+                    <div class="card-img-container">
+                        <img src="<%= Preview.image_url %>" class="card-img-top" alt="Post Image">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" style="font-weight: bold" ><%= Preview.title %></h5>
+                        <p style="font-size: 14px" class="card-text"><%= Preview.content.substring(0, 55) %>...</p>
+                        <p style="font-size: 14px" class="card-text"><%= Preview.nickname %></p>
+                        <p style="font-size: 14px" class="card-text"><%= new Date(Preview.created_at).toLocaleDateString('ko-KR') %></p>
+                        <div class="emotion-ranking" data-emotions="<%= JSON.stringify(Preview.emotions) %>"></div>
+                    </div>
+                </div>
+                </a>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
+<nav aria-label="Diary pagination">
+    <%- include('../components/pagination') %>
+</nav>
+
+<script>
+
+
+// ai감정 상위3개 출력
+document.addEventListener('DOMContentLoaded', function() {
+    const emotionContainers = document.querySelectorAll('.emotion-ranking');
+    
+    emotionContainers.forEach(container => {
+        const emotions = JSON.parse(container.getAttribute('data-emotions'));
+        const sortedEmotions = Object.entries(emotions)
+            .sort((a, b) => b[1] - a[1]) // 내림차순 정렬
+            .slice(0, 3); // 상위 3개 추출
+
+        container.innerHTML = ''; // 초기 내용 지우기
+        sortedEmotions.forEach(([emotion, value]) => {
+            const percentage = (value * 100).toFixed(2);
+            container.innerHTML += `<small class="text-muted">${emotion}: ${percentage}%</small>`;
+        });
+    });
+});
+</script>

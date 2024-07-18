@@ -1,0 +1,24 @@
+body {
+    font-family: 'Pretendard-Regular', sans-serif;
+    background-color: #F4F5F8;
+    margin: 0;
+    padding: 0;
+}
+.main-container {
+    display: flex;
+    max-width: 1280px;
+    margin: auto;
+}
+.profile-container {
+    flex: none;
+    width: 320px;
+    padding: 30px;
+    height: fit-content;
+    position: sticky;
+    top: 130px; /* 스크롤 시 상단에 고정 */
+}
+.content-container {
+    flex: 3;
+    padding: 30px;
+    overflow-y: auto; /* 스크롤 가능 설정 */
+}

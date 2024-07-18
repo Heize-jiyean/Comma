@@ -1,7 +1,140 @@
 <!-- profile_card.ejs -->
+<style>
+    .profile-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #D6D7DA;
+        padding: 40px;
+    }
+    
+    .profile-image {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%; /* 원형 이미지 */
+        margin: auto;
+        background-size: cover; /* 이미지가 컨테이너를 꽉 채우도록 */
+        overflow: hidden;
+        border: 1px solid #D6D7DA;
+        display: flex; /* Flexbox 사용 */
+        justify-content: center; /* 수평 가운데 정렬 */
+    }
+
+    .profile-details {
+        margin-top: 24px;
+    }
+
+    .profile-details h2 {
+        font-weight: 700;
+        font-size: 24px;
+        color: black;
+        margin-bottom: 4px;
+    }
+
+    .badge {
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 16px;
+        margin-left: 8px;
+    }
+
+    .badge-patient {
+        float: right;
+        background-color: #FFE8E3; /* 환자 배경색 */
+        color: #EA5533; /* 환자 텍스트 색 */
+        border: 1px solid #EA5533; /* 환자 배지 테두리 색 */
+    }
+
+    .badge-counselor {
+        float: right;
+        background-color: #F5E8FF; /* 상담사 배경색 */
+        color: #9933EA; /* 상담사 텍스트 색 */
+        border: 1px solid #9933EA; /* 상담사 배지 테두리 색 */
+    }
+
+    .profile-details p {
+        font-weight: 500;
+        font-size: 16px;
+        color: black;
+        margin-top: 8px;
+        margin-bottom: 15px;
+    }
+    .profile-bio {
+        margin-top: 8px;
+        font-size: 16px;
+    }
+
+    .interest-button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: white;
+        color: black;
+        border: 1px solid #D6D7DA;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 40px;
+    }
+
+</style>
 <div class="profile-card">
-    <div class="profile-details">
-        <h2>여기 사용자 이름</h2>
-        <p>여기 사용자 바이오</p>
+    <div class="profile-image">
+        <% if (type === 'patient') { %>
+            <img src="<%= patientUser.profile_picture %>" alt="Patient Profile Picture">
+        <% } else { %>
+            <img src="<%= counselorUser.profile_picture %>" alt="Counselor Profile Picture">
+        <% } %>
     </div>
+    <div class="profile-details">
+        <!-- 이름 -->
+        <h2>
+            <% if (type === 'patient') { %>
+                <%- patientUser.name %>
+            <% } else { %>
+                <%- counselorUser.name %>
+            <% } %>
+            <!-- 배지 추가 -->
+            <div class="badge 
+                <% if (type === 'patient') { %>
+                    badge-patient
+                <% } else { %>
+                    badge-counselor
+                <% } %>">
+                <% if (type === 'patient') { %>
+                    환자
+                <% } else { %>
+                    상담사
+                <% } %>
+            </div>
+        <!-- 닉네임 -->
+        <p>
+            <% if (type === 'patient') { %>
+                <%- patientUser.nickname %>
+            <% } else { %>
+                <%- counselorUser.nickname %>
+            <% } %>
+        </p>
+        
+    </div>
+    <div class="profile-bio"">
+        <!-- 바이오 -->
+        <p>
+            <% if (type === 'patient') { %>
+                <%- patientUser.bio %>
+            <% } else { %>
+                <%- counselorUser.bio %>
+            <% } %>
+        </p>
+    </div>
+    <!-- 관심 등록 버튼 -->
+    <button class="interest-button">
+        <% if (type === 'patient') { %>
+            관심 환자로 등록하기
+        <% } else { %>
+            관심 상담사로 등록하기
+        <% } %>
+    </button>
+    <!-- TODO: 세션에 저장된 사용자 타입에 따라 다르게 뜨드록 처리해야 함 -->
 </div>

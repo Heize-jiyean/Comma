@@ -103,6 +103,7 @@ app.use((req, res, next) => {
 });
 
 
+
 app.use(methodOverride("_method"));
 
 //layouts 사용
@@ -113,18 +114,18 @@ app.get('/', (req, res) => {
   res.render('main');
 });
 
-//hospital 라우팅
-app.use("/hospital", hospitalRouter);
-
 // 라우트 설정
 const authRouter = require('./routers/authRouters');
+app.use("/auth", authRouter);
+
 const profileRouter = require('./routers/profileRouter');
 app.use('/profile', profileRouter);
-//router
-const diaryRouter = require('./routers/diaryRouter');
 
+const diaryRouter = require('./routers/diaryRouter');
 app.use("/diary", diaryRouter);
-app.use("/auth", authRouter);
+
+const guestbookRouter = require('./routers/guestbookRouter');
+app.use("/guestbook", guestbookRouter);
 
 // 404 에러 핸들러
 app.use((req, res, next) => {

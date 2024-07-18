@@ -1,0 +1,142 @@
+<style>
+    .guestbook-container {
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #D6D7DA;
+        padding: 40px;
+        margin-bottom: 20px;
+    }
+    .guestbook-container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #D6D7DA;
+    }
+    .guestbook-container h2 {
+        font-weight: 700;
+        font-size: 28px;
+        color: black;
+        margin: 0;
+    }
+    .guestbook-item {
+        margin-top: 10px;
+        border-bottom: 1px solid #D6D7DA;
+    }
+    .guestbook-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .guestbook-title h3 {
+        margin: 8px 0;
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .guestbook-title span {
+        font-size: 18px;
+        color: #888;
+    }
+    .guestbook-item p {
+        font-size: 18px;
+    }
+    .counselor-info {
+        display: flex;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .counselor-info img {
+        border-radius: 50%;
+        border: 1px solid #D6D7DA;
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+    }
+    .counselor-info .counselor-name {
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .write-guestbook-button {
+        padding: 10px 20px;
+        background-color: #5FD068;
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 20px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .view-all-button {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        background-color: #E9F8EA;
+        color: #4B8673;
+        border: none;
+        border-radius: 16px;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 40px;
+    }
+    .clickable {
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<div class="guestbook-container">
+    <!-- 방명록 헤더 -->
+    <div class="guestbook-container-header">
+        <h2>방명록</h2>
+        <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
+        <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
+    </div>
+    <!-- 방명록 목록 -->
+    <div class="guestbook-list">
+    <% if (guestbooks && guestbooks.length > 0) { %>
+        <% guestbooks.forEach(guestbook => { %>
+            <div class="guestbook-item">
+                <a href="/guestbook/<%= guestbook.guestbook_id %>" style="text-decoration: none; color: inherit;">
+                <!-- 방명록 내용 -->
+                    <div class="guestbook-title">
+                        <h3>
+                            <%= guestbook.title %>
+                        </h3>
+                        <span><%= new Date(guestbook.created_at).toLocaleDateString() %></span>
+                    </div>
+                    <p><%= guestbook.content.length > 60 ? guestbook.content.substring(0, 60) + '...' : guestbook.content %></p>
+                    
+                <!-- 방명록 작성자 -->
+                <% if (showCounselorInfo) { %>
+                    <div class="counselor-info">
+                        <a href="/profile/counselor/<%= guestbook.counselor_nickname %>" class="clickable" style="text-decoration: none; color: inherit;">
+                            <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
+                            <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
+                        </a>
+                    </div>
+                <% } %>
+                </a>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <p>방명록이 없습니다.</p>
+    <% } %>
+    </div>
+    <button class="view-all-button" id="viewAllGuestbooksButton">전체보기</button>
+
+</div>
+
+<script>
+    document.getElementById('writeGuestbookButton').addEventListener('click', function() {
+        const patientNickname = '<%= patientUser.nickname %>';
+        window.location.href = `/guestbook/new/${patientNickname}`;
+    });
+    document.getElementById('viewAllGuestbooksButton').addEventListener('click', function() {
+        const patientNickname = '<%= patientUser.nickname %>';
+        window.location.href = `/profile/patient/${patientNickname}/guestbooks`;
+    });
+</script>

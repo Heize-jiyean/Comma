@@ -7,20 +7,23 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js">
 <style>
     * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; margin: 0; padding: 40px; padding-top: 70px; background: #f4f4f4; }
-    .container { display: flex; flex-direction: column; margin: auto; max-width: 1280px; }
+    body { margin: 0; background: #F4F5F8; }
+    .container { display: flex; flex-direction: column; margin: auto; max-width: 1280px; padding: 30px; }
     .top-section { display: flex; justify-content: space-between; background: #FFFFFF; border-radius: 15px; margin-bottom: 40px; }
     .panel { padding: 20px; flex: 1; }
-    .image-container { margin: 40px; position: relative; width: 100%; height: 600px; overflow: hidden; border-radius: 25px; }
+
+    .image-container { margin: 35px; position: relative; width: 100%; height: 600px; overflow: hidden; border-radius: 25px; }
     #diaryImage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: auto; height: 100%; border-radius: 25px; }
+    
     .title, .content, .created_at { margin-bottom: 10px; }
     .title h1, .content p, .created_at { margin: 0; padding: 10px; }
     .created_at { text-align: right; }
     .title h1 { font-size: 24px; font-weight: bold; }
     .content  { font-size: 16px; white-space: pre-wrap; max-height: 350px; overflow-y: auto; }
-    .content-container { margin: 40px; margin-left: 0px; display: flex; flex-direction: column; position: relative; }
+    .content-container { margin: 35px; margin-left: 0px; display: flex; flex-direction: column; position: relative; }
     label { font-size: 0.9rem; color: #333; }
-    .emotion-chart { width: 100%; max-height: 550px; background: #FFFFFF; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    
+    .emotion-chart { width: 100%; max-height: 550px; background: #FFFFFF; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .emotion-text { margin-bottom: 20px; font-size: 18px; font-weight: bold; }
     canvas { width: 80%; max-height: 380px; }
     .button { padding: 10px 15px; background-color: #4B8673; color: white; text-align: center; cursor: pointer; border-radius: 5px; position: absolute; bottom: 10px; right: 10px; }
@@ -81,23 +84,16 @@
 
 
     function confirmDelete(diaryId) {
-        if (confirm("삭제하시겠습니까?")) {
-            deleteDiary(diaryId);
-        }
+        if (confirm("삭제하시겠습니까?")) { deleteDiary(diaryId); }
     }
     function deleteDiary(diaryId) {
         fetch(`/diary/${diaryId}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
         })
         .then(response => {
-            if (response.ok) {
-                window.location.href = '/'; // 삭제 후 메인 페이지로 리디렉션
-            } else {
-                alert('삭제 실패. 다시 시도해주세요.');
-            }
+            if (response.ok) { window.location.href = '/'; }
+            else { alert('삭제 실패. 다시 시도해주세요.'); }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -121,22 +117,8 @@
             datasets: [{
                 label: '감정 분석',
                 data: Object.values(emotions),
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)', // Red
-                    'rgba(54, 162, 235, 0.2)', // Blue
-                    'rgba(255, 206, 86, 0.2)', // Yellow
-                    'rgba(75, 192, 192, 0.2)', // Teal
-                    'rgba(153, 102, 255, 0.2)', // Purple
-                    'rgba(255, 159, 64, 0.2)'  // Orange
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',   // Red
-                    'rgba(54, 162, 235, 1)',   // Blue
-                    'rgba(255, 206, 86, 1)',   // Yellow
-                    'rgba(75, 192, 192, 1)',   // Teal
-                    'rgba(153, 102, 255, 1)',  // Purple
-                    'rgba(255, 159, 64, 1)'    // Orange
-                ],
+                backgroundColor: [ '#FFAFCC', '#FFF84F','#FF4A4A', '#FF9B52','#62CC79','#8588D5'],
+                borderColor: ['#FFAFCC', '#FFF84F','#FF4A4A', '#FF9B52','#62CC79','#8588D5'],
                 borderWidth: 1
             }]
         },
