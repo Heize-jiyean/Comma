@@ -144,10 +144,11 @@ exports.getCounselorById = async (counselorId) => {
 
         return result.length > 0 ? result[0] : null;
     } catch (error) {
-        console.error('UserModel.getCounselorByNickname 오류:', error);
+        console.error('UserModel.getCounselorById 오류:', error);
         throw error;
     }
-}
+};
+
 
 // 비밀번호 검증
 exports.verifyPassword = async (plainPassword, hashedPassword) => {
