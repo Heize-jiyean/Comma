@@ -280,3 +280,26 @@ exports.findAllByPatientId = async(patientId) => {
         console.log("Diary.findAllByPatientId() 쿼리 실행 중 오류: ", error)
     }
 }
+
+// 환자의 아이디로 환자가 작성한 최신 4개의 일기 가져오기
+exports.findLatestFourByPatientId = async (patientId) => {
+    try {
+        const db = await require("../main").connection();
+
+        let sql = `
+        SELECT *
+        FROM diary
+        WHERE patient_id = ?
+        ORDER BY created_at DESC
+        LIMIT 4`;
+
+        const [rows, fields] = await db.query(sql, [patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows;
+
+    } catch (error) {
+        console.log("Diary.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
+    }
+}

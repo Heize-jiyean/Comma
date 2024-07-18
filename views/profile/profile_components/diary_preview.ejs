@@ -19,7 +19,7 @@
         color: black;
         margin: 0;
     }
-    .diary {
+    .diary-item {
         margin-top: 10px;
         border-bottom: 1px solid #D6D7DA;
     }
@@ -30,15 +30,15 @@
     }
     .diary-title h3 {
         margin: 8px 0;
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 700;
     }
     .diary-title span {
-        font-size: 20px;
+        font-size: 18px;
         color: #888;
     }
-    .diary p {
-        font-size: 20px;
+    .diary-item p {
+        font-size: 18px;
     }
     .write-diary-button {
         padding: 10px 20px;
@@ -67,33 +67,41 @@
 </style>
 
 <div class="diary-container">
+    <!-- 일기 헤더 -->
     <div class="diary-container-header">
         <h2>일기 목록</h2>
         <button class="write-diary-button" id="writeDiaryButton">일기 작성</button>
         <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
     </div>
+    <!-- 일기 목록 -->
+    <div class="diary-list">
     <% if (diaries && diaries.length > 0) { %>
         <% diaries.forEach(diary => { %>
-        <div class="diary">
-            <div class="diary-title">
-                <h3>
-                    <a href="/diary/<%= diary.diary_id %>" style="text-decoration: none; color: inherit;">
+        <div class="diary-item">
+            <a href="/diary/<%= diary.diary_id %>" style="text-decoration: none; color: inherit;">
+                <div class="diary-title">
+                    <h3>
                         <%= diary.title %>
-                    </a>
-                </h3>
-                <span><%= new Date(diary.created_at).toLocaleDateString() %></span>
-            </div>
-            <p><%= diary.content %></p>
+                    </h3>
+                    <span><%= new Date(diary.created_at).toLocaleDateString() %></span>
+                </div>
+                <p><%= diary.content.length > 60 ? diary.content.substring(0, 60) + '...' : diary.content %></p>
+            </a>
         </div>
         <% }) %>
     <% } else { %>
         <p>일기가 없습니다.</p>
     <% } %>
-    <button class="view-all-button">전체보기</button>
+    </div>
+    <button class="view-all-button" id="viewAllDiariesButton">전체보기</button>
 </div>
 
 <script>
     document.getElementById('writeDiaryButton').addEventListener('click', function() {
         window.location.href = `/diary/new`;
     });
+    document.getElementById('viewAllDiariesButton').addEventListener('click', function() {
+        const patientNickname = '<%= patientUser.nickname %>';
+        window.location.href = `/profile/patient/${patientNickname}/diaries`;
+    })
 </script>
