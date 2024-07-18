@@ -157,8 +157,8 @@ async function sendAuthEmail() {
     // 인증 이메일 전송
     else {
         emailError.style.display = 'none';
-
         try {
+            document.body.style.cursor = 'wait';
             const data = { 'email': email };
             const response = await fetch("/auth/send-auth", {
                 method: "POST",
@@ -169,6 +169,7 @@ async function sendAuthEmail() {
             })
 
             const result = await response.json();
+            document.body.style.cursor = 'default';
             if (result.ok) {
                 alert("인증번호가 발송되었습니다.");
                 authNum = result.authNum;
@@ -183,7 +184,7 @@ async function sendAuthEmail() {
         } catch (err) {
             alert("인증번호 발송에 실패하였습니다.");
         }
-        
+
     }
 
 }
