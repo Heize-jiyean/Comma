@@ -15,6 +15,13 @@
     .image-container { margin: 35px; position: relative; width: 100%; height: 600px; overflow: hidden; border-radius: 25px; }
     #diaryImage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: auto; height: 100%; border-radius: 25px; }
     
+    .profile-link { text-decoration: none; color: black; }
+    .profile-link:hover { color: #4B8673; }
+    .profile-container { display: flex; align-items: center; gap: 15px; }
+    #profile-image { width: 50px; height: 50px; border-radius: 50%; background-size: cover;
+                        overflow: hidden; border: 1px solid #D6D7DA; object-fit: cover; }
+    .profile-container p { margin: 0; line-height: 1; font-size: 18px; }
+
     .title, .content, .created_at { margin-bottom: 10px; }
     .title h1, .content p, .created_at { margin: 0; padding: 10px; }
     .created_at { text-align: right; }
@@ -37,6 +44,12 @@
             <img id="diaryImage" src="<%= diary.image_url %>" alt="Diary Image">
         </div>
         <div class="panel content-container">
+            <a href="/profile/patient/<%= patient.nickname %>" class="profile-link">
+            <div class="profile-container">
+                <img id="profile-image" src="<%= patient.profile_picture %>">
+                <p><%= patient.nickname %></p>
+            </div>
+            </a>
             <hr>
             <div class="title"><h1><%= diary.title %></h1></div>
             <div class="content"><p><%= diary.content %></p></div>

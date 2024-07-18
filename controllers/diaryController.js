@@ -1,4 +1,5 @@
 const diaryModel = require('../models/Diary');
+const UserModel = require('../models/User');
 
 
 exports.new = async (req, res) => {
@@ -36,8 +37,8 @@ exports.view = async (req, res) => {
     try {
         const diaryId = req.params.diaryId;
         let diary = await diaryModel.findById(diaryId); // const
-        // 회원정보 불러오기 profileModel.findById(diary.patient_id);
-        console.log(diary);
+        const patient = await UserModel.getPatientById(diary.patient_id);
+        console.log(patient);
 
         if (diary) {
             // 유저 확인 
@@ -50,7 +51,7 @@ exports.view = async (req, res) => {
             // 기본이미지 설정
             diary.image_url = setDefaultImage(diary.image_url);
 
-            res.render('diary/view', {diary});
+            res.render('diary/view', {diary, patient});
         }
     } catch (error) {
         console.error("viewDiary 오류:", error);

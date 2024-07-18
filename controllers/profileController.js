@@ -90,7 +90,7 @@ exports.listAllDiaries = async (req, res) => {
         const patientNickname = req.params.patientNickname;
         const patientUser = await UserModel.getPatientByNickname(patientNickname);
         if (!patientUser) {
-            res.render("/");    // TODO: 없는 환자인 경우 띄울 페이지
+            res.render("main");    // TODO: 없는 환자인 경우 띄울 페이지
             return;
         }
 
