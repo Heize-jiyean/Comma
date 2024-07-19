@@ -59,6 +59,7 @@ exports.getCounselorID = async (counselorId) => {
         console.error("Guestbook.getCounselorID() 쿼리 실행 중 오류:", error);
     }
 };
+
 // 환자 아이디로 한자에게 작성된 방명록 찾기
 exports.findAllByPatientId = async (patientId) => {
     try {
@@ -127,7 +128,7 @@ exports.findLatestFourByPatientId = async (patientId) => {
     }
 }
 
-// 환자 아이디로 환자에게 작성됨 방명록의 총 개수 구하기
+// 환자 아이디로 환자에게 작성된 방명록의 총 개수 구하기
 exports.countByPatientId = async (patientId) => {
     try {
         const db = await require("../main").connection();
@@ -146,6 +147,7 @@ exports.countByPatientId = async (patientId) => {
         console.log("Guestbook.countByPatientId() 쿼리 실행 중 오류: ", error);
     }
 }
+
 
 // 상담사 아이디로 상담사가 작성한 방명록 찾기
 exports.findAllByCounselorId = async (counselorId) => {
@@ -190,5 +192,25 @@ exports.findAllByCounselorIdWithPagination = async(counselorId, page, limit) => 
         return rows;
     } catch (error) {
         console.log("Guestbook.findAllByPatientIdWithPagination() 쿼리 실행 중 오류: ", error)
+    }
+}
+
+// 상담사 아이디로 상담사가 작성한 방명록의 총 개수 구하기
+exports.countByCounselorId = async (counselorId) => {
+    try {
+        const db = await require("../main").connection();
+
+        let sql = `
+            SELECT COUNT(*) AS total
+            FROM guestbook
+            WHERE counselor_id = ?`;
+
+        const [rows, fields] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows[0].total;
+    } catch (error) {
+        console.log("Guestbook.countByCounselorId() 쿼리 실행 중 오류: ", error);
     }
 }
