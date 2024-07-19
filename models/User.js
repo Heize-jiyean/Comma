@@ -5,13 +5,13 @@ exports.createPatient = async (user) => {
     try {
         const db = await require('../main').connection();
         let sql = `
-            INSERT INTO patient (email, password, nickname, name, age, gender, job) 
+            INSERT INTO patient (email, password, nickname, id, age, gender, job) 
             VALUES (?, ?, ?, ?, ?, ?, ?)`;
         const [result] = await db.query(sql, [
             user.email,
             user.password,
             user.nickname,
-            user.name,
+            user.id,
             user.age,
             user.gender,
             user.job,
@@ -30,13 +30,13 @@ exports.createCounselor = async (user) => {
     try {
         const db = await require('../main').connection();
         let sql = `
-            INSERT INTO counselor (email, password, nickname, name, age, gender, specialty, experience) 
+            INSERT INTO counselor (email, password, nickname, id, age, gender, specialty, experience) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
         const [result] = await db.query(sql, [
             user.email,
             user.password,
             user.nickname,
-            user.name,
+            user.id,
             user.age,
             user.gender,
             user.specialty,
@@ -91,40 +91,40 @@ exports.getCounselorByEmail = async (email) => {
     }
 };
 
-// 환자 정보 닉네임으로 가져오기
-exports.getPatientByNickname = async (nickname) => {
+// 환자 정보 로그인아이디로 가져오기
+exports.getPatientByUserId = async (id) => {
     try {
         const db = await require('../main').connection();
         let sql = `
             SELECT *
             FROM patient
-            WHERE nickname = ?`;
-        const [result] = await db.query(sql, [nickname]);
+            WHERE id = ?`;
+        const [result] = await db.query(sql, [id]);
 
         if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
 
         return result.length > 0 ? result[0] : null;
     } catch (error) {
-        console.error('UserModel.getPatientByNickname 오류:', error);
+        console.error('UserModel.getPatientByUserId 오류:', error);
         throw error;
     }
 };
 
-// 의사 정보 닉네임으로 가져오기
-exports.getCounselorByNickname = async (nickname) => {
+// 의사 정보 로그인아이디로 가져오기
+exports.getCounselorByUserId = async (id) => {
     try {
         const db = await require('../main').connection();
         let sql = `
             SELECT *
             FROM counselor
-            WHERE nickname = ?`;
-        const [result] = await db.query(sql, [nickname]);
+            WHERE id = ?`;
+        const [result] = await db.query(sql, [id]);
 
         if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
 
         return result.length > 0 ? result[0] : null;
     } catch (error) {
-        console.error('UserModel.getCounselorByNickname 오류:', error);
+        console.error('UserModel.getCounselorByUserId 오류:', error);
         throw error;
     }
 };
