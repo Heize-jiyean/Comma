@@ -66,12 +66,12 @@ module.exports = {
         });
     },
 
-    // 닉네임 중복 확인
-    checkNickname: async (req, res) => {
-        const nickname = req.body.nickname;
+    // 아이디 중복 확인
+    checkId: async (req, res) => {
+        const id = req.body.id;
 
-        const patientUser = await UserModel.getPatientByNickname(nickname);
-        const counselorUser = await UserModel.getCounselorByNickname(nickname);
+        const patientUser = await UserModel.getPatientByUserId(id);
+        const counselorUser = await UserModel.getCounselorByUserId(id);
 
         if (!patientUser && !counselorUser) {
             return res.status(200).json({ isDuplicate: false });
