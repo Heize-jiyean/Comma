@@ -10,8 +10,11 @@
         <div class="content-container">
             <div class="left">
                 <div class="input-group">
-                    <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
-                    <button type="button" class="btn btn-outline-primary">search</button>
+                    <form class="d-flex" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+                            name="search">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
                 </div>
                 <div id="map" class="map"></div>
             </div>
@@ -22,61 +25,36 @@
                         <a href="/hospital/register" class="btn mb-3">리뷰 등록</a>
                     </div>
                 </div>
-                <!-- 코멘트 목록. 이후 서버에서 코멘트들을 가져옴 -->
                 <div class="comment-list">
-                    <div class="comment">
-                        <div class="hospital">
-                            <h4>병원 이름</h4>
-                            <p>병원 주소</p>
-                        </div>
-                        <div class="profile">
-                            <div class="photo-container">
-                                <img src="https://www.studiopeople.kr/common/img/default_profile.png" alt="프로필 이미지"
-                                    class="photo">
-                                <span>닉네임</span>
+                    <% reviews.forEach(review=> { %>
+                        <div class="comment">
+                            <div class="hospital">
+                                <h4>
+                                    <%= review.hospital_name %>
+                                </h4>
+                                <p>
+                                    <%= review.hospital_address %>
+                                </p>
                             </div>
-                            <span>작성날짜</span>
-                        </div>
-                        <div class="review">
-                            <p>의사 선생님들이 친절하고 시설도 깨끗해요.</p>
-                        </div>
-                    </div>
-
-                    <div class="comment">
-                        <div class="hospital">
-                            <h4>병원 이름</h4>
-                            <p>병원 주소</p>
-                        </div>
-                        <div class="profile">
-                            <div class="photo-container">
-                                <img src="https://www.studiopeople.kr/common/img/default_profile.png" alt="프로필 이미지"
-                                    class="photo">
-                                <span>닉네임</span>
+                            <div class="profile">
+                                <div class="photo-container">
+                                    <img src="https://www.studiopeople.kr/common/img/default_profile.png" alt="프로필 이미지"
+                                        class="photo">
+                                    <span>
+                                        <%= review.patient_nickname %>
+                                    </span>
+                                </div>
+                                <span>
+                                    <%= review.created_at %>
+                                </span>
                             </div>
-                            <span>작성날짜</span>
-                        </div>
-                        <div class="review">
-                            <p>의사 선생님들이 친절하고 시설도 깨끗해요.의사 선생님들이 친절하고 시설도 깨끗해요.의사 선생님들이 친절하고 시설도 깨끗해요.</p>
-                        </div>
-                    </div>
-
-                    <div class="comment">
-                        <div class="hospital">
-                            <h4>병원 이름</h4>
-                            <p>병원 주소</p>
-                        </div>
-                        <div class="profile">
-                            <div class="photo-container">
-                                <img src="https://www.studiopeople.kr/common/img/default_profile.png" alt="프로필 이미지"
-                                    class="photo">
-                                <span>닉네임</span>
+                            <div class="review">
+                                <p>
+                                    <%= review.content %>
+                                </p>
                             </div>
-                            <span>작성날짜</span>
                         </div>
-                        <div class="review">
-                            <p>의사 선생님들이 친절하고 시설도 깨끗해요.의사 선생님들이 친절하고 시설도 깨끗해요.의사 선생님들이 친절하고 시설도 깨끗해요.</p>
-                        </div>
-                    </div>
+                        <% }) %>
                 </div>
             </div>
         </div>
@@ -87,6 +65,61 @@
         const map = new naver.maps.Map('map', {
             center: new naver.maps.LatLng(37.5665, 126.9780),
             zoom: 15
+        });
+
+        // 검색 시 병원 정보 가져오기
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form[role="search"]');
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault(); // 페이지 새로고침 방지
+
+                const searchQuery = form.querySelector('input[name="search"]').value;
+
+                try {
+                    const response = await fetch(`/hospital/search?query=${encodeURIComponent(searchQuery)}`);
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+                    updateMapLocation(data);
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+
+            function updateMapLocation(data) {
+                // 데이터에 위치 정보가 포함되어 있다고 가정
+                if (data[0] && data[0].latitude && data[0].longitude) {
+                    const map = new naver.maps.Map('map', {
+                        center: new naver.maps.LatLng(data[0].latitude, data[0].longitude),
+                        zoom: 17
+                    });
+                    const contentString = [
+                        '<div class="iw_inner">',
+                        `   <h3>${data[0].name}</h3>`,
+                        '</div>'
+                    ].join('');
+                    const marker = new naver.maps.Marker({
+                        position: new naver.maps.LatLng(data[0].latitude, data[0].longitude),
+                        map: map
+                    });
+                    const infowindow = new naver.maps.InfoWindow({
+                        content: contentString
+                    });
+                    naver.maps.Event.addListener(marker, "click", function (e) {
+                        if (infowindow.getMap()) {
+                            infowindow.close();
+                        } else {
+                            infowindow.open(map, marker);
+                        }
+                    });
+                } else {
+                    console.log('No location data available');
+                }
+            }
         });
     </script>
 </body>

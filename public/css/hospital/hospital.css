@@ -8,9 +8,13 @@
     position: fixed;
     top: 124px;
     height: 70px;
-    width: 75vh;
+    width: 50%;
     padding-top: 16px;
     background-color: white;
+}
+
+.head > div {
+    padding-right: 17%;
 }
 
 .left{
@@ -55,6 +59,10 @@
 
 .hospital > h4 {
     padding-right: 10px;
+    font-weight: bolder;
+}
+.hospital > p {
+    font-size: 9pt;
 }
 
 .profile{
