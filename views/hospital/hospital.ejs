@@ -10,13 +10,14 @@
         <div class="content-container">
             <div class="left">
                 <div class="input-group">
-                    <form class="d-flex" role="search">
+                    <form class="d-flex" role="search" id="searchForm">
                         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
                             name="search">
                         <button class="btn btn-outline-success" type="submit">Search</button>
                     </form>
                 </div>
                 <div id="map" class="map"></div>
+                <input type="hidden" id="hospitalsData" value='<%= JSON.stringify(hospitals) %>' />
             </div>
             <div class="right">
                 <div class="head">
@@ -67,6 +68,35 @@
             zoom: 15
         });
 
+        const hospitalsData = document.getElementById('hospitalsData').value;
+        const hospitals = JSON.parse(hospitalsData);
+
+        hospitals.forEach(hospital => {
+            const position = new naver.maps.LatLng(hospital.latitude, hospital.longitude);
+
+            // 기본 제공 마커 생성
+            const marker = new naver.maps.Marker({
+                position: position,
+                map: map,
+                title: hospital.name // 마커에 툴팁 텍스트 추가
+            });
+
+            // 인포윈도우에 병원 이름 추가
+            const contentString = `<div style="padding: 5px; font-size: 12px; font-weight: bold;">${hospital.name}</div>`;
+            const infowindow = new naver.maps.InfoWindow({
+                content: contentString,
+                backgroundColor: 'white',
+                borderColor: '#D6D7DA',
+                anchorSize: new naver.maps.Size(10, 10)
+            });
+
+            // 마커 클릭 시 인포윈도우 열기
+            naver.maps.Event.addListener(marker, 'click', () => {
+                // 클릭한 마커의 인포윈도우 열기
+                infowindow.open(map, marker);
+            });
+        });
+
         // 검색 시 병원 정보 가져오기
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.querySelector('form[role="search"]');
@@ -97,25 +127,24 @@
                         center: new naver.maps.LatLng(data[0].latitude, data[0].longitude),
                         zoom: 17
                     });
-                    const contentString = [
-                        '<div class="iw_inner">',
-                        `   <h3>${data[0].name}</h3>`,
-                        '</div>'
-                    ].join('');
+
+                    // 인포윈도우에 병원 이름 추가
+                    const contentString = `<div style="padding: 5px; font-size: 12px; font-weight: bold;">${data[0].name}</div>`;
+                    const infowindow = new naver.maps.InfoWindow({
+                        content: contentString,
+                        backgroundColor: 'white',
+                        borderColor: '#D6D7DA',
+                        anchorSize: new naver.maps.Size(10, 10)
+                    });
+
                     const marker = new naver.maps.Marker({
                         position: new naver.maps.LatLng(data[0].latitude, data[0].longitude),
                         map: map
                     });
-                    const infowindow = new naver.maps.InfoWindow({
-                        content: contentString
-                    });
-                    naver.maps.Event.addListener(marker, "click", function (e) {
-                        if (infowindow.getMap()) {
-                            infowindow.close();
-                        } else {
-                            infowindow.open(map, marker);
-                        }
-                    });
+
+                    // 마커와 인포윈도우가 항상 보이도록 설정
+                    infowindow.open(map, marker);
+
                 } else {
                     console.log('No location data available');
                 }

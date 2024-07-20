@@ -5,7 +5,9 @@ const hospitalModel = require('../models/Hospital');
 exports.loadingMainPage = async (req, res) => {
     
     const reviews = await ReviewModel.getLatestReviews();
+    const hospitals = await hospitalModel.getAllHospitals();
     res.locals.reviews = reviews;
+    res.locals.hospitals = hospitals;
     res.render('hospital/hospital');
 }
 
