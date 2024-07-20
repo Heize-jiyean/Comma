@@ -129,8 +129,8 @@ exports.getCounselorByUserId = async (id) => {
     }
 };
 
-// 의사 정보 아이디로 가져오기
-exports.getCounselorById = async (counselorId) => {
+// 의사 정보 의사아이디로 가져오기
+exports.getCounselorByCounselorId = async (counselorId) => {
     try {
         const db = await require('../main').connection();
         let sql = `
@@ -144,7 +144,7 @@ exports.getCounselorById = async (counselorId) => {
 
         return result.length > 0 ? result[0] : null;
     } catch (error) {
-        console.error('UserModel.getCounselorById 오류:', error);
+        console.error('UserModel.getCounselorByCounselorId 오류:', error);
         throw error;
     }
 };

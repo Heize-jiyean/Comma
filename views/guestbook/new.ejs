@@ -63,16 +63,21 @@
             font-weight: 700;
             cursor: pointer;
         }
+        #submit-button:disabled {
+            background-color: #E4E5EA;
+            color: #A1A4AC;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
     <div class="guestbook-container">
-        <h2><%= patientUser.name %> 환자에게 방명록 작성</h2>
+        <h2><%= patientUser.nickname %> 환자에게 방명록 작성</h2>
         <form id="guestbook-form">
             <input type="text" id="titleInput" name="title" placeholder="제목을 입력하세요" required>
             <textarea id="contentInput" name="content" placeholder="내용을 입력하세요" required></textarea>
             <div class="submit-button-container">
-                <button id="submit-button" type="button">작성 완료</button>
+                <button id="submit-button" type="button" disabled>작성 완료</button>
             </div>
         </form>
     </div>
@@ -81,7 +86,22 @@
 
 <script type="module">
     const submitButton = document.getElementById('submit-button');
-    
+    const titleInput = document.getElementById('titleInput');
+    const contentInput = document.getElementById('contentInput');
+
+    // 유효성 검사
+    const validateInputs = () => {
+        if (titleInput.value.trim() === '' || contentInput.value.trim() === '') {
+            submitButton.disabled = true;
+        } else {
+            submitButton.disabled = false;
+        }
+    }
+
+    titleInput.addEventListener('input', validateInputs);
+    contentInput.addEventListener('input', validateInputs);
+
+    // 작성 완료 버튼 눌렀을 때의 동작
     submitButton.addEventListener('click', async () => {
         event.preventDefault();
         const title = titleInput.value;
@@ -94,10 +114,11 @@
     
         sendDataToServer(guestbookData);
     });
-    
+
+    // 서버로 데이터 POST하기
     function sendDataToServer(data) {
-        const patientNickname = '<%= patientUser.nickname %>';
-        fetch(`/guestbook/register/${patientNickname}`, {
+        const patientId = '<%= patientUser.id %>';
+        fetch(`/guestbook/register/${patientId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
