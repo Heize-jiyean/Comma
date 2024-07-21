@@ -1,14 +1,13 @@
 const diaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
+const AccessCheck = require('../middlewares/auth');
 
 
 exports.new = async (req, res) => {
     try {
-        
-        // 예외 처리 
+        AccessCheck.checkPatientRole(req.session.user.role);
 
-
-        res.render('diary/new');
+        res.render('diary/new', {patientId: req.session.user.id});
     } catch (error) {
         console.error("newDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -17,13 +16,12 @@ exports.new = async (req, res) => {
 
 exports.register = async (req, res) => {
     try {
+        AccessCheck.checkPatientRole(req.session.user.role);
+
         const { diaryData } = req.body;
         console.log(diaryData);
 
         // 감정분석
-        // 임시 감정 분석 수치
-        diaryData.joy = 10.00; diaryData.surprise = 20.00; diaryData.anger = 30.00; 
-        diaryData.anxiety = 10.00; diaryData.hurt = 10.00; diaryData.sadness = 20.00;
 
         const savedDiaryId = await diaryModel.register(diaryData);
         return res.json({ success: true, redirect: `/diary/${savedDiaryId}` });
@@ -36,23 +34,26 @@ exports.register = async (req, res) => {
 exports.view = async (req, res) => {
     try {
         const diaryId = req.params.diaryId;
+
         let diary = await diaryModel.findById(diaryId); // const
         const patient = await UserModel.getPatientById(diary.patient_id);
-        console.log(patient);
 
-        if (diary) {
-            // 유저 확인 
-            if (diary.is_visible) {
-                // 작성한 회원 본인 && 상담사들
-            } else {
-                // 작성한 회원 본인
+        if (diary && req.session.user) {
+        
+            if (req.session.user.role == "patient") { // 환자 
+                AccessCheck.checkMemberId(req.session.user.id, diary.patient_id); 
             }
+            else if (req.session.user.role == "counselor") { // 상담사 
+                if (!diary.is_visible) {  return res.render("main"); } // 다이어리 비공개
+            }
+            else return res.render("/login/login");
 
             // 기본이미지 설정
             diary.image_url = setDefaultImage(diary.image_url);
 
             res.render('diary/view', {diary, patient});
         }
+        else return res.render("main");
     } catch (error) {
         console.error("viewDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -62,8 +63,10 @@ exports.view = async (req, res) => {
 exports.toggleVisibility = async (req, res) => {
     try {
         const diaryId = req.params.diaryId;
+        const diary = await diaryModel.findById(diaryId); 
 
-        // 유저 확인 (게시글 작성 유저 == 요청 유저)
+        AccessCheck.checkPatientRole(req.session.user.role);
+        AccessCheck.checkMemberId(req.session.user.id, diary.patient_id); 
 
         await diaryModel.toggleVisibility(diaryId);
 
@@ -77,14 +80,15 @@ exports.toggleVisibility = async (req, res) => {
 exports.delete = async (req, res) => {
     try {
         const diaryId = req.params.diaryId;
-
-        // 로그인 여부 확인 && 유저 확인
+        const diary = await diaryModel.findById(diaryId); 
+        
+        AccessCheck.checkPatientRole(req.session.user.role);
+        AccessCheck.checkMemberId(req.session.user.id, diary.patient_id); 
 
         // 스토리지 이미지 삭제
-        const imageUrl = await diaryModel.findImageUrlById(diaryId);
-        if (imageUrl) {
+        if (diary.image_url) {
             // URL parsing
-            const parsedUrl = new URL(imageUrl);
+            const parsedUrl = new URL(diary.image_url);
             const encodedFilePath = parsedUrl.pathname.split('/').pop();
             const filePath = decodeURIComponent(encodedFilePath);
 
@@ -111,10 +115,11 @@ exports.delete = async (req, res) => {
     }
 }
 
+// 상담사 메인화면 일기 리스트
 exports.listOfDiaries = async (req, res) => {
     try {
-        // 예외 처리 
-
+        // AccessCheck.checkCounselorRole(req.session.user.role); 
+        // 개발의 편의를 위해 잠시 주석처리해둠
 
         const option = req.query.option ? req.query.option : "all";
         let currentPage = req.query.page ? parseInt(req.query.page) : 1;

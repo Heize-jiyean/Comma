@@ -1,6 +1,8 @@
 const UserModel = require('../models/User');
 const DiaryModel = require('../models/Diary')
 const GuestbookModel = require('../models/Guestbook');
+const AccessCheck = require('../middlewares/auth');
+
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -85,16 +87,15 @@ exports.counselorProfilePage = async (req, res) => {
 
 // 환자 일기 모아보기 페이지 반환
 exports.listAllDiaries = async (req, res) => {
-    try {
-        // 예외 처리
+    try {    
         const patientNickname = req.params.patientNickname;
         const patientUser = await UserModel.getPatientByNickname(patientNickname);
-        if (!patientUser) {
-            res.render("main");    // TODO: 없는 환자인 경우 띄울 페이지
-            return;
-        }
 
-        // 일기
+        // if (req.session.user.role == "patient") // 여기세션
+
+        // 일기 
+        // 비공개/공개 
+
         const totalPages = Math.ceil( await DiaryModel.countOfFindByPatientId(patientUser.patient_id) / 9);
         let currentPage = req.query.page ? parseInt(req.query.page) : 1;
         let Previews = await DiaryModel.PreviewfindByPatientId(currentPage, patientUser.patient_id);
