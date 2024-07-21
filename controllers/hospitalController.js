@@ -22,6 +22,14 @@ exports.getHospitalLocation = async (req, res) => {
     res.json(hospital);
 }
 
+// 병원 별 코멘트 가져오기
+exports.getCommentByHospital = async (req, res) => {
+    const query = req.query.query;
+
+    const reviews = await ReviewModel.getReviewsByHospital(query);
+    res.json(reviews);
+}
+
 exports.renderRegisterPage = (req, res) => {
     if (!process.env.NAVER_MAP_CLIENT_ID) {
         console.error('NAVER_MAP_CLIENT_ID is not set in environment variables');
