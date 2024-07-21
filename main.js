@@ -9,7 +9,6 @@ const session = require('express-session');
 const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
-const hospitalRouter = require('./routers/hospitalRouters');
 
 // 지도 API 미들웨어
 app.use((req, res, next) => {
@@ -140,6 +139,9 @@ app.use("/diary", diaryRouter);
 
 const guestbookRouter = require('./routers/guestbookRouter');
 app.use("/guestbook", guestbookRouter);
+
+const hospitalRouter = require('./routers/hospitalRouters');
+app.use("/hospital", hospitalRouter);
 
 // 404 에러 핸들러
 app.use((req, res, next) => {

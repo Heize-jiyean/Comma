@@ -101,7 +101,7 @@
         window.location.href = `/diary/new`;
     });
     document.getElementById('viewAllDiariesButton').addEventListener('click', function() {
-        const patientNickname = '<%= patientUser.nickname %>';
-        window.location.href = `/profile/patient/${patientNickname}/diaries`;
+        const patientId = '<%= patientUser.id %>';
+        window.location.href = `/profile/patient/${patientId}/diaries`;
     })
 </script>

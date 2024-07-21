@@ -23,8 +23,8 @@ router.post('/check-email', authController.checkEmail);
 // 이메일 인증 전송
 router.post('/send-auth', authController.emailAuth);
 
-// 닉네임 중복 확인
-router.post('/check-nickname', authController.checkNickname);
+// 아이디 중복 확인
+router.post('/check-id', authController.checkId);
 
 
 

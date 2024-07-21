@@ -88,12 +88,12 @@
         <% } %>
     </div>
     <div class="profile-details">
-        <!-- 이름 -->
+        <!-- 닉네임 -->
         <h2>
             <% if (type === 'patient') { %>
-                <%- patientUser.name %>
+                <%- patientUser.nickname %>
             <% } else { %>
-                <%- counselorUser.name %>
+                <%- counselorUser.nickname %>
             <% } %>
             <!-- 배지 추가 -->
             <div class="badge 
@@ -108,12 +108,12 @@
                     상담사
                 <% } %>
             </div>
-        <!-- 닉네임 -->
+        <!-- 아이디 -->
         <p>
             <% if (type === 'patient') { %>
-                <%- patientUser.nickname %>
+                <%- patientUser.id %>
             <% } else { %>
-                <%- counselorUser.nickname %>
+                <%- counselorUser.id %>
             <% } %>
         </p>
         

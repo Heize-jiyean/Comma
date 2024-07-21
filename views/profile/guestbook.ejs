@@ -63,7 +63,7 @@
 
 <script>
     document.getElementById('writeGuestbookButton').addEventListener('click', function() {
-        const patientNickname = '<%= patientUser.nickname %>';
-        window.location.href = `/guestbook/new/${patientNickname}`;
+        const patientId = '<%= patientUser.id %>';
+        window.location.href = `/guestbook/new/${patientId}`;
     });
 </script>
