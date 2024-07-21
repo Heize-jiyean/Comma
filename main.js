@@ -1,5 +1,5 @@
 require('dotenv').config();
-console.log('Loaded env vars:', process.env);
+console.log('Loaded env vars:', process.env); //환경변수확인
 
 const express = require('express');
 const mysql = require('mysql2/promise');

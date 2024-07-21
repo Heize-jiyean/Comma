@@ -20,7 +20,7 @@ hospitals.forEach(hospital => {
     // 인포윈도우에 병원 이름 추가
     const contentString = `<div style="padding: 5px; font-size: 12px; font-weight: bold;">${hospital.name}</div>`;
     const infowindow = new naver.maps.InfoWindow({
-        content: contentString,
+        content: contentStDring,
         backgroundColor: 'white',
         borderColor: '#D6D7DA',
         anchorSize: new naver.maps.Size(10, 10)
@@ -38,6 +38,7 @@ hospitals.forEach(hospital => {
 // 검색 시 병원 정보 가져오기
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form[role="search"]');
+    const hospitalInfoDiv = document.getElementById('hospitalInfo');
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault(); // 페이지 새로고침 방지
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             updateMapLocation(data);
+            updateHospitalInfo(data[0]);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -88,6 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             console.log('No location data available');
         }
+    }
+
+    function updateHospitalInfo(hospital) {
+        hospitalInfoDiv.innerHTML = `
+            <h3>${hospital.name}</h3>
+            <p>주소: ${hospital.address}</p>
+            <p>전화번호: ${hospital.phone || '정보 없음'}</p>
+            <p>카테고리: ${hospital.category || '정보 없음'}</p>
+        `;
     }
 });
 
