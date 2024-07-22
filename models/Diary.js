@@ -204,27 +204,47 @@ exports.countOfFindAll = async (option, counselorId) => {
     }
 };
 
+
 // 환자 프로필 용
-exports.PreviewfindByPatientId = async (page, patientId) => {
+exports.PreviewfindByPatientId = async (page, patientId, role) => {
     try {
         const db = await require('../main').connection(); 
 
         const pageSize = 9;
         let offset = pageSize * (page - 1);
+        let sql;
 
-        let sql = `
-            SELECT 
-                d.*,
-                p.nickname,
-                p.profile_picture
-            FROM 
-                diary d 
-            JOIN 
-                patient p ON d.patient_id = p.patient_id
-            WHERE 
-                d.patient_id = ?
-            ORDER BY d.created_at DESC LIMIT ? OFFSET ?;
+        if (role == "patient") {
+            sql = `
+                SELECT 
+                    d.*,
+                    p.nickname,
+                    p.profile_picture
+                FROM 
+                    diary d 
+                JOIN 
+                    patient p ON d.patient_id = p.patient_id
+                WHERE 
+                    d.patient_id = ?
+                ORDER BY d.created_at DESC LIMIT ? OFFSET ?;
             `;
+        }
+        else if (role == "counselor") {
+            sql = `
+                SELECT 
+                    d.*,
+                    p.nickname,
+                    p.profile_picture
+                FROM 
+                    diary d 
+                JOIN 
+                    patient p ON d.patient_id = p.patient_id
+                WHERE 
+                    d.patient_id = ? 
+                    AND d.is_visible = TRUE
+                ORDER BY d.created_at DESC LIMIT ? OFFSET ?;
+            `;
+        }
         
         const [rows, fields] = await db.query(sql, [patientId, pageSize, offset]);
 
@@ -235,18 +255,32 @@ exports.PreviewfindByPatientId = async (page, patientId) => {
         console.error("Diary.PreviewfindByPatientId() 쿼리 실행 중 오류:", error);
     }
 };
-exports.countOfFindByPatientId = async (patientId) => {
+exports.countOfFindByPatientId = async (patientId, role) => {
     try {
         const db = await require('../main').connection(); 
+        let sql; 
 
-        let sql = `
-            SELECT 
-                COUNT(*) AS total
-            FROM 
-                diary d 
-            WHERE 
-                patient_id = ?
+        if (role == "patient") {
+            sql = `
+                SELECT 
+                    COUNT(*) AS total
+                FROM 
+                    diary d 
+                WHERE 
+                    patient_id = ?;
             `;
+        }
+        else if (role == "counselor") {
+            sql = `
+                SELECT 
+                    COUNT(*) AS total
+                FROM 
+                    diary d 
+                WHERE 
+                    patient_id = ?
+                    AND d.is_visible = TRUE;
+            `;
+        }
         
         const [rows, fields] = await db.query(sql, [patientId]);
 

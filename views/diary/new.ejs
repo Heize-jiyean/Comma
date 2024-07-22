@@ -119,7 +119,11 @@ submitButton.addEventListener('click', async () => {
 });
 
 async function uploadImage(file) {
-    const storageRef = ref(storage, 'images/' + file.name);
+    const patient_id = document.querySelector('input[name="patientId"]').value;
+    const dateString = new Date().toISOString().split('T')[0];
+    const filename = `${file.name}_${patient_id}_${dateString}`;
+    const storageRef = ref(storage, 'images/' + filename);
+
     try {
         const snapshot = await uploadBytes(storageRef, file);
         return await getDownloadURL(snapshot.ref);

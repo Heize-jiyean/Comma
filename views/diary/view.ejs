@@ -44,7 +44,7 @@
             <img id="diaryImage" src="<%= diary.image_url %>" alt="Diary Image">
         </div>
         <div class="panel content-container">
-            <a href="/profile/patient/<%= patient.nickname %>" class="profile-link">
+            <a href="/profile/patient/<%= patient.id %>" class="profile-link">
             <div class="profile-container">
                 <img id="profile-image" src="<%= patient.profile_picture %>">
                 <p><%= patient.nickname %></p>
@@ -55,12 +55,14 @@
             <div class="content"><p><%= diary.content %></p></div>
             <div class="created_at"><%= new Date(diary.created_at).toLocaleDateString('ko-KR') %></div>
 
+            <% if (user.role === 'patient') { %>
             <label class="privacy-label">
                 <input type="checkbox" id="publicCheckbox" onchange="togglePrivacy('<%= diary.diary_id %>')" 
                     <%= diary. is_visible ? 'checked' : '' %> >
                     상담사가 열람하도록 허용
             </label>
             <div class="button" onclick="confirmDelete('<%= diary.diary_id %>')">삭제</div>
+            <% } %>
         </div>
     </div>
     <div class="panel emotion-chart">
@@ -90,7 +92,6 @@
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('상태 변경 중 오류 발생.');
             document.getElementById('publicCheckbox').checked = !isPublic;
         });
     }

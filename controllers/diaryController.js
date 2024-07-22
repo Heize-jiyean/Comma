@@ -5,7 +5,10 @@ const AccessCheck = require('../middlewares/auth');
 
 exports.new = async (req, res) => {
     try {
-        AccessCheck.checkPatientRole(req.session.user.role);
+        if (!AccessCheck.checkPatientRole(req.session.user.role)) {
+            const referer = req.get('Referer') || '/';
+            return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+        }
 
         res.render('diary/new', {patientId: req.session.user.id});
     } catch (error) {
@@ -16,10 +19,12 @@ exports.new = async (req, res) => {
 
 exports.register = async (req, res) => {
     try {
-        AccessCheck.checkPatientRole(req.session.user.role);
+        if (!AccessCheck.checkPatientRole(req.session.user.role)) {
+            const referer = req.get('Referer') || '/';
+            return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+        }
 
         const { diaryData } = req.body;
-        console.log(diaryData);
 
         // 감정분석
 
@@ -36,22 +41,28 @@ exports.view = async (req, res) => {
         const diaryId = req.params.diaryId;
 
         let diary = await diaryModel.findById(diaryId); // const
-        const patient = await UserModel.getPatientById(diary.patient_id);
+        const patient = await UserModel.getPatientById(diary.patient_id); // ??Cannot read properties of null
 
         if (diary && req.session.user) {
+            const role = req.session.user.role;
         
-            if (req.session.user.role == "patient") { // 환자 
-                AccessCheck.checkMemberId(req.session.user.id, diary.patient_id); 
+            if (role == "patient") { // 환자 
+                if (! AccessCheck.checkPatientId(role, req.session.user.id, diary.patient_id)) {
+                    const referer = req.get('Referer') || '/';
+                    return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+                } 
             }
-            else if (req.session.user.role == "counselor") { // 상담사 
-                if (!diary.is_visible) {  return res.render("main"); } // 다이어리 비공개
+            else if (role == "counselor") { // 상담사 
+                if (!diary.is_visible) { 
+                    const referer = req.get('Referer') || '/';
+                    return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+                } // 다이어리 비공개
             }
-            else return res.render("/login/login");
 
             // 기본이미지 설정
             diary.image_url = setDefaultImage(diary.image_url);
 
-            res.render('diary/view', {diary, patient});
+            res.render('diary/view', {diary, patient, role});
         }
         else return res.render("main");
     } catch (error) {
@@ -65,8 +76,10 @@ exports.toggleVisibility = async (req, res) => {
         const diaryId = req.params.diaryId;
         const diary = await diaryModel.findById(diaryId); 
 
-        AccessCheck.checkPatientRole(req.session.user.role);
-        AccessCheck.checkMemberId(req.session.user.id, diary.patient_id); 
+        if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
+            const referer = req.get('Referer') || '/';
+            return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+        } 
 
         await diaryModel.toggleVisibility(diaryId);
 
@@ -82,8 +95,10 @@ exports.delete = async (req, res) => {
         const diaryId = req.params.diaryId;
         const diary = await diaryModel.findById(diaryId); 
         
-        AccessCheck.checkPatientRole(req.session.user.role);
-        AccessCheck.checkMemberId(req.session.user.id, diary.patient_id); 
+        if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
+            const referer = req.get('Referer') || '/';
+            return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+        } 
 
         // 스토리지 이미지 삭제
         if (diary.image_url) {
@@ -118,7 +133,10 @@ exports.delete = async (req, res) => {
 // 상담사 메인화면 일기 리스트
 exports.listOfDiaries = async (req, res) => {
     try {
-        // AccessCheck.checkCounselorRole(req.session.user.role); 
+        // if (!AccessCheck.checkCounselorRole(req.session.user.role)) {
+        //    const referer = req.get('Referer') || '/';
+        //    return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+        //}
         // 개발의 편의를 위해 잠시 주석처리해둠
 
         const option = req.query.option ? req.query.option : "all";

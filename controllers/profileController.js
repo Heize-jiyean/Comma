@@ -96,24 +96,29 @@ exports.listAllDiaries = async (req, res) => {
             return;
         }
 
-        // if (req.session.user.role == "patient") // 여기세션
+        if (req.session.user) {
+            const role = req.session.user.role;
+        
+            if (role == "patient") {
+                if (! AccessCheck.checkPatientId(role, req.session.user.id, patientUser.patient_id)) {
+                    const referer = req.get('Referer') || '/';
+                    return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+                } 
+            }
 
-        // 일기 
-        // 비공개/공개 
+            const totalPages = Math.ceil( await DiaryModel.countOfFindByPatientId(patientUser.patient_id, role) / 9);
+            let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+            let Previews = await DiaryModel.PreviewfindByPatientId(currentPage, patientUser.patient_id, role);
 
-        const totalPages = Math.ceil( await DiaryModel.countOfFindByPatientId(patientUser.patient_id) / 9);
-        let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-        let Previews = await DiaryModel.PreviewfindByPatientId(currentPage, patientUser.patient_id);
-
-        if (Previews) {
-            Previews.forEach(preview => {
-                preview.image_url = setDefaultImage(preview.image_url);
-                // preview.profile_picture = 프로필 기본이미지 설정
-            });
+            if (Previews) {
+                Previews.forEach(preview => {
+                    preview.image_url = setDefaultImage(preview.image_url);
+                    // preview.profile_picture = 프로필 기본이미지 설정
+                });
+            }
+    
+            res.render('profile/diary', { patientUser, type: 'patient', Previews, currentPage, totalPages});
         }
-
-        res.render('profile/diary', {patientUser: patientUser, type: 'patient', 
-                                        Previews, currentPage, totalPages});
     } catch (error) {
         console.error("listAllDiaries 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
