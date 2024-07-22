@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -21,7 +20,7 @@
                 </form>
             </div>
         </div>
-
+        
         <div class="row mb-4">
             <div class="col-12">
                 <div id="map" class="map" style="height: 400px;"></div>
@@ -34,46 +33,19 @@
                     <div class="card-body">
                         <h2 class="card-title">병원 정보</h2>
                         <div id="hospitalInfo">
-<!-- 병원 정보가 여기에 동적으로 추가될 것입니다 -->
+                            <!-- 병원 정보가 여기에 동적으로 추가될 것입니다 -->
                             <p>병원을 검색하면 정보가 표시됩니다.</p>
                         </div>
                     </div>
                 </div>
             </div>
-
+            
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
                         <h2 class="card-title">병원 리뷰 목록</h2>
-                        <div>
-                            <a href="/hospital/register" class="btn btn-primary mb-3">리뷰 등록</a>
-                        </div>
                         <div class="comment-list">
-                            <% if (reviews && reviews.length > 0) { %>
-                                <% reviews.forEach(review => { %>
-                                    <div class="comment card mb-3">
-                                        <div class="card-body">
-                                            <div class="hospital">
-                                                <h4><%= review.hospital_name %></h4>
-                                                <p><%= review.hospital_address %></p>
-                                            </div>
-                                            <div class="profile d-flex justify-content-between align-items-center">
-                                                <div class="photo-container d-flex align-items-center">
-                                                    <img src="https://www.studiopeople.kr/common/img/default_profile.png"
-                                                        alt="프로필 이미지" class="photo rounded-circle" width="30" height="30">
-                                                    <span class="ms-2"><%= review.patient_nickname %></span>
-                                                </div>
-                                                <span><%= review.created_at %></span>
-                                            </div>
-                                            <div class="review mt-2">
-                                                <p><%= review.content %></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <% }) %>
-                            <% } else { %>
-                                <p>리뷰가 없습니다.</p>
-                            <% } %>
+                            <!-- 리뷰가 여기에 동적으로 추가될 것입니다 -->
                         </div>
                     </div>
                 </div>

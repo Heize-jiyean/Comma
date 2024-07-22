@@ -22,7 +22,7 @@
                 <form id="hospitalForm" action="/hospital/register" method="POST">
                     <div class="mb-3">
                         <label for="name" class="form-label">병원 이름</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <input type="text" class="form-control" id="name" name="name" value="<%= typeof hospitalName !== 'undefined' ? hospitalName : '' %>" required>
                     </div>
                     <div class="mb-3">
                         <label for="address" class="form-label">주소</label>
@@ -105,5 +105,16 @@
     
     // 페이지 로드 완료 시 지도 초기화
     window.onload = initMap;
+
+    // URL 파라미터에서 병원 이름을 가져와 입력 필드에 설정
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hospitalName = urlParams.get('hospitalName');
+        if (hospitalName) {
+            document.getElementById('name').value = decodeURIComponent(hospitalName);
+            document.getElementById('searchInput').value = decodeURIComponent(hospitalName);
+            searchHospital(); // 자동으로 검색 실행
+        }
+    });
     </script>
 </body>
