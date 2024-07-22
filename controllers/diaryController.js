@@ -43,7 +43,8 @@ exports.view = async (req, res) => {
         let diary = await diaryModel.findById(diaryId); // const
         const patient = await UserModel.getPatientById(diary.patient_id); // ??Cannot read properties of null
 
-        if (diary && req.session.user) {
+        if (!diary) return res.render("main");
+        if (req.session.user) {
             const role = req.session.user.role;
         
             if (role == "patient") { // 환자 
@@ -64,7 +65,7 @@ exports.view = async (req, res) => {
 
             res.render('diary/view', {diary, patient, role});
         }
-        else return res.render("main");
+        else return res.render("login/login");
     } catch (error) {
         console.error("viewDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
