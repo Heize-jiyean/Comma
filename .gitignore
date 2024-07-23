@@ -7,3 +7,6 @@ email.js
 
 # Ignore node_modules directory
 node_modules/
+
+python/__pycache__/
+python/model.pt
