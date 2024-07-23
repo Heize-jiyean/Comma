@@ -144,7 +144,7 @@ const AI_post = async (req, res) => {
   try {
     const userData = req.body.inputField;
 
-    const result = spawn('python', ['./python/kobert.py', userData]);
+    const result = spawn('python', ['./python/main.py', userData]);
 
     result.stdout.on('data', (data) => {
       const rs = data.toString();
