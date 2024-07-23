@@ -337,3 +337,28 @@ exports.findLatestFourByPatientId = async (patientId) => {
         console.log("Diary.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
     }
 }
+
+//감정 모델
+//최근 30일 감정 불러오기 
+exports.getEmotionData = async (patientId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            SELECT date, joy, surprise, anger, anxiety, hurt, sadness 
+            FROM diary 
+            WHERE 
+                patient_id = ?
+                AND date >= CURDATE() - INTERVAL 30 DAY
+            ORDER BY date ASC`;
+        const [rows] = await db.query(sql, [patientId]);
+        console.log(rows);
+
+        if (db && db.end) db.end();
+        return rows;
+
+    } catch (error) {
+        console.error("getEmotionData 쿼리 실행 중 오류:", error);
+        return [];
+    }
+};

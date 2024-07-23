@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>환자 감정차트 페이지</title>
+    <link rel="stylesheet" href="/css/profile/dashboard.css">
+    <style>
+        .content-container {
+            background-color: #FFFFFF;
+            border-radius: 20px;
+            border: 1px solid #D6D7DA;
+            padding: 20px; padding-bottom: 40px; padding-top: 40px;
+            margin: 30px;
+        }
+        .line-chart, .bar-chart{
+            margin-top: 50px;
+        }
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .doughnut-chart, .chart-description {
+            flex: 1;
+        }
+        .chart-description {
+            max-width: 400px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="profile-container">
+            <%- include('./profile_components/profile_card') %>
+        </div>
+
+        <div class="content-container">
+            <div><h4 style="font-size: 24px; font-weight: bold; margin-left: 10px">나의 감정 차트</h4></div>
+
+            <!--꺾은선차트-->
+            <div class="line-chart">
+            <p style="margin-left: 20px">나의 월별 감정 변화를 살펴 보세요.</p>
+            <%- include('../chart/line-chart') %>
+            </div><hr style="margin-top: 50px">
+
+
+            <!--도넛차트-->
+            <p style="margin-left: 20px; margin-top: 50px;">지금 가장 많이 나를 점유하고 있는 감정은?</p>
+            <small class="text-muted" style="margin-left: 20px">최근 2주의 일기를 바탕으로 한 데이터입니다.</small>
+            <div class="flex-container">
+                <div class="doughnut-chart">
+                    <%- include('../chart/doughnut-chart') %>
+                </div>
+                <div class="chart-description" style="margin: 10px;">
+                    <p>
+                    <span style="font-size: 20px; font-weight: bold;"><%- patientUser.nickname %></span>
+                    <span>님이 최근 가장 많이 느끼신 감정은</span>
+                    <span style="color:<%= descriptionEmotions.topThree[0].color %>; font-size: 28px;"><%= descriptionEmotions.topThree[0].label %> (<%= descriptionEmotions.topThree[0].percentage %>%)</span>이에요. 그다음으로 
+                    <span style="color:<%= descriptionEmotions.topThree[1].color %>; font-size: 24px;"><%= descriptionEmotions.topThree[1].label %> (<%= descriptionEmotions.topThree[1].percentage %>%)</span>, 
+                    <span style="color:<%= descriptionEmotions.topThree[2].color %>; font-size: 24px;"><%= descriptionEmotions.topThree[2].label %> (<%= descriptionEmotions.topThree[2].percentage %>%)</span> 순입니다. 제일 적게 느낀 감정은 
+                    <span style="color:<%= descriptionEmotions.least.color %>; font-size: 20px;"><%= descriptionEmotions.least.label %> (<%= descriptionEmotions.least.percentage %>%)</span>입니다.
+                    </p>
+                </div>
+            </div><hr style="margin-top: 40px">
+
+
+            <!--막대그래프-->
+            <div class="bar-chart">
+            <p style="margin-left: 20px">월별우세감정</p>
+            <%- include('../chart/bar-chart') %>
+            <div><hr style="margin-top: 50px">
+
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    
+
+</script>
+
