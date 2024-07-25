@@ -7,10 +7,9 @@ const map = new naver.maps.Map('map', {
 const hospitalsData = document.getElementById('hospitalsData').value;
 const hospitals = JSON.parse(hospitalsData);
 
-if (Array.isArray(hospitals)) {
+if (hospitals.length > 0) {
     hospitals.forEach(hospital => {
         const position = new naver.maps.LatLng(hospital.latitude, hospital.longitude);
-        console.log(hospital);
         // 기본 제공 마커 생성
         const marker = new naver.maps.Marker({
             position: position,
@@ -108,8 +107,7 @@ function updateHospitalInfo(hospital) {
     hospitalInfoDiv.innerHTML = `
         <h3>${hospital.name}</h3>
         <p>주소: ${hospital.address || '정보 없음'}</p>
-        <p>위도: ${hospital.latitude}</p>
-        <p>경도: ${hospital.longitude}</p>
+        <p>전화번호: ${hospital.phone ? `${hospital.phone}` : '정보 없음'}</p>
         <p>웹사이트: ${hospital.website ? `<a href="${hospital.website}" target="_blank">${hospital.website}</a>` : '정보 없음'}</p>
         <button onclick="writeReview('${hospital.name}')" class="btn btn-primary">리뷰 쓰기</button>
     `;

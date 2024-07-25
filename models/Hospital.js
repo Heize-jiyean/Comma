@@ -2,7 +2,7 @@
 exports.getAllHospitals = async () => {
     const db = await require('../main').connection();
     const sql = `
-        SELECT hospital_id, name, latitude, longitude, website
+        SELECT *
         FROM hospital`;
     const [rows] = await db.query(sql);
     if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
@@ -13,7 +13,7 @@ exports.getAllHospitals = async () => {
 exports.searchHospitals = async (query) => {
     const db = await require('../main').connection();
     const sql = `
-        SELECT hospital_id, name, latitude, longitude, website
+        SELECT *
         FROM hospital
         WHERE name LIKE ?`;
 

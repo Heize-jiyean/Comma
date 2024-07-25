@@ -32,7 +32,7 @@
         height: 50px;
         margin-right: 10px;
     }
-    .counselor-info .counselor-name {
+    .counselor-info .counselor-nickname {
         font-size: 18px;
         font-weight: bold;
     }
@@ -65,9 +65,9 @@
                 <!-- 방명록 작성자 -->
                 <% if (showCounselorInfo) { %>
                 <div class="counselor-info">
-                    <a href="/profile/counselor/<%= guestbook.counselor_nickname %>" class="clickable" style="text-decoration: none; color: inherit;">
+                    <a href="/profile/counselor/<%= guestbook.counselorId %>" class="clickable" style="text-decoration: none; color: inherit;">
                         <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
-                        <div class="counselor-name"><%= guestbook.counselor_name %> 상담사</div>
+                        <div class="counselor-nickname"><%= guestbook.counselorNickname %> 상담사</div>
                     </a>
                 </div>
                 <% } %>

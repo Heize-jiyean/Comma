@@ -1,6 +1,8 @@
 const UserModel = require('../models/User');
 const DiaryModel = require('../models/Diary')
 const GuestbookModel = require('../models/Guestbook');
+const AccessCheck = require('../middlewares/auth');
+
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -9,8 +11,8 @@ exports.patientProfilePage = async (req, res) => {
 
     try {
         // 환자 정보 가져오기
-        const patientNickname = req.params.patientNickname;
-        const patientUser = await UserModel.getPatientByNickname(patientNickname);
+        const patientId = req.params.patientId;
+        const patientUser = await UserModel.getPatientByUserId(patientId);
 
         // 없는 환자일 경우
         if (!patientUser) {
@@ -26,10 +28,10 @@ exports.patientProfilePage = async (req, res) => {
         
         // 각 방명록 항목에 대해 상담사의 닉네임, 이미지 가져오기
         for (let guestbook of guestbooks) {
-            const counselor = await UserModel.getCounselorById(guestbook.counselor_id);
-            guestbook.counselor_name = counselor ? counselor.name : "Unknown";
-            guestbook.counselor_nickname = counselor ? counselor.nickname : "Unknown";
-            guestbook.counselor_profile_picture = counselor ? counselor.profile_picture : null;
+            const counselor = await UserModel.getCounselorByCounselorId(guestbook.counselor_id);
+            guestbook.counselorId = counselor ? counselor.id : "Unknown";
+            guestbook.counselorNickname = counselor ? counselor.nickname : "Unknown";
+            guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
         }
 
         // 렌더링
@@ -52,8 +54,8 @@ exports.counselorProfilePage = async (req, res) => {
 
     try {
         // 상담사 정보 가져오기
-        const counselorNickname = req.params.counselorNickname;
-        const counselorUser = await UserModel.getCounselorByNickname(counselorNickname);
+        const counselorId = req.params.counselorId;
+        const counselorUser = await UserModel.getCounselorByUserId(counselorId);
 
         // 없는 상담사일 경우
         if (!counselorUser) {
@@ -63,7 +65,7 @@ exports.counselorProfilePage = async (req, res) => {
 
         // 페이지네이션 처리
         const limit = 10; // 한 페이지에 보여줄 방명록 수
-        const totalGuestbooks = await GuestbookModel.countByPatientId(counselorUser.counselor_id);
+        const totalGuestbooks = await GuestbookModel.countByCounselorId(counselorUser.counselor_id);
         const totalPages = Math.ceil(totalGuestbooks / limit);
 
         let currentPage = req.query.page ? parseInt(req.query.page) : 1;   // URL의 쿼리 매개변수 중 page 값을 가져옴 
@@ -87,27 +89,36 @@ exports.counselorProfilePage = async (req, res) => {
 exports.listAllDiaries = async (req, res) => {
     try {
         // 예외 처리
-        const patientNickname = req.params.patientNickname;
-        const patientUser = await UserModel.getPatientByNickname(patientNickname);
+        const patientId = req.params.patientId;
+        const patientUser = await UserModel.getPatientByUserId(patientId);
         if (!patientUser) {
             res.render("/");    // TODO: 없는 환자인 경우 띄울 페이지
             return;
         }
 
-        // 일기
-        const totalPages = Math.ceil( await DiaryModel.countOfFindByPatientId(patientUser.patient_id) / 9);
-        let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-        let Previews = await DiaryModel.PreviewfindByPatientId(currentPage, patientUser.patient_id);
+        if (req.session.user) {
+            const role = req.session.user.role;
+        
+            if (role == "patient") {
+                if (! AccessCheck.checkPatientId(role, req.session.user.id, patientUser.patient_id)) {
+                    const referer = req.get('Referer') || '/';
+                    return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+                } 
+            }
 
-        if (Previews) {
-            Previews.forEach(preview => {
-                preview.image_url = setDefaultImage(preview.image_url);
-                // preview.profile_picture = 프로필 기본이미지 설정
-            });
+            const totalPages = Math.ceil( await DiaryModel.countOfFindByPatientId(patientUser.patient_id, role) / 9);
+            let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+            let Previews = await DiaryModel.PreviewfindByPatientId(currentPage, patientUser.patient_id, role);
+
+            if (Previews) {
+                Previews.forEach(preview => {
+                    preview.image_url = setDefaultImage(preview.image_url);
+                    // preview.profile_picture = 프로필 기본이미지 설정
+                });
+            }
+    
+            res.render('profile/diary', { patientUser, type: 'patient', Previews, currentPage, totalPages});
         }
-
-        res.render('profile/diary', {patientUser: patientUser, type: 'patient', 
-                                        Previews, currentPage, totalPages});
     } catch (error) {
         console.error("listAllDiaries 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -123,8 +134,8 @@ function setDefaultImage(image_url) {
 exports.listAllGuestbooks = async (req, res) => {
     try {
         // 환자 정보 가져오기
-        const patientNickname = req.params.patientNickname;
-        const patientUser = await UserModel.getPatientByNickname(patientNickname);
+        const patientId = req.params.patientId;
+        const patientUser = await UserModel.getPatientByUserId(patientId);
 
         // 없는 환자일 경우
         if (!patientUser) {
@@ -143,10 +154,10 @@ exports.listAllGuestbooks = async (req, res) => {
 
         // 각 방명록 항목에 대해 상담사의 닉네임, 프로필 이미지 가져오기
         for (let guestbook of guestbooks) {
-            const counselor = await UserModel.getCounselorById(guestbook.counselor_id);
-            guestbook.counselor_name = counselor ? counselor.name : "Unknown";
-            guestbook.counselor_nickname = counselor ? counselor.nickname : "Unknown";
-            guestbook.counselor_profile_picture = counselor ? counselor.profile_picture : null;
+            const counselor = await UserModel.getCounselorByCounselorId(guestbook.counselor_id);
+            guestbook.counselorId = counselor ? counselor.id : "Unknown";
+            guestbook.counselorNickname = counselor ? counselor.nickname : "Unknown";
+            guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
         }
 
         // 렌더링

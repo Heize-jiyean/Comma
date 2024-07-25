@@ -4,8 +4,9 @@ const UserModel = require('../models/User');
 // 방명록 작성 페이지 반환
 exports.new = async (req, res) => {
     try {
-        const patientNickname = req.params.patientNickname; 
-        const patientUser = await UserModel.getPatientByNickname(patientNickname); 
+        // 환자 정보 가져오기
+        const patientId = req.params.patientId; 
+        const patientUser = await UserModel.getPatientByUserId(patientId); 
 
         res.render('guestbook/new.ejs', { patientUser: patientUser });
     } catch (error) {
@@ -20,10 +21,10 @@ exports.register = async (req, res) => {
         const { guestbookData } = req.body;
         console.log(guestbookData);
 
-        const patientNickname = req.params.patientNickname; 
-        const patientUser = await UserModel.getPatientByNickname(patientNickname);
+        const patientId = req.params.patientId; 
+        const patientUser = await UserModel.getPatientByUserId(patientId);
 
-        const counselorId = 1;  // TODO: 실제 값으로 바꿔주기
+        const counselorId = 2;  // TODO: 실제 값으로 바꿔주기
 
         newGuestbookData = {
             patient_id: patientUser.patient_id,
@@ -32,7 +33,7 @@ exports.register = async (req, res) => {
         }
 
         const savedGuestbookId = await GuestbookModel.register(newGuestbookData);
-        return res.json({ success: true, redirect: `/` });
+        return res.json({ success: true, redirect: `/guestbook/${savedGuestbookId}` });
     } catch (error) {
         console.error("registerGuestbook 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
