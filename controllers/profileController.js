@@ -209,6 +209,9 @@ exports.accounttRemovalPage = async(req, res) => {
         res.render("profile/setting.ejs", { page: 'accountRemoval' });
     } catch (error) {
         console.log("프로필 수정 - 탈퇴 페이지 반환 오류: ", error);
+    }
+}
+
 // 감정 차트 반환페이지 
 exports.charts = async (req, res) => {
     try {
