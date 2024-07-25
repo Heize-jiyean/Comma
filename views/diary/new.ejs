@@ -140,6 +140,7 @@ function sendDataToServer(data) {
     .then(data => {
         console.log('Success:', data);
         if (data.success && data.redirect) {
+            /////////////////
             window.location.href = data.redirect;
         }
     })

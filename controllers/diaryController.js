@@ -25,6 +25,7 @@ exports.register = async (req, res) => {
         diaryData.anxiety = 10.00; diaryData.hurt = 10.00; diaryData.sadness = 20.00;
 
         const savedDiaryId = await diaryModel.register(diaryData);
+        ////////////////////////////
         return res.json({ success: true, redirect: `/diary/${savedDiaryId}` });
     } catch (error) {
         console.error("registerDiary 오류:", error);
