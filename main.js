@@ -99,11 +99,21 @@ app.use((req, res, next) => {
   next();
 });
 
-//네이버 지도 API 클라이언트 ID를 res.locals에 설정
-app.use((req, res, next) => {
-  res.locals.naverMapClientId = process.env.NAVER_MAP_CLIENT_ID;
-  next();
+/////////////////////////////////////////
+// 테스트 : 세션 확인
+app.get('/session-data', (req, res) => {
+  if (req.session.user) {
+      res.json({
+          message: '세션 데이터가 있습니다.',
+          user: req.session.user
+      });
+  } else {
+      res.json({
+          message: '세션 데이터가 없습니다.'
+      });
+  }
 });
+/////////////////////////////////////////
 
 app.use(methodOverride("_method"));
 

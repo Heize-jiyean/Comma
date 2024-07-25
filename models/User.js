@@ -51,6 +51,26 @@ exports.createCounselor = async (user) => {
     }
 };
 
+// 환자정보 아이디로 가져오기
+exports.getPatientById = async (patientId) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            SELECT *
+            FROM patient
+            WHERE patient_id = ?`;
+
+        const [rows, fields] = await db.query(sql, [patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows.length > 0 ? rows[0] : null;
+    } catch (error) {
+        console.error("UserModel.createUser() 쿼리 실행 중 오류:", error);
+        throw error;
+    }
+};
+
 // 환자 정보 이메일로 가져오기
 exports.getPatientByEmail = async (email) => {
     try {
@@ -129,8 +149,8 @@ exports.getCounselorByUserId = async (id) => {
     }
 };
 
-// 의사 정보 아이디로 가져오기
-exports.getCounselorById = async (counselorId) => {
+// 의사 정보 의사아이디로 가져오기
+exports.getCounselorByCounselorId = async (counselorId) => {
     try {
         const db = await require('../main').connection();
         let sql = `
@@ -144,7 +164,7 @@ exports.getCounselorById = async (counselorId) => {
 
         return result.length > 0 ? result[0] : null;
     } catch (error) {
-        console.error('UserModel.getCounselorById 오류:', error);
+        console.error('UserModel.getCounselorByCounselorId 오류:', error);
         throw error;
     }
 };
