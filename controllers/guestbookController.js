@@ -82,14 +82,13 @@ exports.delete = async (req, res) => {
             res.status(404).send("삭제할 방명록을 찾을 수 없습니다.");
             return;
         }
-        
-        const patientUserId = await GuestbookModel.getPatientIdByGuestbookId(guestbookId);  // 방명록에서 patient_id 추출
 
+        const patientUserId = await GuestbookModel.getPatientIdByGuestbookId(guestbookId);  // 방명록에서 patient_id 추출
         const deletionResult = await GuestbookModel.delete(guestbookId);
         
         if (deletionResult > 0) {
             if (patientUserId) {
-                return res.json({redirect: `/profile/patient/${patientUserId}/guestbooks`});
+                return res.json({success: true, redirect: `/profile/patient/${patientUserId}/guestbooks`});
             } else {
                 res.status(404).send("환자 정보를 찾을 수 없습니다.");
             }

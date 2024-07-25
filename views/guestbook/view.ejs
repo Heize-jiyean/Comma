@@ -24,10 +24,10 @@
     .edit-btn, .delete-btn {
         padding: 8px 16px;
         margin-left: 10px;
-        border: 2px solid #B0BEC5; /* 진한 회색 테두리 */
-        background-color: #FFFFFF; /* 흰색 배경 */
+        border: 2px solid #B0BEC5; 
+        background-color: #FFFFFF; 
         color: black;
-        border-radius: 13px; /* 모서리 둥근 처리 */
+        border-radius: 13px;
         cursor: pointer;
         font-size: 16px;
         font-weight: bold;
@@ -41,22 +41,17 @@
     function handleDelete(guestbookId, patientUserId) {  // patientUserId 파라미터 추가
         if (confirm('정말로 삭제하시겠습니까?')) {
             fetch(`/guestbook/${guestbookId}`, {
-
                 method: 'DELETE'
-            }).then(response => {
-                if (response.ok) {
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.redirect) {
                     alert('방명록이 삭제되었습니다.');
-                    //삭제 후 방명록 받은 환자의 방명록전체보기 페이지로 리다이렉션
-                    //문자열로 url받기
-                    //window.location.href = `/profile/patient/${patientUserId}/guestbooks`; 
-                    window.location.href = response.redirect;
-                } else {
-                    response.json().then(data => alert(data.message));
+                    console.log(data.redirect);
+                    window.location.href = data.redirect;
                 }
-                
-    
-                
-            }).catch(error => {
+            })
+            .catch(error => {
                 console.error('Error:', error);
                 alert('서버 오류가 발생했습니다.');
             });
