@@ -26,6 +26,13 @@
         .chart-description {
             max-width: 400px; 
         }
+        #BarChartContainer {
+            width: auto;
+            max-height: 350px;
+            padding: 20px;
+            overflow-y: auto; /* 세로 스크롤 활성화 */
+            
+        }
     </style>
 </head>
 <body>
@@ -39,8 +46,8 @@
 
             <!--꺾은선차트-->
             <div class="line-chart">
-            <p style="margin-left: 20px">나의 월별 감정 변화를 살펴 보세요.</p>
-            <%- include('../chart/line-chart') %>
+                <p style="margin-left: 20px">나의 월별 감정 변화를 살펴 보세요.</p>
+                <%- include('../chart/line-chart') %>
             </div><hr style="margin-top: 50px">
 
 
@@ -61,14 +68,16 @@
                     <span style="color:<%= descriptionEmotions.least.color %>; font-size: 20px;"><%= descriptionEmotions.least.label %> (<%= descriptionEmotions.least.percentage %>%)</span>입니다.
                     </p>
                 </div>
-            </div><hr style="margin-top: 40px">
+            </div><hr style="margin-top: 20px">
 
 
             <!--막대그래프-->
             <div class="bar-chart">
-            <p style="margin-left: 20px">월별우세감정</p>
-            <%- include('../chart/bar-chart') %>
-            <div><hr style="margin-top: 50px">
+                <p style="margin-left: 20px">월별 우세 감정</p>
+                <div id="BarChartContainer">
+                    <%- include('../chart/bar-chart') %>
+                </div>
+            <div>
 
         </div>
     </div>

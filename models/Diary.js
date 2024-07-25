@@ -345,20 +345,43 @@ exports.getEmotionData = async (patientId) => {
         const db = await require('../main').connection();
 
         let sql = `
-            SELECT date, joy, surprise, anger, anxiety, hurt, sadness 
+            SELECT created_at, joy, surprise, anger, anxiety, hurt, sadness 
             FROM diary 
             WHERE 
                 patient_id = ?
-                AND date >= CURDATE() - INTERVAL 30 DAY
-            ORDER BY date ASC`;
+                AND created_at >= CURDATE() - INTERVAL 30 DAY
+            ORDER BY created_at ASC`;
         const [rows] = await db.query(sql, [patientId]);
-        console.log(rows);
 
         if (db && db.end) db.end();
         return rows;
 
     } catch (error) {
         console.error("getEmotionData 쿼리 실행 중 오류:", error);
+        return [];
+    }
+};
+
+//최근 해당 달의 감정 불러오기
+exports.getEmotionDataByMonth  = async (patientId, year, month) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            SELECT created_at, joy, surprise, anger, anxiety, hurt, sadness 
+            FROM diary 
+            WHERE 
+                patient_id = ?
+                AND YEAR(created_at) = ?
+                AND MONTH(created_at) = ?
+            ORDER BY created_at ASC`;
+        const [rows] = await db.query(sql, [patientId, parseInt(year), parseInt(month)]);
+
+        if (db && db.end) db.end();
+        return rows;
+
+    } catch (error) {
+        console.error("getEmotionDataByMonth 쿼리 실행 중 오류:", error);
         return [];
     }
 };
