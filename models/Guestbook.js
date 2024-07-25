@@ -81,6 +81,30 @@ exports.findAllByPatientId = async (patientId) => {
     }
 }
 
+//방명록을 받은 환자id 구하기
+exports.getPatientIdByGuestbookId = async (guestbookId) => {
+    try {
+        const db = await require('../main').connection(); 
+        let sql = `
+            SELECT patient.id
+            FROM patient
+            JOIN guestbook ON patient.patient_id = guestbook.patient_id
+            WHERE guestbook.guestbook_id = ?;
+
+        `;
+        const [rows] = await db.query(sql, [guestbookId]);
+
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows[0].id : null;  // 환자의 id 반환
+
+    } catch (error) {
+        console.error("getPatientIdByGuestbookId() 쿼리 실행 중 오류:", error);
+        if (db && db.end) db.end();
+        return null;  // 오류 발생 시 null 반환
+    }
+};
+
+
 // 환자 아이디로 한자에게 작성된 방명록 찾기 (페이지네이션)
 exports.findAllByPatientIdWithPagination = async (patientId, page, limit) => {
     try {
@@ -214,3 +238,17 @@ exports.countByCounselorId = async (counselorId) => {
         console.log("Guestbook.countByCounselorId() 쿼리 실행 중 오류: ", error);
     }
 }
+
+// 방명록 삭제 처리함수
+exports.delete = async (guestbookId) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `DELETE FROM guestbook WHERE guestbook_id = ?`;
+        const [result] = await db.query(sql, [guestbookId]);
+
+        if (db && db.end) db.end();
+        return result.affectedRows; // 삭제된 행의 수를 반환
+    } catch (error) {
+        console.error("Guestbook.delete() 쿼리 실행 중 오류:", error);
+    }
+};
