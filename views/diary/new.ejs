@@ -29,6 +29,7 @@
 <body>
 <div class="container">
   <div class="panel">
+    <input type="hidden" name="patientId" value="<%= patientId %>">
     <input type="file" id="fileInput" accept="image/*">
     <div id="preview">
         <div class="placeholder">사진을 추가해주세요</div>
@@ -106,7 +107,7 @@ submitButton.addEventListener('click', async () => {
     }
 
     const diaryData = {
-        patient_id: 3, // 임시 작성자 id
+        patient_id: document.querySelector('input[name="patientId"]').value,
         title: title,
         content: content,
         image_url: image_url,
@@ -118,7 +119,11 @@ submitButton.addEventListener('click', async () => {
 });
 
 async function uploadImage(file) {
-    const storageRef = ref(storage, 'images/' + file.name);
+    const patient_id = document.querySelector('input[name="patientId"]').value;
+    const dateString = new Date().toISOString().split('T')[0];
+    const filename = `${file.name}_${patient_id}_${dateString}`;
+    const storageRef = ref(storage, 'images/' + filename);
+
     try {
         const snapshot = await uploadBytes(storageRef, file);
         return await getDownloadURL(snapshot.ref);
