@@ -7,10 +7,9 @@ const map = new naver.maps.Map('map', {
 const hospitalsData = document.getElementById('hospitalsData').value;
 const hospitals = JSON.parse(hospitalsData);
 
-if (Array.isArray(hospitals)) {
+if (hospitals.length > 0) {
     hospitals.forEach(hospital => {
         const position = new naver.maps.LatLng(hospital.latitude, hospital.longitude);
-        console.log(hospital);
         // 기본 제공 마커 생성
         const marker = new naver.maps.Marker({
             position: position,

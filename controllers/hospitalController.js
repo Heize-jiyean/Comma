@@ -6,11 +6,9 @@ exports.loadingMainPage = async (req, res) => {
     try {
         const reviews = await ReviewModel.getLatestReviews();
         const hospitals = await hospitalModel.getAllHospitals();
-        res.render('hospital/hospital', { 
-            reviews: reviews,
-            hospitals: JSON.stringify(hospitals),
-            naverMapClientId: process.env.NAVER_MAP_CLIENT_ID || ''
-        });
+        res.locals.reviews = reviews;
+        res.locals.hospitals = hospitals;
+        res.render('hospital/hospital');
     } catch (error) {
         console.error('Error loading main page:', error);
         res.status(500).send('Internal Server Error');
