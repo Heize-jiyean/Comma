@@ -99,6 +99,7 @@ module.exports = {
                 console.log('Login successful for user:', user.email);
                 req.session.user = {
                     id: user.patient_id || user.counselor_id,
+                    custom_id: user.id,
                     email: user.email,
                     nickname: user.nickname,
                     role: user.patient_id ? 'patient' : 'counselor'
