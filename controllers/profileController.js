@@ -1,7 +1,8 @@
 const UserModel = require('../models/User');
 const DiaryModel = require('../models/Diary')
 const GuestbookModel = require('../models/Guestbook');
-const AccessCheck = require('../middlewares/auth');
+const AccessCheck = require('../utils/authUtils');
+const EmotionData = require('../utils/emotionUtils');
 
 
 // 환자 프로필 페이지 반환
@@ -113,7 +114,6 @@ exports.listAllDiaries = async (req, res) => {
             if (Previews) {
                 Previews.forEach(preview => {
                     preview.image_url = setDefaultImage(preview.image_url);
-                    // preview.profile_picture = 프로필 기본이미지 설정
                 });
             }
     
@@ -175,4 +175,66 @@ exports.listAllGuestbooks = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 
+}
+
+// 감정 차트 반환페이지 
+exports.charts = async (req, res) => {
+    try {
+        // 환자 정보 가져오기
+        const patientId = req.params.patientId;
+        const patientUser = await UserModel.getPatientByUserId(patientId);
+
+        // 최근 30일 감정데이터 불러오기 
+        const recentData = await DiaryModel.getEmotionData(patientUser.patient_id);
+        //임시 그래프 데이터
+        // const recentData = [
+        //     { date: '2024-07-01', joy: 14, surprise: 24, anger: 21, anxiety: 9, hurt: 12, sadness: 18 },
+        //     { date: '2024-07-02', joy: 27, surprise: 17, anger: 23, anxiety: 26, hurt: 79, sadness: 24 },
+        //     { date: '2024-07-03', joy: 21, surprise: 20, anger: 26, anxiety: 25, hurt: 74, sadness: 12 },
+        //     { date: '2024-07-04', joy: 13, surprise: 19, anger: 20, anxiety: 14, hurt: 50, sadness: 20 },
+        //     { date: '2024-07-05', joy: 22, surprise: 15, anger: 12, anxiety: 18, hurt: 66, sadness: 29 },
+        //     { date: '2024-07-06', joy: 25, surprise: 28, anger: 15, anxiety: 22, hurt: 77, sadness: 18 },
+        //     { date: '2024-07-07', joy: 18, surprise: 33, anger: 24, anxiety: 15, hurt: 12, sadness: 16 },
+        //     { date: '2024-07-08', joy: 17, surprise: 44, anger: 11, anxiety: 9, hurt: 42, sadness: 21 },
+        //     { date: '2024-07-09', joy: 16, surprise: 12, anger: 13, anxiety: 10, hurt: 61, sadness: 28 },
+        //     { date: '2024-07-10', joy: 20, surprise: 55, anger: 15, anxiety: 44, hurt: 52, sadness: 23 },
+        //     { date: '2024-07-11', joy: 15, surprise: 25, anger: 18, anxiety: 26, hurt: 63, sadness: 27 },
+        //     { date: '2024-07-12', joy: 28, surprise: 14, anger: 27, anxiety: 0, hurt: 39, sadness: 22 },
+        //     { date: '2024-07-13', joy: 21, surprise: 21, anger: 29, anxiety: 14, hurt: 20, sadness: 11 },
+        //     { date: '2024-07-14', joy: 26, surprise: 10, anger: 19, anxiety: 21, hurt: 15, sadness: 13 },
+        //     { date: '2024-07-15', joy: 48, surprise: 16, anger: 22, anxiety: 11, hurt: 27, sadness: 19 },
+        //     { date: '2024-07-16', joy: 13, surprise: 39, anger: 20, anxiety: 15, hurt: 8, sadness: 26 },
+        //     { date: '2024-07-17', joy: 19, surprise: 22, anger: 17, anxiety: 18, hurt: 81, sadness: 14 },
+        //     { date: '2024-07-18', joy: 11, surprise: 26, anger: 12, anxiety: 14, hurt: 69, sadness: 24 },
+        //     { date: '2024-07-19', joy: 17, surprise: 28, anger: 22, anxiety: 5, hurt: 79, sadness: 16 },
+        //     { date: '2024-07-20', joy: 12, surprise: 57, anger: 29, anxiety: 0, hurt: 55, sadness: 28 },
+        //     { date: '2024-07-21', joy: 25, surprise: 66, anger: 15, anxiety: 3, hurt: 76, sadness: 21 },
+        //     { date: '2024-07-22', joy: 22, surprise: 20, anger: 16, anxiety: 7, hurt: 74, sadness: 19 },
+        //     { date: '2024-07-23', joy: 19, surprise: 54, anger: 25, anxiety: 16, hurt: 57, sadness: 11 },
+        //     { date: '2024-07-24', joy: 14, surprise: 15, anger: 14, anxiety: 20, hurt: 68, sadness: 12 },
+        //     { date: '2024-07-25', joy: 26, surprise: 28, anger: 21, anxiety: 1, hurt: 80, sadness: 25 },
+        //     { date: '2024-07-26', joy: 28, surprise: 56, anger: 23, anxiety: 15, hurt: 13, sadness: 21 },
+        //     { date: '2024-07-27', joy: 18, surprise: 52, anger: 17, anxiety: 20, hurt: 12, sadness: 24 },
+        //     { date: '2024-07-28', joy: 20, surprise: 18, anger: 26, anxiety: 16, hurt: 71, sadness: 14 },
+        //     { date: '2024-07-29', joy: 27, surprise: 14, anger: 12, anxiety: 19, hurt: 15, sadness: 23 },
+        //     { date: '2024-07-30', joy: 13, surprise: 16, anger: 20, anxiety: 14, hurt: 28, sadness: 19 },
+        //     { date: '2024-07-31', joy: 29, surprise: 20, anger: 11, anxiety: 18, hurt: 27, sadness: 15 }
+        // ];
+
+        const Percentages = EmotionData.calculateEmotionPercentages(recentData);
+        const descriptionEmotions = EmotionData.generateEmotionSummary(Percentages);
+        const monthlyPercentages = EmotionData.calculateMonthlyEmotionPercentages(patientUser);
+
+
+        res.render('profile/emotion-chart', 
+            {patientUser, type: 'patient',
+            lineChartEmotionData: recentData, 
+            doughnutChartEmotionData: Percentages,
+            barChartData: monthlyPercentages,
+            descriptionEmotions
+        });
+    } catch (error) {
+        console.error("newDiary 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
 }

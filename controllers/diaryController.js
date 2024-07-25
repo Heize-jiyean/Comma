@@ -1,6 +1,6 @@
 const diaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
-const AccessCheck = require('../middlewares/auth');
+const AccessCheck = require('../utils/authUtils');
 
 
 exports.new = async (req, res) => {

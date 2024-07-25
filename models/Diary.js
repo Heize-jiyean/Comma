@@ -337,3 +337,51 @@ exports.findLatestFourByPatientId = async (patientId) => {
         console.log("Diary.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
     }
 }
+
+//감정 모델
+//최근 30일 감정 불러오기 
+exports.getEmotionData = async (patientId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            SELECT created_at, joy, surprise, anger, anxiety, hurt, sadness 
+            FROM diary 
+            WHERE 
+                patient_id = ?
+                AND created_at >= CURDATE() - INTERVAL 30 DAY
+            ORDER BY created_at ASC`;
+        const [rows] = await db.query(sql, [patientId]);
+
+        if (db && db.end) db.end();
+        return rows;
+
+    } catch (error) {
+        console.error("getEmotionData 쿼리 실행 중 오류:", error);
+        return [];
+    }
+};
+
+//최근 해당 달의 감정 불러오기
+exports.getEmotionDataByMonth  = async (patientId, year, month) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            SELECT created_at, joy, surprise, anger, anxiety, hurt, sadness 
+            FROM diary 
+            WHERE 
+                patient_id = ?
+                AND YEAR(created_at) = ?
+                AND MONTH(created_at) = ?
+            ORDER BY created_at ASC`;
+        const [rows] = await db.query(sql, [patientId, parseInt(year), parseInt(month)]);
+
+        if (db && db.end) db.end();
+        return rows;
+
+    } catch (error) {
+        console.error("getEmotionDataByMonth 쿼리 실행 중 오류:", error);
+        return [];
+    }
+};
