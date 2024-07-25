@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>프로필 수정 페이지</title>
+    <style>
+        body {
+            font-family: 'Pretendard-Regular', sans-serif;
+            background-color: #F4F5F8;
+            margin: 0;
+            padding: 0;
+        }
+        .setting-container {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #D6D7DA;
+            margin: 20px auto;
+            max-width: 800px;
+            display: flex;
+            flex-direction: row;
+        }
+        .side-bar-container {
+            border-right: 1px solid #D6D7DA;
+        }
+        .side-bar {
+            width: 200px;
+            padding: 20px;
+        }
+        .side-bar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .side-bar li a {
+            display: block;
+            padding: 10px;
+            color: #A1A4AC;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .side-bar li a:hover {
+            border-radius: 12px;
+            background-color: #e9ecef;
+        }
+        .side-bar li a.active {
+            color: black;
+        }
+        .conent-container {
+            width: 100%;;
+            padding: 60px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="setting-container">
+        <div class="side-bar-container">
+            <div class="side-bar">
+                <ul>
+                    <li><a href="/profile/settings/profileEdit" class="<%= page === 'profileEdit' ? 'active' : '' %>">프로필 편집</a></li>
+                    <li><a href="/profile/settings/passwordChange" class="<%= page === 'passwordChange' ? 'active' : '' %>">비밀번호 변경</a></li>
+                    <li><a href="/profile/settings/accountRemoval" class="<%= page === 'accountRemoval' ? 'active' : '' %>">회원 탈퇴</a></li>
+                </ul>
+                
+            </div>
+        </div>
+        <div class="conent-container">
+            <div class="content">
+                <% if (page === 'profileEdit') { %>
+                    <h2>프로필 편집</h2>
+                    <%- include('./setting_components/profile_edit') %>
+                <% } else if (page === 'passwordChange') { %>
+                    <%- include('./setting_components/password_change') %>
+                <% } else if (page === 'accountRemoval') { %>
+                    <h2>탈퇴</h2>
+                    <%- include('./setting_components/account_removal') %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

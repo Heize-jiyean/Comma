@@ -165,3 +165,39 @@ exports.listAllGuestbooks = async (req, res) => {
     }
 
 }
+
+
+// 프로필 수정 - 프로필 편집 페이지 밚환
+exports.profileEditPage = async(req, res) => {
+    try {
+        
+        // 렌더링
+        res.render("profile/setting.ejs", { page: 'profileEdit' });
+
+    } catch (error) {
+        console.error("프로필 수정 - 프로필 편집 페이지 반환 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+// 프로필 수정 - 비밀번호 변경 페이지 반환
+exports.passwordChangePage = async(req, res) => {
+    try {
+        // 렌더링
+        res.render("profile/setting.ejs", { page: 'passwordChange' });
+    } catch (error) {
+        console.log("프로필 수정 - 비밀번호 변경 페이지 반환 오류: ", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+// 프로필 수정 -탈퇴 페이지 밚환
+exports.accounttRemovalPage = async(req, res) => {
+    try {
+        // 렌더링
+        res.render("profile/setting.ejs", { page: 'accountRemoval' });
+    } catch (error) {
+        console.log("프로필 수정 - 탈퇴 페이지 반환 오류: ", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
