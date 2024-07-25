@@ -204,27 +204,47 @@ exports.countOfFindAll = async (option, counselorId) => {
     }
 };
 
+
 // 환자 프로필 용
-exports.PreviewfindByPatientId = async (page, patientId) => {
+exports.PreviewfindByPatientId = async (page, patientId, role) => {
     try {
         const db = await require('../main').connection(); 
 
         const pageSize = 9;
         let offset = pageSize * (page - 1);
+        let sql;
 
-        let sql = `
-            SELECT 
-                d.*,
-                p.nickname,
-                p.profile_picture
-            FROM 
-                diary d 
-            JOIN 
-                patient p ON d.patient_id = p.patient_id
-            WHERE 
-                d.patient_id = ?
-            ORDER BY d.created_at DESC LIMIT ? OFFSET ?;
+        if (role == "patient") {
+            sql = `
+                SELECT 
+                    d.*,
+                    p.nickname,
+                    p.profile_picture
+                FROM 
+                    diary d 
+                JOIN 
+                    patient p ON d.patient_id = p.patient_id
+                WHERE 
+                    d.patient_id = ?
+                ORDER BY d.created_at DESC LIMIT ? OFFSET ?;
             `;
+        }
+        else if (role == "counselor") {
+            sql = `
+                SELECT 
+                    d.*,
+                    p.nickname,
+                    p.profile_picture
+                FROM 
+                    diary d 
+                JOIN 
+                    patient p ON d.patient_id = p.patient_id
+                WHERE 
+                    d.patient_id = ? 
+                    AND d.is_visible = TRUE
+                ORDER BY d.created_at DESC LIMIT ? OFFSET ?;
+            `;
+        }
         
         const [rows, fields] = await db.query(sql, [patientId, pageSize, offset]);
 
@@ -235,18 +255,32 @@ exports.PreviewfindByPatientId = async (page, patientId) => {
         console.error("Diary.PreviewfindByPatientId() 쿼리 실행 중 오류:", error);
     }
 };
-exports.countOfFindByPatientId = async (patientId) => {
+exports.countOfFindByPatientId = async (patientId, role) => {
     try {
         const db = await require('../main').connection(); 
+        let sql; 
 
-        let sql = `
-            SELECT 
-                COUNT(*) AS total
-            FROM 
-                diary d 
-            WHERE 
-                patient_id = ?
+        if (role == "patient") {
+            sql = `
+                SELECT 
+                    COUNT(*) AS total
+                FROM 
+                    diary d 
+                WHERE 
+                    patient_id = ?;
             `;
+        }
+        else if (role == "counselor") {
+            sql = `
+                SELECT 
+                    COUNT(*) AS total
+                FROM 
+                    diary d 
+                WHERE 
+                    patient_id = ?
+                    AND d.is_visible = TRUE;
+            `;
+        }
         
         const [rows, fields] = await db.query(sql, [patientId]);
 
@@ -303,3 +337,51 @@ exports.findLatestFourByPatientId = async (patientId) => {
         console.log("Diary.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
     }
 }
+
+//감정 모델
+//최근 30일 감정 불러오기 
+exports.getEmotionData = async (patientId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            SELECT created_at, joy, surprise, anger, anxiety, hurt, sadness 
+            FROM diary 
+            WHERE 
+                patient_id = ?
+                AND created_at >= CURDATE() - INTERVAL 30 DAY
+            ORDER BY created_at ASC`;
+        const [rows] = await db.query(sql, [patientId]);
+
+        if (db && db.end) db.end();
+        return rows;
+
+    } catch (error) {
+        console.error("getEmotionData 쿼리 실행 중 오류:", error);
+        return [];
+    }
+};
+
+//최근 해당 달의 감정 불러오기
+exports.getEmotionDataByMonth  = async (patientId, year, month) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            SELECT created_at, joy, surprise, anger, anxiety, hurt, sadness 
+            FROM diary 
+            WHERE 
+                patient_id = ?
+                AND YEAR(created_at) = ?
+                AND MONTH(created_at) = ?
+            ORDER BY created_at ASC`;
+        const [rows] = await db.query(sql, [patientId, parseInt(year), parseInt(month)]);
+
+        if (db && db.end) db.end();
+        return rows;
+
+    } catch (error) {
+        console.error("getEmotionDataByMonth 쿼리 실행 중 오류:", error);
+        return [];
+    }
+};

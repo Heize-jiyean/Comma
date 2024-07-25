@@ -6,10 +6,10 @@
         max-width: 1080px; margin-bottom: 16px; }
     .card { border-radius: 30px; overflow: hidden; }
 
-    .card-img-container { height: 280px; overflow: hidden; }
+    .card-img-container { height: 260px; overflow: hidden; }
     .card-link { text-decoration: none; color: black; }
     .card-link:hover { color: #4B8673; }
-    .card-body { margin: 10px; height: 180px;}
+    .card-body { margin: 10px; height: 200px;}
     .text-muted { padding-right: 12px; }
 </style>
 </head>
@@ -28,7 +28,7 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title" style="font-weight: bold" ><%= Preview.title %></h5>
-                        <p style="font-size: 14px" class="card-text"><%= Preview.content.substring(0, 55) %>...</p>
+                        <p style="font-size: 14px" class="card-text"><%= Preview.content.substring(0, 45) %>...</p>
                         <p style="font-size: 14px" class="card-text"><%= Preview.nickname %></p>
                         <p style="font-size: 14px" class="card-text"><%= new Date(Preview.created_at).toLocaleDateString('ko-KR') %></p>
                         <div class="emotion-ranking" data-emotions="<%= JSON.stringify(Preview.emotions) %>"></div>

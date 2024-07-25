@@ -1,4 +1,5 @@
 require('dotenv').config();
+console.log('Loaded env vars:', process.env); //환경변수확인
 
 const express = require('express');
 const mysql = require('mysql2/promise');
@@ -53,7 +54,6 @@ admin.initializeApp({
 });
 
 // DB connection
-require('dotenv').config();
 exports.connection = async () => {
   try {
       const db = await mysql.createPool({
@@ -79,9 +79,6 @@ app.set('views', path.join(__dirname, 'views'));
 // 정적 파일 제공
 app.use(express.static(path.join(__dirname, 'public')));
 
-// layouts 사용
-app.use(layouts);
-
 // express.json() 미들웨어 추가
 app.use(express.json());
 
@@ -95,13 +92,28 @@ app.use((req, res, next) => {
   next();
 });
 
+
 // user 변수 설정을 위한 미들웨어 (통합)
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
 
-
+/////////////////////////////////////////
+// 테스트 : 세션 확인
+app.get('/session-data', (req, res) => {
+  if (req.session.user) {
+      res.json({
+          message: '세션 데이터가 있습니다.',
+          user: req.session.user
+      });
+  } else {
+      res.json({
+          message: '세션 데이터가 없습니다.'
+      });
+  }
+});
+/////////////////////////////////////////
 
 app.use(methodOverride("_method"));
 
@@ -140,6 +152,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
 
+
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
+  console.log('Final check NAVER_MAP_CLIENT_ID:', process.env.NAVER_MAP_CLIENT_ID);
 });
