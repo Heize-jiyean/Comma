@@ -105,9 +105,12 @@
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' }
         })
-        .then(response => {
-            if (response.ok) { window.location.href = '/'; }
-            else { alert('삭제 실패. 다시 시도해주세요.'); }
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            if (data.success && data.redirect) {
+                window.location.href = data.redirect;
+            }
         })
         .catch(error => {
             console.error('Error:', error);

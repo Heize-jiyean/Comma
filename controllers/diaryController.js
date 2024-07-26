@@ -10,6 +10,14 @@ exports.new = async (req, res) => {
             return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
         }
 
+        const patientId = req.session.user.id;
+        const date = new Date();
+        const todayDiary = await diaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
+        if (todayDiary) {
+            const redirect = `/diary/${todayDiary.diary_id}`;
+            return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
+        }
+
         res.render('diary/new', {patientId: req.session.user.id});
     } catch (error) {
         console.error("newDiary 오류:", error);
@@ -95,6 +103,7 @@ exports.delete = async (req, res) => {
     try {
         const diaryId = req.params.diaryId;
         const diary = await diaryModel.findById(diaryId); 
+        const patient = await UserModel.getPatientById(diary.patient_id);
         
         if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
             const referer = req.get('Referer') || '/';
@@ -123,8 +132,9 @@ exports.delete = async (req, res) => {
         // DB diary 삭제
         await diaryModel.delete(diaryId);
 
+        console.log(patient.id);
         // redirect
-        return res.status(200).send("삭제 성공");
+        return res.json({ success: true, redirect: `/profile/patient/${patient.id}/diaries` });
     } catch (error) {
         console.error("deleteDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");

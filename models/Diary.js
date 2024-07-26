@@ -46,18 +46,22 @@ exports.delete = async (diaryId) => {
     }
 };
 
-exports.findImageUrlById = async (diaryId) => {
+exports.findBypatientIdAndDate = async (patientId, year, month, day) => {
     try {
         const db = await require('../main').connection(); 
 
         let sql = `
-            SELECT image_url 
+            SELECT *
             FROM diary
-            WHERE diary_id = ?`; 
-        const [rows, fields] = await db.query(sql, [diaryId]);
+            WHERE patient_id = ?
+                AND YEAR(created_at) = ?
+                AND MONTH(created_at) = ?
+                AND DAY(created_at) = ?
+            `; 
+        const [rows, fields] = await db.query(sql, [patientId, parseInt(year), parseInt(month), parseInt(day)]);
         
         if (db && db.end) db.end();
-        return rows.length > 0 ? rows[0].image_url : null;
+        return rows.length > 0 ? rows[0] : null;
 
     } catch (error) {
         console.error("Diary.findImageUrlById() 쿼리 실행 중 오류:", error);
