@@ -1,120 +1,48 @@
-<head>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=<%= naverMapClientId %>&submodules=geocoder"></script>
-</head>
-<body>
-    <!-- 디버깅용 코드 -->
-    <script>
-    console.log('Naver Map Client ID:', '<%= naverMapClientId %>');
-    </script>
-    
-    <div class="container mt-5">
-        <h2>리뷰 등록</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="searchInput" placeholder="병원 이름 검색">
-                    <button class="btn btn-primary mt-2" onclick="searchHospital()">검색</button>
-                </div>
-                <div id="map" style="width:100%;height:400px;"></div>
-            </div>
-            <div class="col-md-6">
-                <form id="hospitalForm" action="/hospital/register" method="POST">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">병원 이름</label>
-                        <input type="text" class="form-control" id="name" name="name" value="<%= typeof hospitalName !== 'undefined' ? hospitalName : '' %>" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="address" class="form-label">주소</label>
-                        <input type="text" class="form-control" id="address" name="address" required>
-                    </div>
-                    <input type="hidden" id="latitude" name="latitude">
-                    <input type="hidden" id="longitude" name="longitude">
-                    <div class="mb-3">
-                        <label for="description" class="form-label">설명</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">리뷰 등록</button>
-                </form>
-            </div>
+<!-- Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="reviewModalLabel">리뷰 등록</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        <div class="modal-body">
+          <form id="hospitalForm" action="/hospital/register" method="POST">
+            <div class="mb-3">
+              <label for="name" class="form-label">병원 이름</label>
+              <input type="text" class="form-control" id="name" name="name" value="<%= typeof hospitalName !== 'undefined' ? hospitalName : '' %>" required readonly>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">리뷰 내용</label>
+              <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+            </div>
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+          <button type="button" class="btn btn-primary" onclick="submitReview()">리뷰 등록</button>
+        </div>
+      </div>
     </div>
-    
-    <script>
-    let map;
-    let marker;
-    
-    function initMap() {
-        console.log('initMap function called');
-        if (typeof naver === 'undefined' || typeof naver.maps === 'undefined') {
-            console.error('Naver Maps API is not loaded');
-            return;
-        }
-        map = new naver.maps.Map('map', {
-            center: new naver.maps.LatLng(37.5665, 126.9780),
-            zoom: 13
-        });
-        console.log('Map initialized');
+  </div>
+  
+  <script>
+  function submitReview() {
+    const form = document.getElementById('hospitalForm');
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
     }
     
-    function searchHospital() {
-        const query = document.getElementById('searchInput').value;
-        naver.maps.Service.geocode({
-            query: query
-        }, function(status, response) {
-            if (status === naver.maps.Service.Status.ERROR) {
-                return alert('검색 결과를 찾을 수 없습니다.');
-            }
-            if (response.v2.meta.totalCount === 0) {
-                return alert('검색 결과가 없습니다.');
-            }
-            var item = response.v2.addresses[0];
-            var point = new naver.maps.Point(item.x, item.y);
-            map.setCenter(point);
-            if (marker) marker.setMap(null);
-            marker = new naver.maps.Marker({
-                position: point,
-                map: map
-            });
-            updateForm(item);
-        });
-    }
-    
-    function updateForm(item) {
-        document.getElementById('name').value = document.getElementById('searchInput').value;
-        document.getElementById('address').value = item.roadAddress || item.jibunAddress;
-        document.getElementById('latitude').value = item.y;
-        document.getElementById('longitude').value = item.x;
-    }
-    
-    document.getElementById('hospitalForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (!document.getElementById('name').value.trim()) {
-            return alert('병원 이름을 입력해주세요.');
-        }
-        if (!document.getElementById('address').value.trim()) {
-            return alert('주소를 입력해주세요.');
-        }
-        if (!document.getElementById('latitude').value || !document.getElementById('longitude').value) {
-            return alert('지도에서 정확한 위치를 선택해주세요.');
-        }
-    
-        this.submit();
-    });
-    
-    // 페이지 로드 완료 시 지도 초기화
-    window.onload = initMap;
-
-    // URL 파라미터에서 병원 이름을 가져와 입력 필드에 설정
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const hospitalName = urlParams.get('hospitalName');
-        if (hospitalName) {
-            document.getElementById('name').value = decodeURIComponent(hospitalName);
-            document.getElementById('searchInput').value = decodeURIComponent(hospitalName);
-            searchHospital(); // 자동으로 검색 실행
-        }
-    });
-    </script>
-</body>
+    form.submit();
+  }
+  
+  // 모달이 열릴 때 병원 이름을 설정
+  document.getElementById('reviewModal').addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const hospitalName = button.getAttribute('data-hospital-name');
+    document.getElementById('name').value = hospitalName;
+  });
+  </script>

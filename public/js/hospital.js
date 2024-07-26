@@ -4,11 +4,18 @@ const map = new naver.maps.Map('map', {
     zoom: 15
 });
 
+console.log('Hospitals data:', document.getElementById('hospitalsData').value); // 디버깅 로그 추가
 const hospitalsData = document.getElementById('hospitalsData').value;
-const hospitals = JSON.parse(hospitalsData);
+let hospitals = JSON.parse(hospitalsData);
+console.log('Parsed hospitals:', hospitals); // 디버깅 로그 추가
+if (!Array.isArray(hospitals)) {
+    hospitals = [hospitals]; // 단일 객체인 경우 배열로 변환
+}
+console.log('Processed hospitals:', hospitals); // 디버깅 로그 추가
 
 if (hospitals.length > 0) {
     hospitals.forEach(hospital => {
+        console.log('Creating marker for hospital:', hospital); // 디버깅 로그 추가
         const position = new naver.maps.LatLng(hospital.latitude, hospital.longitude);
         // 기본 제공 마커 생성
         const marker = new naver.maps.Marker({
@@ -43,10 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault(); // 페이지 새로고침 방지
+        console.log('Search form submitted'); // 디버깅용 로그
 
         const searchQuery = form.querySelector('input[name="search"]').value;
+        console.log('Search query:', searchQuery); // 디버깅용 로그
 
         try {
+            console.log('Sending fetch request'); // 디버깅용 로그
             const response = await fetch(`/hospital/search?query=${encodeURIComponent(searchQuery)}`);
 
             if (!response.ok) {
@@ -54,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
+            console.log('Search response:', data); // 디버깅용 로그
+
             if (data && data.length > 0) {
                 updateMapLocation(data[0]);
                 updateHospitalInfo(data[0]);
@@ -109,12 +121,18 @@ function updateHospitalInfo(hospital) {
         <p>주소: ${hospital.address || '정보 없음'}</p>
         <p>전화번호: ${hospital.phone ? `${hospital.phone}` : '정보 없음'}</p>
         <p>웹사이트: ${hospital.website ? `<a href="${hospital.website}" target="_blank">${hospital.website}</a>` : '정보 없음'}</p>
-        <button onclick="writeReview('${hospital.name}')" class="btn btn-primary">리뷰 쓰기</button>
+        <button onclick="writeReview('${hospital.name}', ${hospital.hospital_id})" 
+                data-hospital-name="${hospital.name}" 
+                data-hospital-id="${hospital.hospital_id}" 
+                class="btn btn-primary">리뷰 쓰기</button>
     `;
 }
 
-function writeReview(hospitalName) {
-    window.location.href = `/hospital/register?hospitalName=${encodeURIComponent(hospitalName)}`;
+function writeReview(hospitalName, hospitalId) {
+    const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+    document.querySelector('#reviewModal [name="name"]').value = hospitalName;
+    document.querySelector('#reviewModal [name="hospital_id"]').value = hospitalId;
+    modal.show();
 }
 
 // 병원 코멘트 가져오기
@@ -165,5 +183,48 @@ function updateReviewList(reviews) {
         });
     } else {
         commentList.innerHTML = '<p>리뷰가 없습니다.</p>';
+    }
+}
+
+//리뷰 제출 함수
+async function submitReview() {
+    const form = document.getElementById('hospitalForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const formData = new FormData(form);
+    const reviewData = {
+        hospital_id: formData.get('hospital_id'),
+        patient_id: 1, // 임시로 1로 설정. 실제로는 로그인한 사용자의 ID를 사용해야 합니다.
+        content: formData.get('description')
+    };
+
+    try {
+        const response = await fetch('/hospital/review/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reviewData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const newReviews = await response.json();
+        updateReviewList(newReviews);
+        
+        // 모달 닫기
+        const modal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
+        modal.hide();
+
+        // 폼 리셋
+        form.reset();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('리뷰 제출 중 오류가 발생했습니다.');
     }
 }
