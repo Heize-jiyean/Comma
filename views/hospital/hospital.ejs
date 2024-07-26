@@ -69,6 +69,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">리뷰 내용</label>
+                            <p class="text-muted">이용하신 병원의 리뷰를 상세하게 적어주시면, 다른 환자분들의 병원 이용에 많은 도움이 됩니다.</p>
                             <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
                         </div>
                         <input type="hidden" id="hospital_id" name="hospital_id">
@@ -88,11 +89,15 @@
     <script>
     // 모달이 열릴 때 병원 이름과 ID를 설정
     document.getElementById('reviewModal').addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const hospitalName = button.getAttribute('data-hospital-name');
-        const hospitalId = button.getAttribute('data-hospital-id');
-        document.getElementById('name').value = hospitalName;
-        document.getElementById('hospital_id').value = hospitalId;
+        // 이벤트가 버튼에 의해 트리거된 경우
+        if (event.relatedTarget) {
+            const button = event.relatedTarget;
+            const hospitalName = button.getAttribute('data-hospital-name');
+            const hospitalId = button.getAttribute('data-hospital-id');
+            document.getElementById('name').value = hospitalName;
+            document.getElementById('hospital_id').value = hospitalId;
+        }
+        // 그렇지 않은 경우 (JavaScript에서 직접 모달을 열 때)는 아무 작업도 하지 않음
     });
     </script>
 </body>

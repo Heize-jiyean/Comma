@@ -129,9 +129,9 @@ function updateHospitalInfo(hospital) {
 }
 
 function writeReview(hospitalName, hospitalId) {
-    const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
     document.querySelector('#reviewModal [name="name"]').value = hospitalName;
     document.querySelector('#reviewModal [name="hospital_id"]').value = hospitalId;
+    const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
     modal.show();
 }
 
