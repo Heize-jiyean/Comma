@@ -37,6 +37,7 @@ exports.register = async (req, res) => {
         // 감정분석
 
         const savedDiaryId = await diaryModel.register(diaryData);
+        ////////////////////////////
         return res.json({ success: true, redirect: `/diary/${savedDiaryId}` });
     } catch (error) {
         console.error("registerDiary 오류:", error);

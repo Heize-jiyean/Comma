@@ -1,0 +1,100 @@
+<style>
+    .photo-container {
+        margin-bottom: 20px;
+    }
+
+    #photo-preview {
+        width: 100px;
+        height: 100px;
+        border: 1px solid #ccc;
+        border-radius: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    label {
+        width: 160px;
+        margin-right: 10px;
+        font-size: 14px;
+        color: black;
+    }
+    input[type="text"], input[type="email"], select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #D6D7DA;
+        border-radius: 12px;
+        font-size: 16px;
+    }
+    .btn-container {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .btn-save {
+        background-color: #5FD068;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    .btn-save:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<!-- TODO: 프로필 사진 설정 추가 필요 -->
+<div class="photo-container">
+    <div id="photo-preview"></div>
+    <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*" onchange="previewProfilePhoto()">
+</div>
+<div class="form-group">
+    <label for="user-id">아이디</label>
+    <input type="text" id="user-id" name="user-id" required>
+</div>
+<div class="form-group">
+    <label for="nickname">닉네임</label>
+    <input type="text" id="nickname" name="nickname" required>
+</div>
+<div class="form-group">
+    <label for="email">이메일</label>
+    <input type="email" id="email" name="email" required>
+</div>
+<div class="form-group">
+    <label for="gender">성별</label>
+    <select id="gender" name="gender">
+        <option value="male">남</option>
+        <option value="female">여</option>
+    </select>
+</div>
+<div class="form-group">
+    <label for="birthYear">출생연도</label>
+    <select id="birthYear" name="birthYear" /></select>
+</div>
+<div class="form-group">
+    <label for="bio">소개</label>
+    <input type="text" id="bio" name="bio" required>
+</div>
+<div class="btn-container">
+    <button type="button" class="btn-save">수정 완료</button>
+</div>
+
+<script>
+    const currentYear = new Date().getFullYear();
+    const birthYearSelect = document.getElementById('birthYear');
+    for (let year = currentYear; year >= 1950; year--) {
+        let option = document.createElement('option');
+        option.value = year;
+        option.text = year;
+        birthYearSelect.appendChild(option);
+    }
+</script>

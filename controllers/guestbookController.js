@@ -43,21 +43,62 @@ exports.register = async (req, res) => {
 // 방명록 상세조회
 exports.view = async (req, res) => {
     try {
-        const guestbookId = req.params.guestbookId; 
-        let guestbook = await GuestbookModel.findById(guestbookId); 
-        
-        if (guestbook) {
-            let profile = await GuestbookModel.getCounselorID(guestbook.counselor_id);
-            
-            guestbook.author_name = profile.name + ' 상담사';
-            guestbook.author_profile_image = profile.profile_picture; // 프로필 이미지 추가
+        const guestbookId = req.params.guestbookId;
+        let guestbook = await GuestbookModel.findById(guestbookId);
+        let patientUserId = await GuestbookModel.getPatientIdByGuestbookId(guestbookId);  // 새로운 함수 호출
 
-            res.render('guestbook/view', { guestbook });
-        } else {
-            res.status(404).send("방명록을 찾을 수 없습니다.");
+        if (!guestbook) {
+            return res.status(404).send("방명록을 찾을 수 없습니다.");
         }
+
+        let counselor = await GuestbookModel.getCounselorID(guestbook.counselor_id);
+        guestbook.author_name = counselor.nickname + ' 상담사';
+        guestbook.author_profile_image = counselor.profile_picture;
+
+        const loggedInUser = req.session.user;
+        const isOwner = loggedInUser && (loggedInUser.role === 'counselor' && loggedInUser.id === guestbook.counselor_id);
+
+        res.render('guestbook/view', {
+            guestbook,
+            isOwner,
+            loggedInUser,
+            patientUserId  // 뷰로 환자의 ID 전달
+        });
     } catch (error) {
         console.error("viewGuestbook 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
-}
+};
+
+
+
+
+// 방명록 삭제하기
+exports.delete = async (req, res) => {
+    try {
+        const guestbookId = req.params.guestbookId;
+        const guestbook = await GuestbookModel.findById(guestbookId); // 방명록 정보를 먼저 조회
+        if (!guestbook) {
+            res.status(404).send("삭제할 방명록을 찾을 수 없습니다.");
+            return;
+        }
+
+        const patientUserId = await GuestbookModel.getPatientIdByGuestbookId(guestbookId);  // 방명록에서 patient_id 추출
+        const deletionResult = await GuestbookModel.delete(guestbookId);
+        
+        if (deletionResult > 0) {
+            if (patientUserId) {
+                return res.json({success: true, redirect: `/profile/patient/${patientUserId}/guestbooks`});
+            } else {
+                res.status(404).send("환자 정보를 찾을 수 없습니다.");
+            }
+        } else {
+            res.status(404).send("삭제할 방명록을 찾을 수 없습니다.");
+        }
+    } catch (error) {
+        console.error("deleteGuestbook 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+};
+
+
