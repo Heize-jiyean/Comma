@@ -15,9 +15,9 @@ exports.searchHospitals = async (query) => {
     const sql = `
         SELECT *
         FROM hospital
-        WHERE name LIKE ?`;
+        WHERE name LIKE ? OR address LIKE ?`;
 
-    const [rows] = await db.query(sql, [`%${query}%`]);
+    const [rows] = await db.query(sql, [`%${query}%`, `%${query}%`]);
     if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
     return rows;
 }
