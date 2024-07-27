@@ -6,7 +6,6 @@ exports.loadingMainPage = async (req, res) => {
     try {
         const reviews = await ReviewModel.getLatestReviews();
         const hospitals = await hospitalModel.getAllHospitals();
-        console.log('Hospitals from controller:', hospitals); // 디버깅 로그 추가
         res.render('hospital/hospital', { 
             reviews: reviews,
             hospitals: hospitals, // JSON.stringify 제거

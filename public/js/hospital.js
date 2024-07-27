@@ -1,26 +1,41 @@
 // 네이버 지도 초기화 (실제 좌표로 대체 필요)
 const map = new naver.maps.Map('map', {
     center: new naver.maps.LatLng(37.5665, 126.9780),
-    zoom: 15
+    zoom: 13
 });
 
-console.log('Hospitals data:', document.getElementById('hospitalsData').value); // 디버깅 로그 추가
+// 사용자의 현재 위치를 가져와서 지도 중심 설정
+// JavaScript의 Geolocation API 사용
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+        const userLocation = new naver.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        map.setCenter(userLocation);
+
+        // 초기 마커 업데이트 호출
+        updateMarkers(map, markerInfo);
+    }, error => {
+        console.error('Geolocation error: ', error);
+    });
+} else {
+    console.error('Geolocation is not supported by this browser.');
+}
+
+// 병원 정보 객체 불러오기
 const hospitalsData = document.getElementById('hospitalsData').value;
 let hospitals = JSON.parse(hospitalsData);
-console.log('Parsed hospitals:', hospitals); // 디버깅 로그 추가
 if (!Array.isArray(hospitals)) {
     hospitals = [hospitals]; // 단일 객체인 경우 배열로 변환
 }
-console.log('Processed hospitals:', hospitals); // 디버깅 로그 추가
+
+// 마커 및 인포윈도우 정보를 담을 배열
+let markerInfo = [];
 
 if (hospitals.length > 0) {
     hospitals.forEach(hospital => {
-        console.log('Creating marker for hospital:', hospital); // 디버깅 로그 추가
         const position = new naver.maps.LatLng(hospital.latitude, hospital.longitude);
         // 기본 제공 마커 생성
         const marker = new naver.maps.Marker({
             position: position,
-            map: map,
             title: hospital.name // 마커에 툴팁 텍스트 추가
         });
 
@@ -33,14 +48,55 @@ if (hospitals.length > 0) {
             anchorSize: new naver.maps.Size(10, 10)
         });
 
+        // 마커, 인포윈도우, 그리고 contentString을 병원 ID와 함께 객체로 저장
+        markerInfo.push({
+            hospitalId: hospital.hospital_id,
+            marker: marker,
+            infowindow: infowindow,
+        });
+
         // 마커 클릭 시 인포윈도우 열기
         naver.maps.Event.addListener(marker, 'click', () => {
             // 클릭한 마커의 인포윈도우 열기
             infowindow.open(map, marker);
+            // 병원 정보 로딩
+            updateHospitalInfo(hospital)
             // 코멘트 가져오기
             collectCommentHospital(hospital.hospital_id)
         });
     });
+}
+
+
+// 맵이 idle 상태일 때 보이는 영역의 마커를 업데이트
+naver.maps.Event.addListener(map, 'idle', function () {
+    updateMarkers(map, markerInfo);
+});
+
+function updateMarkers(map, markerInfo) {
+    var mapBounds = map.getBounds();
+    var marker, position;
+
+    for (var i = 0; i < markerInfo.length; i++) {
+        marker = markerInfo[i].marker;
+        position = marker.getPosition();
+
+        if (mapBounds.hasLatLng(position)) {
+            showMarker(map, marker);
+        } else {
+            hideMarker(map, marker);
+        }
+    }
+}
+
+function showMarker(map, marker) {
+    if (marker.getMap()) return;
+    marker.setMap(map);
+}
+
+function hideMarker(map, marker) {
+    if (!marker.getMap()) return;
+    marker.setMap(null);
 }
 
 // 검색 시 병원 정보 가져오기
@@ -193,7 +249,7 @@ async function submitReview() {
         form.reportValidity();
         return;
     }
-    
+
     const formData = new FormData(form);
     const reviewData = {
         hospital_id: formData.get('hospital_id'),
@@ -216,7 +272,7 @@ async function submitReview() {
 
         const newReviews = await response.json();
         updateReviewList(newReviews);
-        
+
         // 모달 닫기
         const modal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
         modal.hide();
