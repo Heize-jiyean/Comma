@@ -176,7 +176,7 @@ function updateHospitalInfo(hospital) {
         <h3>${hospital.name}</h3>
         <p>주소: ${hospital.address || '정보 없음'}</p>
         <p>전화번호: ${hospital.phone ? `${hospital.phone}` : '정보 없음'}</p>
-        <p>웹사이트: ${hospital.website ? `<a href="${hospital.website}" target="_blank">${hospital.website}</a>` : '정보 없음'}</p>
+        <p>웹사이트: ${hospital.website ? `<a href="https://${hospital.website}" target="_blank">${hospital.website}</a>` : '정보 없음'}</p>
         <button onclick="writeReview('${hospital.name}', ${hospital.hospital_id})" 
                 data-hospital-name="${hospital.name}" 
                 data-hospital-id="${hospital.hospital_id}" 
