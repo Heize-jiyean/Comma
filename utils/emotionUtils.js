@@ -1,28 +1,29 @@
 const DiaryModel = require('../models/Diary')
 
 
-
 // 여러날자의 일기의 감정을 분류
 exports.calculateEmotionPercentages = (Data) => {
+    console.log(Data);
     const total = { joy: 0, surprise: 0, anger: 0, anxiety: 0, hurt: 0, sadness: 0 };
     Data.forEach(entry => {
-        total.joy += entry.joy;
-        total.surprise += entry.surprise;
-        total.anger += entry.anger;
-        total.anxiety += entry.anxiety;
-        total.hurt += entry.hurt;
-        total.sadness += entry.sadness;
+        total.joy += parseFloat(entry.joy);
+        total.surprise += parseFloat(entry.surprise);
+        total.anger += parseFloat(entry.anger);
+        total.anxiety += parseFloat(entry.anxiety);
+        total.hurt += parseFloat(entry.hurt);
+        total.sadness += parseFloat(entry.sadness);
     });
 
     const totalSum = total.joy + total.surprise + total.anger + total.anxiety + total.hurt + total.sadness;
     const totalPercentages = {
-        joy: (total.joy / totalSum) * 100,
-        surprise: (total.surprise / totalSum) * 100,
-        anger: (total.anger / totalSum) * 100,
-        anxiety: (total.anxiety / totalSum) * 100,
-        hurt: (total.hurt / totalSum) * 100,
-        sadness: (total.sadness / totalSum) * 100
+        joy: totalSum > 0 ? (total.joy / totalSum) * 100 : 0,
+        surprise: totalSum > 0 ? (total.surprise / totalSum) * 100 : 0,
+        anger: totalSum > 0 ? (total.anger / totalSum) * 100 : 0,
+        anxiety: totalSum > 0 ? (total.anxiety / totalSum) * 100 : 0,
+        hurt: totalSum > 0 ? (total.hurt / totalSum) * 100 : 0,
+        sadness: totalSum > 0 ? (total.sadness / totalSum) * 100 : 0
     };
+    console.log(totalPercentages);
     return totalPercentages;
 }
 

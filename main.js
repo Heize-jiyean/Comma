@@ -10,6 +10,7 @@ const session = require('express-session');
 const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
+const spawn = require('child_process').spawn;
 
 // 지도 API 미들웨어
 app.use((req, res, next) => {
@@ -161,6 +162,7 @@ const AI_post = async (req, res) => {
       const rs = data.toString();
       try {
           const parsedResult = JSON.parse(rs);
+          console.log(parsedResult);
           res.json(parsedResult);
       } catch (e) {
           res.status(500).json({ error: 'Failed to parse Python script output' });

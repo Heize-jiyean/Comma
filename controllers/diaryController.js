@@ -1,24 +1,28 @@
 const diaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
 const AccessCheck = require('../utils/authUtils');
+const spawn = require('child_process').spawn;
 
 
 exports.new = async (req, res) => {
     try {
-        if (!AccessCheck.checkPatientRole(req.session.user.role)) {
-            const referer = req.get('Referer') || '/';
-            return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
-        }
+        if (req.session.user) {
+            if (!AccessCheck.checkPatientRole(req.session.user.role)) {
+                const referer = req.get('Referer') || '/';
+                return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+            }
 
-        const patientId = req.session.user.id;
-        const date = new Date();
-        const todayDiary = await diaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
-        if (todayDiary) {
-            const redirect = `/diary/${todayDiary.diary_id}`;
-            return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
-        }
+            const patientId = req.session.user.id;
+            const date = new Date();
+            const todayDiary = await diaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
+            if (todayDiary) {
+                const redirect = `/diary/${todayDiary.diary_id}`;
+                return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
+            }
 
-        res.render('diary/new', {patientId: req.session.user.id});
+            res.render('diary/new', {patientId: req.session.user.id});
+        }
+        else return res.render("login/login");
     } catch (error) {
         console.error("newDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -27,18 +31,35 @@ exports.new = async (req, res) => {
 
 exports.register = async (req, res) => {
     try {
-        if (!AccessCheck.checkPatientRole(req.session.user.role)) {
-            const referer = req.get('Referer') || '/';
-            return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+        if (req.session.user) {
+            if (!AccessCheck.checkPatientRole(req.session.user.role)) {
+                const referer = req.get('Referer') || '/';
+                return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+            }
+            const { diaryData } = req.body;
+    
+            const savedDiaryId = await diaryModel.register(diaryData);
+            res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
+
+            // 감정분석
+            const result = await spawn('python', ['./python/main.py', diaryData.content]);
+            result.stdout.on('data', (data) => {
+                const rs = data.toString();
+                try {
+                    const emotionResult = JSON.parse(rs);
+                    console.log(emotionResult);
+
+                    diaryModel.registerEmotion(savedDiaryId, emotionResult);
+
+                } catch (e) {
+                    console.error("감정분석 오류");
+                }
+            });
+    
+
+            return;
         }
-
-        const { diaryData } = req.body;
-
-        // 감정분석
-
-        const savedDiaryId = await diaryModel.register(diaryData);
-        ////////////////////////////
-        return res.json({ success: true, redirect: `/diary/${savedDiaryId}` });
+        else return res.render("login/login");
     } catch (error) {
         console.error("registerDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -83,17 +104,20 @@ exports.view = async (req, res) => {
 
 exports.toggleVisibility = async (req, res) => {
     try {
-        const diaryId = req.params.diaryId;
-        const diary = await diaryModel.findById(diaryId); 
+        if (req.session.user) {
+            const diaryId = req.params.diaryId;
+            const diary = await diaryModel.findById(diaryId); 
 
-        if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
-            const referer = req.get('Referer') || '/';
-            return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
-        } 
-
-        await diaryModel.toggleVisibility(diaryId);
-
-        res.status(200).json({ success: true });
+            if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
+                const referer = req.get('Referer') || '/';
+                return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+            } 
+    
+            await diaryModel.toggleVisibility(diaryId);
+    
+            res.status(200).json({ success: true });
+        }
+        else return res.render("login/login");
     } catch (error) {
         console.error("registerDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -102,40 +126,43 @@ exports.toggleVisibility = async (req, res) => {
 
 exports.delete = async (req, res) => {
     try {
-        const diaryId = req.params.diaryId;
-        const diary = await diaryModel.findById(diaryId); 
-        const patient = await UserModel.getPatientById(diary.patient_id);
-        
-        if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
-            const referer = req.get('Referer') || '/';
-            return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
-        } 
-
-        // 스토리지 이미지 삭제
-        if (diary.image_url) {
-            // URL parsing
-            const parsedUrl = new URL(diary.image_url);
-            const encodedFilePath = parsedUrl.pathname.split('/').pop();
-            const filePath = decodeURIComponent(encodedFilePath);
-
-            const admin = require('firebase-admin');
-            const bucket = admin.storage().bucket('comma-5a85c.appspot.com'); 
-            const file = bucket.file(filePath);
-
-            try {
-                await file.delete();  // 파일 삭제
-            } catch (error) {
-                console.error("Failed to delete file", error);
-                res.status(500).send({ error: "Failed to delete file: " + error.message });
+        if (req.session.user) {
+            const diaryId = req.params.diaryId;
+            const diary = await diaryModel.findById(diaryId); 
+            const patient = await UserModel.getPatientById(diary.patient_id);
+            
+            if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
+                const referer = req.get('Referer') || '/';
+                return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+            } 
+    
+            // 스토리지 이미지 삭제
+            if (diary.image_url) {
+                // URL parsing
+                const parsedUrl = new URL(diary.image_url);
+                const encodedFilePath = parsedUrl.pathname.split('/').pop();
+                const filePath = decodeURIComponent(encodedFilePath);
+    
+                const admin = require('firebase-admin');
+                const bucket = admin.storage().bucket('comma-5a85c.appspot.com'); 
+                const file = bucket.file(filePath);
+    
+                try {
+                    await file.delete();  // 파일 삭제
+                } catch (error) {
+                    console.error("Failed to delete file", error);
+                    res.status(500).send({ error: "Failed to delete file: " + error.message });
+                }
             }
+            
+            // DB diary 삭제
+            await diaryModel.delete(diaryId);
+    
+            console.log(patient.id);
+            // redirect
+            return res.json({ success: true, redirect: `/profile/patient/${patient.id}/diaries` });
         }
-        
-        // DB diary 삭제
-        await diaryModel.delete(diaryId);
-
-        console.log(patient.id);
-        // redirect
-        return res.json({ success: true, redirect: `/profile/patient/${patient.id}/diaries` });
+        else return res.render("login/login");
     } catch (error) {
         console.error("deleteDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -145,26 +172,29 @@ exports.delete = async (req, res) => {
 // 상담사 메인화면 일기 리스트
 exports.listOfDiaries = async (req, res) => {
     try {
-        // if (!AccessCheck.checkCounselorRole(req.session.user.role)) {
-        //    const referer = req.get('Referer') || '/';
-        //    return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
-        //}
-        // 개발의 편의를 위해 잠시 주석처리해둠
+        if (req.session.user) {
+            // if (!AccessCheck.checkCounselorRole(req.session.user.role)) {
+            //     const referer = req.get('Referer') || '/';
+            //     return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+            //  }
+            // 개발편의를 위해 잠시 주석처리
 
-        const option = req.query.option ? req.query.option : "all";
-        let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-
-        const totalPages = Math.ceil( await diaryModel.countOfFindAll(option, 1) / 9);
-        let Previews = await diaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
-
-        if (Previews) {
-            Previews.forEach(preview => {
-                preview.image_url = setDefaultImage(preview.image_url);
-                // preview.profile_picture = 프로필 기본이미지 설정
-            });
+             const option = req.query.option ? req.query.option : "all";
+             let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+     
+             const totalPages = Math.ceil( await diaryModel.countOfFindAll(option, 1) / 9);
+             let Previews = await diaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
+     
+             if (Previews) {
+                 Previews.forEach(preview => {
+                     preview.image_url = setDefaultImage(preview.image_url);
+                     // preview.profile_picture = 프로필 기본이미지 설정
+                 });
+             }
+             
+             res.render('main-counselor', {Previews, currentPage, totalPages});
         }
-        
-        res.render('main-counselor', {Previews, currentPage, totalPages});
+        else return res.render("login/login");
     } catch (error) {
         console.error("listAllDiaries 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
