@@ -17,6 +17,9 @@ exports.new = async (req, res) => {
 
 // 방명록 작성 내용 등록
 exports.register = async (req, res) => {
+    const loginId = req.session.user.id;
+    // const loginRole = req.session.user.role;
+
     try {
         const { guestbookData } = req.body;
         console.log(guestbookData);
@@ -24,7 +27,7 @@ exports.register = async (req, res) => {
         const patientId = req.params.patientId; 
         const patientUser = await UserModel.getPatientByUserId(patientId);
 
-        const counselorId = 2;  // TODO: 실제 값으로 바꿔주기
+        const counselorId = loginId;
 
         newGuestbookData = {
             patient_id: patientUser.patient_id,
