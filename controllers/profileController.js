@@ -7,8 +7,13 @@ const EmotionData = require('../utils/emotionUtils');
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
-    const loginId = "dain09";  // TODO: 세션 처리
-    res.locals.loginId = loginId;
+    if (!AccessCheck.isUserAuthenticated(req.session.user)) {
+        const referer = req.get('Referer') || '/';
+        return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+    }
+
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
 
     try {
         // 환자 정보 가져오기
@@ -18,30 +23,39 @@ exports.patientProfilePage = async (req, res) => {
         // 없는 환자일 경우
         if (!patientUser) {
             res.render("/");    // TODO: 없는 환자인 경우 띄울 페이지
-            return;
+            console.log("없는 환자임");
+            // return;
         }
 
-        // 환자가 작성한 일기 가져오기
-        const diaries = await DiaryModel.findLatestFourByPatientId(patientUser.patient_id);
+        // 접근 권한 확인
+        if (loginRole === 'counselor' || (loginRole === 'patient' && loginId == patientUser.patient_id)) {
 
-        // 환자에게 작성된 방명록 가져오기
-        const guestbooks = await GuestbookModel.findLatestFourByPatientId(patientUser.patient_id);
-        
-        // 각 방명록 항목에 대해 상담사의 닉네임, 이미지 가져오기
-        for (let guestbook of guestbooks) {
-            const counselor = await UserModel.getCounselorByCounselorId(guestbook.counselor_id);
-            guestbook.counselorId = counselor ? counselor.id : "Unknown";
-            guestbook.counselorNickname = counselor ? counselor.nickname : "Unknown";
-            guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
+            // 환자가 작성한 일기 가져오기
+            const diaries = await DiaryModel.findLatestFourByPatientId(patientUser.patient_id);
+
+            // 환자에게 작성된 방명록 가져오기
+            const guestbooks = await GuestbookModel.findLatestFourByPatientId(patientUser.patient_id);
+            
+            // 각 방명록 항목에 대해 상담사의 닉네임, 이미지 가져오기
+            for (let guestbook of guestbooks) {
+                const counselor = await UserModel.getCounselorByCounselorId(guestbook.counselor_id);
+                guestbook.counselorId = counselor ? counselor.id : "Unknown";
+                guestbook.counselorNickname = counselor ? counselor.nickname : "Unknown";
+                guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
+            }
+
+            // 렌더링
+            res.render("profile/patient.ejs", { 
+                patientUser: patientUser, 
+                type: 'patient', 
+                diaries: diaries, 
+                guestbooks: guestbooks,
+                loginRole: loginRole
+            });
+        } else {
+            res.status(403).send("접근 권한이 없습니다.");
         }
 
-        // 렌더링
-        res.render("profile/patient.ejs", { 
-            patientUser: patientUser, 
-            type: 'patient', 
-            diaries: diaries, 
-            guestbooks: guestbooks
-        });
     } catch (error) {
         console.error("환자 프로필 반환 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
