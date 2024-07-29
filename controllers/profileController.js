@@ -167,6 +167,16 @@ function setDefaultImage(image_url) {
 
 // 환자 방명록 모아보기 페이지 반환
 exports.listAllGuestbooks = async (req, res) => {
+    // 로그인하지 않은 사용자가 접근할 경우
+    if (!AccessCheck.isUserAuthenticated(req.session.user)) {
+        const referer = req.get('Referer') || '/';
+        return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+    }
+
+    // 로그인한 사용자
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+
     try {
         // 환자 정보 가져오기
         const patientId = req.params.patientId;
@@ -178,32 +188,37 @@ exports.listAllGuestbooks = async (req, res) => {
             return;
         }
 
-        // 페이지네이션 처리
-        const limit = 10; // 한 페이지에 보여줄 방명록 수
-        const totalGuestbooks = await GuestbookModel.countByPatientId(patientUser.patient_id);
-        const totalPages = Math.ceil(totalGuestbooks / limit);
+        // 접근 권한 확인
+        if (loginRole === 'counselor' || (loginRole === 'patient' && loginId == patientUser.patient_id)) {
+            // 페이지네이션 처리
+            const limit = 10; // 한 페이지에 보여줄 방명록 수
+            const totalGuestbooks = await GuestbookModel.countByPatientId(patientUser.patient_id);
+            const totalPages = Math.ceil(totalGuestbooks / limit);
 
-        let currentPage = req.query.page ? parseInt(req.query.page) : 1;   // URL의 쿼리 매개변수 중 page 값을 가져옴 
-        const guestbooks = await GuestbookModel.findAllByPatientIdWithPagination(patientUser.patient_id, currentPage, limit);
+            let currentPage = req.query.page ? parseInt(req.query.page) : 1;   // URL의 쿼리 매개변수 중 page 값을 가져옴 
+            const guestbooks = await GuestbookModel.findAllByPatientIdWithPagination(patientUser.patient_id, currentPage, limit);
 
 
-        // 각 방명록 항목에 대해 상담사의 닉네임, 프로필 이미지 가져오기
-        for (let guestbook of guestbooks) {
-            const counselor = await UserModel.getCounselorByCounselorId(guestbook.counselor_id);
-            guestbook.counselorId = counselor ? counselor.id : "Unknown";
-            guestbook.counselorNickname = counselor ? counselor.nickname : "Unknown";
-            guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
+            // 각 방명록 항목에 대해 상담사의 닉네임, 프로필 이미지 가져오기
+            for (let guestbook of guestbooks) {
+                const counselor = await UserModel.getCounselorByCounselorId(guestbook.counselor_id);
+                guestbook.counselorId = counselor ? counselor.id : "Unknown";
+                guestbook.counselorNickname = counselor ? counselor.nickname : "Unknown";
+                guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
+            }
+
+            // 렌더링
+            res.render("profile/guestbook.ejs", { 
+                patientUser: patientUser, 
+                type: 'patient', 
+                guestbooks: guestbooks,
+                currentPage: currentPage,
+                totalPages: totalPages,
+                loginRole: loginRole
+            });
+        } else {
+            res.status(403).send("접근 권한이 없습니다.");
         }
-
-        // 렌더링
-        res.render("profile/guestbook.ejs", { 
-            patientUser: patientUser, 
-            type: 'patient', 
-            guestbooks: guestbooks,
-            currentPage: currentPage,
-            totalPages: totalPages,
-        });
-
 
     } catch (error) {
         console.log("listAllGuestbooks 오류:", error);
