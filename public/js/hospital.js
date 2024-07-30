@@ -99,42 +99,106 @@ function hideMarker(map, marker) {
     marker.setMap(null);
 }
 
-// 검색 시 병원 정보 가져오기
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form[role="search"]');
-    const hospitalInfoDiv = document.getElementById('hospitalInfo');
+let cache = ''; // 캐시 초기화
+let checkInputInterval; // 인터벌 ID를 저장할 변수
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault(); // 페이지 새로고침 방지
-        console.log('Search form submitted'); // 디버깅용 로그
+const form = document.querySelector('form[role="search"]');
+const searchInput = form.querySelector('input[name="search"]');
+const hospitalInfoDiv = document.getElementById('hospitalInfo');
+const ul = document.querySelector(".pop_rel_keywords");
+const relContainer = document.querySelector(".rel_search");
 
-        const searchQuery = form.querySelector('input[name="search"]').value;
-        console.log('Search query:', searchQuery); // 디버깅용 로그
+// 입력값을 확인할 인터벌을 설정합니다
+const startCheckingInput = () => {
+    checkInputInterval = setInterval(() => {
+        const inputValue = searchInput.value;
 
-        try {
-            console.log('Sending fetch request'); // 디버깅용 로그
-            const response = await fetch(`/hospital/search?query=${encodeURIComponent(searchQuery)}`);
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.json();
-            console.log('Search response:', data); // 디버깅용 로그
-
-            if (data && data.length > 0) {
-                updateMapLocation(data[0]);
-                updateHospitalInfo(data[0]);
-                collectCommentHospital(data[0].hospital_id);
-            } else {
-                hospitalInfoDiv.innerHTML = '<p>검색 결과가 없습니다.</p>';
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            hospitalInfoDiv.innerHTML = '<p>검색 중 오류가 발생했습니다.</p>';
+        // 입력값이 변경된 경우에만 처리
+        if (inputValue !== cache) {
+            cache = inputValue;
+            loadData(inputValue); // 입력값이 변경된 경우 데이터 로드
         }
-    });
+
+        // 추천 검색어 리스트 숨기기/보이기
+        if (inputValue === "") {
+            relContainer.classList.add("hide");
+        } else {
+            relContainer.classList.remove("hide");
+        }
+    }, 500); // 0.5초마다 체크
+};
+
+// 입력값 확인 시작
+startCheckingInput();
+
+// 입력값 확인 중단 함수
+const stopCheckingInput = () => {
+    if (checkInputInterval) {
+        clearInterval(checkInputInterval);
+    }
+};
+
+// 병원 관련 자동검색어 완성 함수
+const loadData = async (input) => {
+    console.log('Fetching data for:', input); // 요청 로그
+    try {
+        const response = await fetch(`/hospital/autocomplete?query=${encodeURIComponent(input)}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log('Data received:', data); // 응답 데이터 로그
+        updateAutocompleteList(data.suggestions);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+};
+
+// 검색어 자동완성 목록을 업데이트합니다
+const updateAutocompleteList = (suggestions) => {
+    ul.innerHTML = ''; // 기존 목록 초기화
+    if (suggestions.length > 0) {
+        suggestions.forEach((suggestion) => {
+            const li = document.createElement('li');
+            li.textContent = suggestion;
+            li.addEventListener('click', () => {
+                searchInput.value = suggestion;
+                relContainer.classList.add("hide");
+            });
+            ul.appendChild(li);
+        });
+        relContainer.classList.remove("hide"); // 추천 검색어 리스트 표시
+    } else {
+        relContainer.classList.add("hide"); // 추천 검색어 리스트 숨기기
+    }
+};
+
+// 검색 시 병원 정보 가져오기
+form.addEventListener('submit', async (event) => {
+    event.preventDefault(); // 페이지 새로고침 방지
+    const searchQuery = searchInput.value;
+
+    try {
+        const response = await fetch(`/hospital/search?query=${encodeURIComponent(searchQuery)}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        if (data && data.length > 0) {
+            updateMapLocation(data[0]);
+            updateHospitalInfo(data[0]);
+            collectCommentHospital(data[0].hospital_id);
+        } else {
+            hospitalInfoDiv.innerHTML = '<p>검색 결과가 없습니다.</p>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        hospitalInfoDiv.innerHTML = '<p>검색 중 오류가 발생했습니다.</p>';
+    }
 });
+
+// 페이지가 unload될 때 체크를 멈추는 함수 호출
+window.addEventListener('beforeunload', stopCheckingInput);
 
 function updateMapLocation(data) {
     // 데이터에 위치 정보가 포함되어 있다고 가정

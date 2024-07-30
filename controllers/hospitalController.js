@@ -17,6 +17,7 @@ exports.loadingMainPage = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
 // 병원 위치 로딩
 exports.getHospitalLocation = async (req, res) => {
     try {
@@ -31,6 +32,15 @@ exports.getHospitalLocation = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// 검색어 자동 완성
+exports.getAutoComplete = async (req, res) => {
+    const query = req.query.query;
+    if (query) {
+        const suggestions = await hospitalModel.getAutocomplete(query);
+        res.json({ suggestions });
+    }
+}
 
 // 병원 별 코멘트 가져오기
 exports.getCommentByHospital = async (req, res) => {
