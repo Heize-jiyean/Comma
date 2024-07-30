@@ -146,7 +146,7 @@
 
     <% if (type === 'patient') { %>
         <% if ((user.role === 'patient') && (user.custom_id === patientUser.id)) { %>
-            <button class="setting-button">프로필 수정하기</button>
+            <button class="setting-button" id="settingButton">프로필 수정하기</button>
         <% } else if (user.role === 'counselor') { %>
             <button class="interest-button">관심 환자로 등록하기</button>
         <% } %>
@@ -158,5 +158,10 @@
         <% } %>
     <% } %>
 
-    <!-- TODO: 세션에 저장된 사용자 타입에 따라 다르게 뜨드록 처리해야 함 -->
 </div>
+
+<script>
+    document.getElementById('settingButton').addEventListener('click', function() {
+        window.location.href = `/profile/settings/profileEdit`;
+    })
+</script>
