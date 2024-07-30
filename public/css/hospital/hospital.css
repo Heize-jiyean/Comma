@@ -2,6 +2,43 @@
     display: flex;
 }
 
+.col-12 {
+    position: relative;
+}
+
+.hide {
+    display: none !important;
+    /* 사용자가 아무것도 입력하지 않았을 때 검색창을 숨기는 용도*/
+}
+
+.rel_search {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    border: 1px solid #ddd;
+    border-radius: .25rem;
+    z-index: 2;
+    background-color: white;
+    width: 97%;
+}
+
+.pop_rel_keywords {
+    list-style: none;
+    padding-left: 0;
+    margin-right: 30%;
+    width: 100%;
+}
+
+.pop_rel_keywords>li {
+    line-height: 250%;
+    padding-left: 2%;
+}
+
+.pop_rel_keywords>li:hover {
+    background-color: #F4F5F8;
+}
+
 .head {
     display: flex;
     justify-content: space-between;
@@ -13,11 +50,11 @@
     background-color: white;
 }
 
-.head > div {
+.head>div {
     padding-right: 17%;
 }
 
-.left{
+.left {
     position: fixed;
     width: 42%;
     height: 96vh;
@@ -39,6 +76,7 @@
     z-index: 1;
     padding: 17px;
 }
+
 .map {
     width: 100%;
     height: 80%;
@@ -57,26 +95,32 @@
     align-items: baseline;
 }
 
-.hospital > h4 {
+.hospital>h4 {
     padding-right: 10px;
     font-weight: bolder;
 }
-.hospital > p {
+
+.hospital>p {
     font-size: 9pt;
 }
 
-.profile{
+.profile {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
 .photo {
-    width: 50px; /* 원하는 크기로 설정 */
-    height: 50px; /* 원하는 크기로 설정 */
-    border-radius: 50%; /* 둥근 모서리 설정 */
-    object-fit: cover; /* 이미지 비율 유지 및 잘림 방지 */
-    border: 2px solid #ddd; /* 선택 사항: 테두리 추가 */
+    width: 50px;
+    /* 원하는 크기로 설정 */
+    height: 50px;
+    /* 원하는 크기로 설정 */
+    border-radius: 50%;
+    /* 둥근 모서리 설정 */
+    object-fit: cover;
+    /* 이미지 비율 유지 및 잘림 방지 */
+    border: 2px solid #ddd;
+    /* 선택 사항: 테두리 추가 */
     margin-right: 10px;
 }
 
