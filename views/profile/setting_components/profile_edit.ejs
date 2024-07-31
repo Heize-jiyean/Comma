@@ -59,15 +59,15 @@
 </div>
 <div class="form-group">
     <label for="user-id">아이디</label>
-    <input type="text" id="user-id" name="user-id" required>
+    <input type="text" id="user-id" name="user-id">
 </div>
 <div class="form-group">
     <label for="nickname">닉네임</label>
-    <input type="text" id="nickname" name="nickname" required>
+    <input type="text" id="nickname" name="nickname">
 </div>
 <div class="form-group">
     <label for="email">이메일</label>
-    <input type="email" id="email" name="email" required>
+    <input type="email" id="email" name="email">
 </div>
 <div class="form-group">
     <label for="gender">성별</label>
@@ -82,8 +82,24 @@
 </div>
 <div class="form-group">
     <label for="bio">소개</label>
-    <input type="text" id="bio" name="bio" required>
+    <input type="text" id="bio" name="bio">
 </div>
+<% if (loginRole === 'patient') { %>
+    <div class="form-group">
+        <label for="job">직업</label>
+        <input type="text" id="job" name="job">
+    </div>
+<% } else { %>
+    <div class="form-group">
+        <label for="specialty">전문의</label>
+        <input type="text" id="specialty" name="specialty">
+    </div>
+    <div class="form-group">
+        <label for="experience">경력</label>
+        <input type="text" id="experience" name="experience">
+    </div>
+<% } %>
+
 <div class="btn-container">
     <button type="button" class="btn-save">수정 완료</button>
 </div>

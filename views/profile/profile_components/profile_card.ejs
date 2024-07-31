@@ -152,7 +152,7 @@
         <% } %>
     <% } else if (type === 'counselor') { %>
         <% if ((user.role === 'counselor') && (user.custom_id === counselorUser.id)) { %>
-            <button class ="setting-button">프로필 수정하기</button>
+            <button class ="setting-button" id="settingButton">프로필 수정하기</button>
         <% } else if (user.role === 'patient') { %>
             <button class="interest-button">관심 상담사로 등록하기</button>
         <% } %>
