@@ -1,5 +1,3 @@
-const { options } = require('../email');
-
 exports.register = async (diary) => {
     try {
         const db = await require('../main').connection(); 

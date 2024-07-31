@@ -10,7 +10,7 @@ const session = require('express-session');
 const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
-const spawn = require('child_process').spawn;
+const cors = require('cors');
 
 // 지도 API 미들웨어
 app.use((req, res, next) => {
@@ -51,27 +51,16 @@ app.use(session({
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');  // 서비스 계정 키 파일의 경로
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount), 
+  storageBucket: 'comma-5a85c.appspot.com'
 });
 
-// DB connection
-exports.connection = async () => {
-  try {
-      const db = await mysql.createPool({
-          host: process.env.DB_HOST,
-          user: process.env.DB_USER,
-          password: process.env.DB_PW,
-          port: process.env.DB_PORT,
-          database: process.env.DB_NAME,
-          waitForConnections: true,
-          insecureAuth: true,
-      });
-      return db;
-  } catch (error) {
-      console.error("데이터베이스 연결 오류:", error);
-      throw error;
-  }
+// CORS 미들웨어 설정
+const corsOptions = {
+  origin: 'http://localhost:3000', // 클라이언트 도메인
+  optionsSuccessStatus: 200
 };
+app.use(cors(corsOptions));
 
 // EJS 설정
 app.set('view engine', 'ejs');
@@ -142,41 +131,9 @@ app.use("/guestbook", guestbookRouter);
 const hospitalRouter = require('./routers/hospitalRouters');
 app.use("/hospital", hospitalRouter);
 
-//AI 테스트용 코드(예시 코드 제공을 위해 추가 -> 확인 후 지워주세요.)
-const AI_get = async (req, res) => {
-  try {
-    res.render('AI')
-  } catch (error) {
-      console.error("AI 오류:", error);
-      res.status(500).send("서버 오류가 발생했습니다.");
-  }
-};
+const articleRouter = require('./routers/articleRouters');
+app.use("/article", articleRouter);
 
-const AI_post = async (req, res) => {
-  try {
-    const userData = req.body.inputField;
-
-    const result = spawn('python', ['./python/main.py', userData]);
-
-    result.stdout.on('data', (data) => {
-      const rs = data.toString();
-      try {
-          const parsedResult = JSON.parse(rs);
-          console.log(parsedResult);
-          res.json(parsedResult);
-      } catch (e) {
-          res.status(500).json({ error: 'Failed to parse Python script output' });
-      }
-    });
-  } catch (error) {
-      console.error("AI 오류:", error);
-      res.status(500).send("서버 오류가 발생했습니다.");
-  }
-};
-
-app.get('/AI', AI_get);
-app.post('/AI', AI_post);
-//
 
 // 404 에러 핸들러
 app.use((req, res, next) => {

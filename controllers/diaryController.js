@@ -1,4 +1,4 @@
-const diaryModel = require('../models/Diary');
+const DiaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
 const AccessCheck = require('../utils/authUtils');
 const spawn = require('child_process').spawn;
@@ -14,13 +14,13 @@ exports.new = async (req, res) => {
 
             const patientId = req.session.user.id;
             const date = new Date();
-            const todayDiary = await diaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
+            const todayDiary = await DiaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
             if (todayDiary) {
                 const redirect = `/diary/${todayDiary.diary_id}`;
                 return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
             }
 
-            res.render('diary/new', {patientId: req.session.user.id});
+            res.render('diary/new', {patientId});
         }
         else return res.render("login/login");
     } catch (error) {
@@ -38,7 +38,7 @@ exports.register = async (req, res) => {
             }
             const { diaryData } = req.body;
     
-            const savedDiaryId = await diaryModel.register(diaryData);
+            const savedDiaryId = await DiaryModel.register(diaryData);
             res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
 
             // 감정분석
@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
                     const emotionResult = JSON.parse(rs);
                     console.log(emotionResult);
 
-                    diaryModel.registerEmotion(savedDiaryId, emotionResult);
+                    DiaryModel.registerEmotion(savedDiaryId, emotionResult);
 
                 } catch (e) {
                     console.error("감정분석 오류");
@@ -70,7 +70,7 @@ exports.view = async (req, res) => {
     try {
         const diaryId = req.params.diaryId;
 
-        let diary = await diaryModel.findById(diaryId); // const
+        let diary = await DiaryModel.findById(diaryId); // const
         const patient = await UserModel.getPatientById(diary.patient_id); // ??Cannot read properties of null
 
         if (!diary) return res.render("main");
@@ -106,14 +106,14 @@ exports.toggleVisibility = async (req, res) => {
     try {
         if (req.session.user) {
             const diaryId = req.params.diaryId;
-            const diary = await diaryModel.findById(diaryId); 
+            const diary = await DiaryModel.findById(diaryId); 
 
             if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
                 const referer = req.get('Referer') || '/';
                 return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
             } 
     
-            await diaryModel.toggleVisibility(diaryId);
+            await DiaryModel.toggleVisibility(diaryId);
     
             res.status(200).json({ success: true });
         }
@@ -128,7 +128,7 @@ exports.delete = async (req, res) => {
     try {
         if (req.session.user) {
             const diaryId = req.params.diaryId;
-            const diary = await diaryModel.findById(diaryId); 
+            const diary = await DiaryModel.findById(diaryId); 
             const patient = await UserModel.getPatientById(diary.patient_id);
             
             if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
@@ -156,9 +156,8 @@ exports.delete = async (req, res) => {
             }
             
             // DB diary 삭제
-            await diaryModel.delete(diaryId);
+            await DiaryModel.delete(diaryId);
     
-            console.log(patient.id);
             // redirect
             return res.json({ success: true, redirect: `/profile/patient/${patient.id}/diaries` });
         }
@@ -170,7 +169,7 @@ exports.delete = async (req, res) => {
 }
 
 // 상담사 메인화면 일기 리스트
-exports.listOfDiaries = async (req, res) => {
+exports.list = async (req, res) => {
     try {
         if (req.session.user) {
             // if (!AccessCheck.checkCounselorRole(req.session.user.role)) {
@@ -182,8 +181,8 @@ exports.listOfDiaries = async (req, res) => {
              const option = req.query.option ? req.query.option : "all";
              let currentPage = req.query.page ? parseInt(req.query.page) : 1;
      
-             const totalPages = Math.ceil( await diaryModel.countOfFindAll(option, 1) / 9);
-             let Previews = await diaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
+             const totalPages = Math.ceil( await DiaryModel.countOfFindAll(option, 1) / 9);
+             let Previews = await DiaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
      
              if (Previews) {
                  Previews.forEach(preview => {

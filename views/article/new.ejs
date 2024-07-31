@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아티클 작성 페이지</title>
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #F4F5F8; }
+    .container { display: flex; justify-content: center; margin: auto; max-width: 1280px; }
+    .panel { padding: 20px; width: 85%; }
+    
+    .input, .textarea { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: Arial, sans-serif; }
+    #content { padding-top: 15px; padding-bottom: 15px; }
+    #titleInput { font-size: 16px; font-weight: bold; }
+    
+    button { background-color: black; color: white; border: none; cursor: pointer; }
+    label { font-size: 0.9rem; color: #333; }
+    .placeholder { text-align: center; background-color: #F4F5F8; color: #979797; }
+    .small-button { padding: 7px 13px; font-size: 0.8rem; position: absolute; left: 0; bottom: -35px; width: auto; }
+
+    #submitButton { background-color: #5FD068; padding: 7px 13px; width: auto; border-radius: 5px;}
+    .form-container { width: 100%; max-width: 600px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+</style>
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+</head>
+<body>
+<div class="container">
+    <input type="hidden" name="counselorId" value="<%= counselorId %>">
+    <div class="panel">
+        <input type="text" id="titleInput" class="input" placeholder="제목을 입력하세요">
+        <div id="content"></div>
+        <button id="submitButton">작성 완료</button>
+    </div>
+</div>
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-storage-compat.js"></script>
+<script>
+// Firebase 초기화
+const firebaseConfig = {
+    apiKey: "AIzaSyAoZC_XqFl5HIJ1v3NYGWrCc5CH3FEvva0",
+    authDomain: "comma-5a85c.firebaseapp.com",
+    projectId: "comma-5a85c",
+    storageBucket: "comma-5a85c.appspot.com",
+    messagingSenderId: "193588412726",
+    appId: "1:193588412726:web:2c6994dbe833fff855f397"
+};
+firebase.initializeApp(firebaseConfig);
+const storage = firebase.storage();
+
+// TUI 에디터 설정
+const editor = new toastui.Editor({
+    el: document.querySelector('#content'),
+    height: '600px',
+    initialEditType: 'wysiwyg',
+    initialValue: '내용을 입력해 주세요.',
+    previewStyle: 'vertical',
+});
+
+document.getElementById('submitButton').addEventListener('click', function() {
+    const counselor_id = document.querySelector('input[name="counselorId"]').value;
+    const title = document.getElementById('titleInput').value;
+    const content = editor.getHTML();
+    const currentTime = Date.now();
+    const base64Content = btoa(unescape(encodeURIComponent(content))); // UTF-8 인코딩을 위한 base64 인코딩
+
+    const dataUrl = `data:text/html;charset=utf-8;base64,${base64Content}`; // Data URL 형식
+    const storageRef = storage.ref(`articles/${title}-${counselor_id}-${currentTime}.html`); // 제목-상담사id-등록시각
+
+    storageRef.putString(dataUrl, 'data_url').then(snapshot => {
+        return snapshot.ref.getDownloadURL();
+    }).then(downloadURL => {
+        console.log('File available at', downloadURL);
+        // 서버로 URL 전송
+        const articleData = {
+            counselor_id : counselor_id,
+            title : title,
+            content : downloadURL
+        }
+
+        fetch('/article/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ articleData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            if (data.success && data.redirect) {
+                window.location.href = data.redirect;
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }).catch(error => {
+        console.error('Upload failed:', error);
+    });
+});
+</script>
+</body>
+</html>

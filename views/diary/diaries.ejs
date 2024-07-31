@@ -4,7 +4,7 @@
     body { margin: 0; background: #F4F5F8; }
     .diaries { display: flex; flex-direction: column; justify-content: space-between; align-items: center; margin: auto; 
         max-width: 1080px; margin-bottom: 16px; }
-    .card { border-radius: 30px; overflow: hidden; }
+    .card { border-radius: 30px; overflow: hidden; min-width: 240px; }
 
     .card-img-container { height: 260px; overflow: hidden; }
     .card-link { text-decoration: none; color: black; }
@@ -31,7 +31,6 @@
                         <p style="font-size: 14px" class="card-text"><%= Preview.content.substring(0, 45) %>...</p>
                         <p style="font-size: 14px" class="card-text"><%= Preview.nickname %></p>
                         <p style="font-size: 14px" class="card-text"><%= new Date(Preview.created_at).toLocaleDateString('ko-KR') %></p>
-                        <div class="emotion-ranking" data-emotions="<%= JSON.stringify(Preview.emotions) %>"></div>
                     </div>
                 </div>
                 </a>
@@ -43,25 +42,3 @@
 <nav aria-label="Diary pagination">
     <%- include('../components/pagination') %>
 </nav>
-
-<script>
-
-
-// ai감정 상위3개 출력
-document.addEventListener('DOMContentLoaded', function() {
-    const emotionContainers = document.querySelectorAll('.emotion-ranking');
-    
-    emotionContainers.forEach(container => {
-        const emotions = JSON.parse(container.getAttribute('data-emotions'));
-        const sortedEmotions = Object.entries(emotions)
-            .sort((a, b) => b[1] - a[1]) // 내림차순 정렬
-            .slice(0, 3); // 상위 3개 추출
-
-        container.innerHTML = ''; // 초기 내용 지우기
-        sortedEmotions.forEach(([emotion, value]) => {
-            const percentage = (value * 100).toFixed(2);
-            container.innerHTML += `<small class="text-muted">${emotion}: ${percentage}%</small>`;
-        });
-    });
-});
-</script>
