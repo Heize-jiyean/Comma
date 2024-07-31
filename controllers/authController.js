@@ -1,11 +1,12 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const UserModel = require('../models/User');
 const smtpTransport = require('../email');
 
 // 랜덤 인증번호 생성 코드
 const generateRandomNumber = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
+};
 
 module.exports = {
     // singup페이지 로드
@@ -124,5 +125,137 @@ module.exports = {
                 res.json({ success: true });
             }
         });
+    },
+
+    // 비밀번호 찾기 페이지 로드
+    forgotPasswordLoad: (req, res) => {
+        res.render('login/forgot-password');
+    },
+
+    // 비밀번호 재설정 이메일 전송
+    forgotPassword: async (req, res) => {
+        const { email } = req.body;
+        try {
+            console.log('Attempting to find user with email:', email);
+            let user = await UserModel.getPatientByEmail(email);
+            if (!user) {
+                console.log('User not found in patient table, checking counselor table');
+                user = await UserModel.getCounselorByEmail(email);
+            }
+    
+            if (!user) {
+                console.log('User not found');
+                return res.status(404).json({ success: false, message: '해당 이메일로 등록된 사용자가 없습니다.' });
+            }
+    
+            console.log('User found:', user);
+    
+            // 토큰 생성
+            const token = crypto.randomBytes(20).toString('hex');
+            const expires = Date.now() + 3600000; // 1시간 후 만료
+    
+            console.log('Attempting to save reset token');
+            // 사용자 모델에 토큰 저장
+            const saveResult = await UserModel.saveResetToken(user.id, token, expires);
+            console.log('Save result:', saveResult);
+            if (!saveResult) {
+                console.log('Failed to save reset token');
+                return res.status(500).json({ success: false, message: '토큰 저장 중 오류가 발생했습니다.' });
+            }
+    
+            console.log('Reset token saved successfully');
+    
+            // 이메일 전송
+            const resetUrl = `http://${req.headers.host}/auth/reset-password/${token}`;
+            const mailOptions = {
+                from: "team.ive.comma@gmail.com",
+                to: email,
+                subject: "Comma 비밀번호 재설정",
+                html: `<p>비밀번호를 재설정하려면 다음 링크를 클릭하세요:</p>
+                       <a href="${resetUrl}">${resetUrl}</a>`
+            };
+    
+            console.log('Attempting to send email');
+            smtpTransport.sendMail(mailOptions, (err, response) => {
+                if (err) {
+                    console.error("Email sending error:", err);
+                    return res.status(500).json({ success: false, message: '이메일 전송 중 오류가 발생했습니다.' });
+                }
+                console.log('Email sent successfully');
+                res.json({ success: true, message: '비밀번호 재설정 이메일이 전송되었습니다.' });
+            });
+    
+        } catch (error) {
+            console.error("Forgot password error:", error);
+            res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+        }
+    },
+
+    // 닉네임 체크 함수
+    checkNickname: async (req, res) => {
+        const nickname = req.body.nickname;
+
+        const patientUser = await UserModel.getPatientByNickname(nickname);
+        const counselorUser = await UserModel.getCounselorByNickname(nickname);
+
+        if (!patientUser && !counselorUser) {
+            return res.status(200).json({ isDuplicate: false });
+        } else {
+            return res.status(200).json({ isDuplicate: true });
+        }
+    },
+
+    // 비밀번호 재설정 페이지 로드
+    resetPasswordLoad: async (req, res) => {
+        const { token } = req.params;
+        try {
+            const user = await UserModel.getUserByResetToken(token);
+            if (!user || Date.now() > user.resetTokenExpires) {
+                return res.status(400).render('login/reset-password', { error: '유효하지 않거나 만료된 토큰입니다.' });
+            }
+            res.render('login/reset-password', { token });
+        } catch (error) {
+            console.error("Reset password load error:", error);
+            res.status(500).render('login/reset-password', { error: '서버 오류가 발생했습니다.' });
+        }
+    },
+
+    // 새 비밀번호 설정
+    resetPassword: async (req, res) => {
+        const { token, password } = req.body;
+        try {
+            const user = await UserModel.getUserByResetToken(token);
+            if (!user || Date.now() > user.resetTokenExpires) {
+                return res.status(400).json({ success: false, message: '유효하지 않거나 만료된 토큰입니다.' });
+            }
+    
+            console.log('User found for password reset:', user);
+    
+            // 비밀번호 해싱 및 업데이트
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const updateResult = await UserModel.updatePassword(user.id, hashedPassword);
+            
+            if (!updateResult) {
+                console.error('Failed to update password for user:', user.id);
+                return res.status(500).json({ success: false, message: '비밀번호 업데이트 중 오류가 발생했습니다.' });
+            }
+    
+            console.log('Password updated successfully for user:', user.id);
+    
+            // 토큰 제거
+            const clearResult = await UserModel.clearResetToken(user.id);
+            
+            if (!clearResult) {
+                console.error('Failed to clear reset token for user:', user.id);
+                return res.status(500).json({ success: false, message: '토큰 제거 중 오류가 발생했습니다.' });
+            }
+    
+            console.log('Reset token cleared successfully for user:', user.id);
+    
+            res.json({ success: true, message: '비밀번호가 성공적으로 재설정되었습니다.' });
+        } catch (error) {
+            console.error("Reset password error:", error);
+            res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+        }
     }
 };
