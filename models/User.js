@@ -52,7 +52,7 @@ exports.createCounselor = async (user) => {
 };
 
 // 환자정보 아이디로 가져오기
-exports.getPatientById = async (patientId) => {
+exports.getPatientByPatientId = async (patientId) => {
     try {
         const db = await require('../main').connection();
         let sql = `
@@ -66,7 +66,7 @@ exports.getPatientById = async (patientId) => {
 
         return rows.length > 0 ? rows[0] : null;
     } catch (error) {
-        console.error("UserModel.createUser() 쿼리 실행 중 오류:", error);
+        console.error("UserModel.getPatientByPatientId() 쿼리 실행 중 오류:", error);
         throw error;
     }
 };

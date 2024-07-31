@@ -41,7 +41,7 @@ exports.view = async (req, res) => {
         const diaryId = req.params.diaryId;
 
         let diary = await diaryModel.findById(diaryId); // const
-        const patient = await UserModel.getPatientById(diary.patient_id); // ??Cannot read properties of null
+        const patient = await UserModel.getPatientByPatientId(diary.patient_id); // ??Cannot read properties of null
 
         if (!diary) return res.render("main");
         if (req.session.user) {
