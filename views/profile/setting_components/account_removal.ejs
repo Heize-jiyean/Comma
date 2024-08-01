@@ -54,16 +54,16 @@
 
 <script>
     const saveButton = document.getElementById('saveButton');
-    const passwordInput = document.getElementById('password');
+    const password = document.getElementById('password');
 
     // 버튼 활성화 상태 관리
-    passwordInput.addEventListener('input', () => {
-        saveButton.disabled = !passwordInput.value.trim();
+    password.addEventListener('input', () => {
+        saveButton.disabled = !password.value.trim();
     });
 
     // 탈퇴하기 버튼 눌렀을 때 실행됨
     saveButton.addEventListener('click', function() {
-        const passwordValue = passwordInput.value;
+        const passwordValue = password.value;
 
         if(!passwordValue) {
             alert('비밀번호를 입력해주세요.');
