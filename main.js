@@ -59,7 +59,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: { 
     secure: process.env.NODE_ENV === 'production', // HTTPS를 사용하는 경우에만 true로 설정
-    maxAge: 24 * 60 * 60 * 1000 // 24시간
+    maxAge: 5 * 60 * 60 * 1000 // 5시간
   }
 }));
 
@@ -151,3 +151,7 @@ app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
   console.log('Final check NAVER_MAP_CLIENT_ID:', process.env.NAVER_MAP_CLIENT_ID);
 });
+
+// 클라이언트 측 JavaScript를 위한 코드 (로그아웃 기능)
+app.use(express.static('public'));
+

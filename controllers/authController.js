@@ -104,7 +104,12 @@ module.exports = {
                     nickname: user.nickname,
                     role: user.patient_id ? 'patient' : 'counselor'
                 };
-                res.json({ success: true, message: '로그인 성공' });
+                // 리다이렉트 URL을 응답에 포함
+                res.json({ 
+                    success: true, 
+                    message: '로그인 성공', 
+                    redirectUrl: '/'  // 메인 페이지로 리다이렉트
+                });
             } else {
                 console.log('Login failed: Invalid credentials');
                 res.status(400).json({ success: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' });
