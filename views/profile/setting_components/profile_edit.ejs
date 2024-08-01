@@ -34,11 +34,23 @@
         border-radius: 12px;
         font-size: 16px;
     }
+    input[readonly] {
+        color: #A1A4AC;
+    }
     .btn-container {
         display: flex;
         justify-content: flex-end;
     }
-    .btn-save {
+    .btn-disabled {
+        background-color: #E4E5EA;
+        color: #A1A4AC;
+        border: none;
+        padding: 4px 8px;
+        font-size: 16px;
+        cursor: not-allowed;
+        border-radius: 5px;
+    }
+    #saveButton {
         background-color: #5FD068;
         color: white;
         border: none;
@@ -47,8 +59,13 @@
         cursor: pointer;
         border-radius: 5px;
     }
-    .btn-save:hover {
+    #saveButton:hover {
         background-color: #45a049;
+    }
+    #saveButton:disabled {
+        background-color: #E4E5EA;
+        color: #A1A4AC;
+        cursor: not-allowed;
     }
 </style>
 
@@ -59,58 +76,142 @@
 </div>
 <div class="form-group">
     <label for="user-id">아이디</label>
-    <input type="text" id="user-id" name="user-id">
+    <input type="text" id="user-id" name="user-id" value="<%= loginUser.id %>" readonly>
 </div>
 <div class="form-group">
     <label for="nickname">닉네임</label>
-    <input type="text" id="nickname" name="nickname">
+    <input type="text" id="nickname" name="nickname" value="<%= loginUser.nickname %>" data-initial-value="<%= loginUser.nickname %>">
 </div>
 <div class="form-group">
     <label for="email">이메일</label>
-    <input type="email" id="email" name="email">
+    <input type="email" id="email" name="email" value="<%= loginUser.email %>" readonly>
 </div>
 <div class="form-group">
     <label for="gender">성별</label>
-    <select id="gender" name="gender">
-        <option value="male">남</option>
-        <option value="female">여</option>
+    <select id="gender" name="gender" data-initial-value="<%= loginUser.gender %>"">
+        <option value="male" <%= loginUser.gender === 'male' ? 'selected' : '' %>>남</option>
+        <option value="female" <%= loginUser.gender === 'female' ? 'selected' : '' %>>여</option>
     </select>
 </div>
 <div class="form-group">
     <label for="birthYear">출생연도</label>
-    <select id="birthYear" name="birthYear" /></select>
+    <select id="birthYear" name="birthYear" value="<%= loginUser.age %>" data-initial-value="<%= loginUser.age %>"></select>
 </div>
 <div class="form-group">
     <label for="bio">소개</label>
-    <input type="text" id="bio" name="bio">
+    <input type="text" id="bio" name="bio" value="<%= loginUser.bio %>" data-initial-value="<%= loginUser.bio %>">
 </div>
 <% if (loginRole === 'patient') { %>
     <div class="form-group">
         <label for="job">직업</label>
-        <input type="text" id="job" name="job">
+        <input type="text" id="job" name="job" value="<%= loginUser.job %>" data-initial-value="<%= loginUser.job %>">
     </div>
 <% } else { %>
     <div class="form-group">
         <label for="specialty">전문의</label>
-        <input type="text" id="specialty" name="specialty">
+        <input type="text" id="specialty" name="specialty" value="<%= loginUser.specialty %>" data-initial-value="<% loginUser.specialty %>">
     </div>
     <div class="form-group">
         <label for="experience">경력</label>
-        <input type="text" id="experience" name="experience">
+        <input type="text" id="experience" name="experience" value="<%= loginUser.experience %>"" data-initial-value="<% loginUser.experience %>">
     </div>
 <% } %>
 
 <div class="btn-container">
-    <button type="button" class="btn-save">수정 완료</button>
+    <button type="button" id="saveButton" disabled>편집 완료</button>
 </div>
 
 <script>
-    const currentYear = new Date().getFullYear();
-    const birthYearSelect = document.getElementById('birthYear');
-    for (let year = currentYear; year >= 1950; year--) {
-        let option = document.createElement('option');
-        option.value = year;
-        option.text = year;
-        birthYearSelect.appendChild(option);
+    const loginRole = "<%= loginRole %>";
+    // 생년월일 폼
+    document.addEventListener("DOMContentLoaded", function() {
+        const birthYearSelect = document.getElementById('birthYear');
+        const currentYear = new Date().getFullYear();
+        const initialBirthYear = birthYearSelect.getAttribute('data-initial-value');
+
+        // 1950부터 현재 연도까지
+        for (let year = currentYear; year >= 1950; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.text = year;
+            if (year.toString() === initialBirthYear) {
+                option.selected = true;
+            }
+            birthYearSelect.appendChild(option);
+        }
+    });
+
+    // 편집완료 버튼 활성화 상태를 동적으로 관리
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputs = document.querySelectorAll('input:not([readonly]), select');
+        const saveButton = document.getElementById('saveButton');
+        
+        let changeCount = 0;
+        let fieldChanged = new Map();  // 각 필드의 변경 상태를 추적하기 위한 Map
+
+        inputs.forEach(input => {
+            const initialValue = input.getAttribute('data-initial-value');
+            fieldChanged.set(input, false);  // 초기 상태는 모든 필드가 변경되지 않음으로 설정
+
+            input.addEventListener('input', function() {
+                if (this.value !== initialValue && (fieldChanged.get(this) === false)) {
+                    this.style.borderColor = '#5FD068';
+                    fieldChanged.set(this, true);
+                    changeCount++;
+                } else if (this.value === initialValue && (fieldChanged.get(this) === true )) {
+                    this.style.borderColor = '#D6D7DA';
+                    fieldChanged.set(this, false);
+                    changeCount--;
+                }
+                saveButton.disabled = (changeCount === 0);  // 변경된 필드가 없으면 버튼 비활성화
+            });
+        });
+    });
+
+    // 편집완료 버튼 눌렀을 때 실행됨
+    saveButton.addEventListener('click', function() {
+        const nickname = document.getElementById('nickname').value;
+        const birthYear = document.getElementById('birthYear').value;
+        const gender = document.getElementById('gender').value;
+        const bio = document.getElementById('bio').value;
+
+        let profileData = {
+            nickname: nickname,
+            age: birthYear,
+            gender: gender,
+            bio: bio
+        }
+
+        if (loginRole === 'patient') {
+            profileData.job = document.getElementById('job').value;
+        } else if (loginRole === 'counselor') {
+            profileData.specialty = document.getElementById('specialty').value;
+            profileData.experience = document.getElementById('experience').value;
+        }
+
+        console.log(profileData);
+
+        // 변경사항을 서버로 전송
+        sendDataToServer(profileData);
+    })
+
+    // 서버로 데이터 PUT하는 함수
+    function sendDataToServer(data) {
+        fetch('/profile/settings/profileEdit', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ profileData: data })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('프로필 편집 완료');
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     }
+
 </script>

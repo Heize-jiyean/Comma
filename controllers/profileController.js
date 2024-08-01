@@ -228,7 +228,7 @@ exports.listAllGuestbooks = async (req, res) => {
 }
 
 
-// 프로필 수정 - 프로필 편집 페이지 밚환
+// 프로필 수정 - 프로필 편집 페이지 반환
 exports.profileEditPage = async(req, res) => {
     // 로그인하지 않은 사용자가 접근할 경우
     if (!AccessCheck.isUserAuthenticated(req.session.user)) {
@@ -240,15 +240,47 @@ exports.profileEditPage = async(req, res) => {
     const loginRole = req.session.user.role;
 
     try {
+        let loginUser;
+
+        if (loginRole === 'patient') {
+            loginUser = await UserModel.getPatientByPatientId(loginId);
+        } else if (loginRole === 'counselor') {
+            loginUser = await UserModel.getCounselorByCounselorId(loginId);
+        }
+
         // 렌더링
         res.render("profile/setting.ejs", { 
             page: 'profileEdit', 
-            loginId, 
-            loginRole
+            loginRole,
+            loginUser
         });
 
     } catch (error) {
         console.error("프로필 수정 - 프로필 편집 페이지 반환 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+// 프로필 수정 - 프로필 편집 처리
+exports.profileEdit = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    
+    try {
+        const { profileData } = req.body;
+
+        console.log(profileData);
+        
+        if (loginRole === 'patient') {
+            UserModel.updatePatientProfile(loginId, profileData);
+        } else if (loginRole === 'counselor') {
+            UserModel.updateCounselorProfile(loginId, profileData);
+        }
+        
+        res.status(200).json({ success: true });
+
+    } catch (error) {
+        console.log("프로필 수정 - 프로필 편집 처리 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }

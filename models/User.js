@@ -202,3 +202,71 @@ exports.loginCounselor = async (email, password) => {
         throw error;
     }
 };
+
+// 환자 프로필 업데이트
+exports.updatePatientProfile = async (patientId, profileData) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            UPDATE patient
+            SET nickname = ?,
+                age = ?,
+                gender = ?,
+                bio = ?,
+                job = ?
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [
+            profileData.nickname,
+            profileData.age,
+            profileData.gender,
+            profileData.bio,
+            profileData.job,
+            patientId
+        ]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return;
+
+    } catch (error) {
+        console.error('UserModel.updatePatientProfile 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 프로필 업데이트
+exports.updateCounselorProfile = async (counselorId, profileData) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            UPDATE counselor
+            SET nickname = ?,
+                age = ?,
+                gender = ?,
+                bio = ?,
+                specialty = ?,
+                experience = ?
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [
+            profileData.nickname,
+            profileData.age,
+            profileData.gender,
+            profileData.bio,
+            profileData.specialty,
+            profileData.experience,
+            counselorId
+        ]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return;
+
+    } catch (error) {
+        console.error('UserModel.updateCounselorProfile 오류:', error);
+        throw error;
+    }
+}
