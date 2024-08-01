@@ -203,8 +203,13 @@
         })
         .then(response => response.json())
         .then(data => {
-            alert('프로필 편집 완료');
-            window.location.reload();
+            if (data.success) {
+                alert('프로필 편집 완료');
+                window.location.reload();
+            } else {
+                alert(data.message);
+                window.location.reload();
+            }
         })
         .catch(error => {
             console.error('Error:', error);
