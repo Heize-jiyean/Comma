@@ -122,7 +122,8 @@ module.exports = {
                 console.error("Logout error:", err);
                 res.status(500).json({ success: false, error: '로그아웃 중 오류가 발생했습니다.' });
             } else {
-                res.json({ success: true });
+                res.clearCookie('session_cookie_name'); // 세션 쿠키 삭제
+                res.json({ success: true, message: '로그아웃되었습니다.' }); // 성공 응답 보내기
             }
         });
     },
