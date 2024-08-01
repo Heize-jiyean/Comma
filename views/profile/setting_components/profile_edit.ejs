@@ -106,11 +106,11 @@
 <% } else { %>
     <div class="form-group">
         <label for="specialty">전문의</label>
-        <input type="text" id="specialty" name="specialty" value="<%= loginUser.specialty %>" data-initial-value="<% loginUser.specialty %>">
+        <input type="text" id="specialty" name="specialty" value="<%= loginUser.specialty %>" data-initial-value="<%= loginUser.specialty %>">
     </div>
     <div class="form-group">
         <label for="experience">경력</label>
-        <input type="text" id="experience" name="experience" value="<%= loginUser.experience %>"" data-initial-value="<% loginUser.experience %>">
+        <input type="text" id="experience" name="experience" value="<%= loginUser.experience %>"" data-initial-value="<%= loginUser.experience %>">
     </div>
 <% } %>
 
@@ -155,10 +155,12 @@
                     this.style.borderColor = '#5FD068';
                     fieldChanged.set(this, true);
                     changeCount++;
+                    console.log("1 증가 //// ", changeCount);
                 } else if (this.value === initialValue && (fieldChanged.get(this) === true )) {
                     this.style.borderColor = '#D6D7DA';
                     fieldChanged.set(this, false);
                     changeCount--;
+                    console.log("1 감소 //// ", changeCount);
                 }
                 saveButton.disabled = (changeCount === 0);  // 변경된 필드가 없으면 버튼 비활성화
             });
