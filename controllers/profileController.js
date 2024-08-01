@@ -301,6 +301,50 @@ exports.passwordChangePage = async(req, res) => {
     }
 }
 
+// 프로필 설정 - 비밀번호 변경 처리
+exports.passwordChange = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    const currentPassword = req.body.currentPassword;
+    const newPassword = req.body.newPassword;
+
+    try {
+        // 현재 배밀번호 확인
+        let isPasswordCorrect;
+        if (loginRole === 'patient') {
+            isPasswordCorrect = await UserModel.checkPatientPassword(loginId, currentPassword);
+        } else if (loginRole === 'counselor') {
+            isPasswordCorrect = await UserModel.checkCounselorPassword(loginId, currentPassword);
+        }
+
+        // 현재 비밀번호가 일치하지 않은 경우
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ 
+                success: false, 
+                message: '현재 비밀번호가 일치하지 않습니다.' 
+            });
+        }
+
+        // 새 비밀번호로 업데이트
+        if (loginRole === 'patient') {
+            await UserModel.updatePatientPassword(loginId, newPassword);
+        } else if (loginRole === 'counselor') {
+            await UserModel.updateCounselorPassword(loginId, newPassword);
+        }
+
+        // 성공 응답 메시지 보내기
+        res.status(200).json({
+            success: true,
+            message: '비밀번호가 성공적으로 변경되었습니다.'
+        })
+
+
+    } catch (error) {
+        console.log("프로필 설정 - 비밀번호 변경 처리 오류: ", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
 // 프로필 설정 - 탈퇴 페이지 반환
 exports.accountRemovalPage = async(req, res) => {
     // 로그인하지 않은 사용자가 접근할 경우

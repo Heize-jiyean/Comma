@@ -26,6 +26,9 @@ router.put('/settings/profileEdit', profileController.profileEdit);
 // [GET] 프로필 설정 - 비밀번호 변경 페이지
 router.get('/settings/passwordChange', profileController.passwordChangePage);
 
+// [PUT] 프로필 설정 - 비밀번호 변경 처리
+router.put('/settings/passwordChange', profileController.passwordChange);
+
 // [GET] 프로필 설정 - 회원 탈퇴 페이지
 router.get('/settings/accountRemoval', profileController.accountRemovalPage);
 

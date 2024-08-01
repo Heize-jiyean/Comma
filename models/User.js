@@ -315,8 +315,49 @@ exports.checkCounselorPassword = async (counselorId, inputPassword) => {
     }
 }
 
-// 비밀번호 변경
+// 환자 비밀번호 변경
+exports.updatePatientPassword = async(patientId, newPassword) => {
+    try {
+        const db = await require('../main').connection();
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        let sql = `
+            UPDATE patient
+            SET password = ?
+            WHERE patient_id = ?`;
 
+        const [result] = await db.query(sql, [hashedPassword, patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result.affectedRows === 1;
+
+    } catch (error) {
+        console.log('UserModel.updatePatientPassword 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 비밀번호 변경
+exports.updateCounselorPassword = async(counselorId, newPassword) => {
+    try {
+        const db = await require('../main').connection();
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        let sql = `
+            UPDATE counselor
+            SET password = ?
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [hashedPassword, counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result.affectedRows === 1;
+
+    } catch (error) {
+        console.log('UserModel.updateCounselorPassword 오류:', error);
+        throw error;
+    }
+}
 
 
 // 환자 계정 탈퇴
