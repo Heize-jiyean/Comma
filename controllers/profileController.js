@@ -286,6 +286,12 @@ exports.profileEdit = async(req, res) => {
 
 // 프로필 설정 - 비밀번호 변경 페이지 반환
 exports.passwordChangePage = async(req, res) => {
+    // 로그인하지 않은 사용자가 접근할 경우
+    if (!AccessCheck.isUserAuthenticated(req.session.user)) {
+        const referer = req.get('Referer') || '/';
+        return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+    }
+
     try {
         // 렌더링
         res.render("profile/setting.ejs", { page: 'passwordChange' });
@@ -297,6 +303,12 @@ exports.passwordChangePage = async(req, res) => {
 
 // 프로필 설정 - 탈퇴 페이지 반환
 exports.accountRemovalPage = async(req, res) => {
+    // 로그인하지 않은 사용자가 접근할 경우
+    if (!AccessCheck.isUserAuthenticated(req.session.user)) {
+        const referer = req.get('Referer') || '/';
+        return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+    }
+
     try {
         // 렌더링
         res.render("profile/setting.ejs", { page: 'accountRemoval' });
