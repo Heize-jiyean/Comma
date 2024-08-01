@@ -321,15 +321,15 @@ exports.accountRemovalPage = async(req, res) => {
 exports.accountRemoval = async(req, res) => {
     const loginId = req.session.user.id;
     const loginRole = req.session.user.role;
-    const passwordInput = req.body.passwordInput;
+    const password = req.body.password;
 
     try {
         let isPasswordCorrect = false;
 
         if (loginRole === 'patient') {
-            isPasswordCorrect = await UserModel.checkPatientPassword(loginId, passwordInput);
+            isPasswordCorrect = await UserModel.checkPatientPassword(loginId, password);
         } else if (loginRole === 'counselor') {
-            isPasswordCorrect = await UserModel.checkCounselorPassword(loginId, passwordInput);
+            isPasswordCorrect = await UserModel.checkCounselorPassword(loginId, password);
         }
 
         if (isPasswordCorrect === false) {

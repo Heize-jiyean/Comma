@@ -60,15 +60,11 @@
 
     // 탈퇴하기 버튼 눌렀을 때 실행됨
     saveButton.addEventListener('click', function() {
-        const passwordValue = password.value;
-
-        if(!passwordValue) {
-            alert('비밀번호를 입력해주세요.');
-            return;
-        }
 
         // 비밀번호를 서버로 전송하여 탈퇴 요청
-        sendDataToServer(passwordValue);
+        sendDataToServer({
+            password: password.value
+        });
     })
 
     // 서버로 데이터 POST하는 함수
@@ -78,7 +74,7 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ passwordInput: data })
+            body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(data => {
