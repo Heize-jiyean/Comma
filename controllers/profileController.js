@@ -228,7 +228,7 @@ exports.listAllGuestbooks = async (req, res) => {
 }
 
 
-// 프로필 수정 - 프로필 편집 페이지 반환
+// 프로필 설정 - 프로필 편집 페이지 반환
 exports.profileEditPage = async(req, res) => {
     // 로그인하지 않은 사용자가 접근할 경우
     if (!AccessCheck.isUserAuthenticated(req.session.user)) {
@@ -256,12 +256,12 @@ exports.profileEditPage = async(req, res) => {
         });
 
     } catch (error) {
-        console.error("프로필 수정 - 프로필 편집 페이지 반환 오류:", error);
+        console.error("프로필 설정 - 프로필 편집 페이지 반환 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
 
-// 프로필 수정 - 프로필 편집 처리
+// 프로필 설정 - 프로필 편집 처리
 exports.profileEdit = async(req, res) => {
     const loginId = req.session.user.id;
     const loginRole = req.session.user.role;
@@ -269,8 +269,6 @@ exports.profileEdit = async(req, res) => {
     try {
         const { profileData } = req.body;
 
-        console.log(profileData);
-        
         if (loginRole === 'patient') {
             UserModel.updatePatientProfile(loginId, profileData);
         } else if (loginRole === 'counselor') {
@@ -280,31 +278,77 @@ exports.profileEdit = async(req, res) => {
         res.status(200).json({ success: true });
 
     } catch (error) {
-        console.log("프로필 수정 - 프로필 편집 처리 오류:", error);
+        console.log("프로필 설정 - 프로필 편집 처리 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
 
-// 프로필 수정 - 비밀번호 변경 페이지 반환
+
+// 프로필 설정 - 비밀번호 변경 페이지 반환
 exports.passwordChangePage = async(req, res) => {
     try {
         // 렌더링
         res.render("profile/setting.ejs", { page: 'passwordChange' });
     } catch (error) {
-        console.log("프로필 수정 - 비밀번호 변경 페이지 반환 오류: ", error);
+        console.log("프로필 설정 - 비밀번호 변경 페이지 반환 오류: ", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
 
-// 프로필 수정 -탈퇴 페이지 밚환
-exports.accounttRemovalPage = async(req, res) => {
+// 프로필 설정 - 탈퇴 페이지 반환
+exports.accountRemovalPage = async(req, res) => {
     try {
         // 렌더링
         res.render("profile/setting.ejs", { page: 'accountRemoval' });
     } catch (error) {
-        console.log("프로필 수정 - 탈퇴 페이지 반환 오류: ", error);
+        console.log("프로필 설정 - 탈퇴 페이지 반환 오류: ", error);
     }
 }
+
+// 프로필 설정 - 탈퇴 처리
+exports.accountRemoval = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    const passwordInput = req.body.passwordInput;
+
+    try {
+        let isPasswordCorrect = false;
+
+        if (loginRole === 'patient') {
+            isPasswordCorrect = await UserModel.checkPatientPassword(loginId, passwordInput);
+        } else if (loginRole === 'counselor') {
+            isPasswordCorrect = await UserModel.checkCounselorPassword(loginId, passwordInput);
+        }
+
+        if (isPasswordCorrect === false) {
+            return res.status(401).json({ 
+                success: false, 
+                message: '비밀번호가 일치하지 않습니다.'
+            });
+        }
+
+        // 비밀번호가 일치하면 탈퇴 처리
+        if (loginRole === 'patient') {
+            await UserModel.removePatient(loginId);
+        } else if (loginRole === 'counselor') {
+            await UserModel.removeCounselor(loginId);
+        }
+
+        req.session.destroy();  // 세션 파괴 처리
+
+        // 성공 응답 메시지 보내기
+        res.status(200).json({
+            success: true,
+            message: '계정이 성공적으로 삭제되었습니다.'
+        })
+
+    } catch (error) {
+        console.log("프로필 설정 - 탈퇴 처리 오류: ", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+
+}
+
 
 // 감정 차트 반환페이지 
 exports.charts = async (req, res) => {

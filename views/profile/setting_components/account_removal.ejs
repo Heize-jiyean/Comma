@@ -24,7 +24,7 @@
         display: flex;
         justify-content: flex-end;
     }
-    .btn-save {
+    #saveButton {
         background-color: #5FD068;
         color: white;
         border: none;
@@ -33,18 +33,69 @@
         cursor: pointer;
         border-radius: 5px;
     }
-    .btn-save:hover {
+    #saveButton:hover {
         background-color: #45a049;
+    }
+    #saveButton:disabled {
+        background-color: #E4E5EA;
+        color: #A1A4AC;
+        cursor: not-allowed;
     }
 </style>
 
 
 <div class="form-group">
     <label for="checkPassword">비밀번호 학인</label>
-    <input type="password" id="checkPassword" name="checkPassword" required>
+    <input type="password" id="passwordInput" >
 </div>
 <div class="btn-container">
-    <button type="button" class="btn-save">탈퇴하기</button>
+    <button type="button" id="saveButton" disabled>탈퇴하기</button>
 </div>
 
+<script>
+    const saveButton = document.getElementById('saveButton');
+    const passwordInput = document.getElementById('passwordInput');
 
+    // 버튼 활성화 상태 관리
+    passwordInput.addEventListener('input', () => {
+        saveButton.disabled = !passwordInput.value.trim();
+    });
+
+    // 탈퇴하기 버튼 눌렀을 때 실행됨
+    saveButton.addEventListener('click', function() {
+        const passwordValue = passwordInput.value;
+
+        if(!passwordValue) {
+            alert('비밀번호를 입력해주세요.');
+            return;
+        }
+
+        // 비밀번호를 서버로 전송하여 탈퇴 요청
+        sendDataToServer(passwordValue);
+    })
+
+    // 서버로 데이터 POST하는 함수
+    function sendDataToServer(data) {
+        fetch('/profile/settings/accountRemoval', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ passwordInput: data })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('탈퇴 완료');
+                window.location.href = '/';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+
+</script>

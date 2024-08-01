@@ -270,3 +270,91 @@ exports.updateCounselorProfile = async (counselorId, profileData) => {
         throw error;
     }
 }
+
+// 환자 비밀번호 확인 
+exports.checkPatientPassword = async (patientId, inputPassword) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            SELECT password
+            FROM patient
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [patientId]);
+        const passwordMatch = await bcrypt.compare(inputPassword, result[0].password);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return passwordMatch;
+
+    } catch (error) {
+        console.log('UserModel.checkPatientPassword 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 비밀번호 확인
+exports.checkCounselorPassword = async (counselorId, inputPassword) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            SELECT password
+            FROM counselor
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [counselorId]);
+        const passwordMatch = await bcrypt.compare(inputPassword, result[0].password);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return passwordMatch;
+
+    } catch (error) {
+        console.log('UserModel.checkCounselorPassword 오류:', error);
+        throw error;
+    }
+}
+
+// 비밀번호 변경
+
+
+
+// 환자 계정 탈퇴
+exports.removePatient = async (patientId) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            DELETE FROM patient
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return (result.affectedRows === 1);
+
+    } catch (error) {
+        console.log('UserModel.removePatient 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 계정 탈퇴
+exports.removeCounselor = async (counselorId) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            DELETE FROM counselor
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return (result.affectedRows === 1);
+
+    } catch (error) {
+        console.log('UserModel.removeCounselor 오류:', error);
+        throw error;
+    }
+}
