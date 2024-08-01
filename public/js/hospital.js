@@ -162,8 +162,9 @@ const updateAutocompleteList = (suggestions) => {
             const li = document.createElement('li');
             li.textContent = suggestion;
             li.addEventListener('click', () => {
-                searchInput.value = suggestion;
-                relContainer.classList.add("hide");
+                searchInput.value = suggestion;  // 검색어를 입력 필드에 설정
+                relContainer.classList.add("hide");  // 추천 검색어 리스트 숨기기
+                form.requestSubmit();  // 폼 제출 트리거 (이벤트 방지하지 않음)
             });
             ul.appendChild(li);
         });
