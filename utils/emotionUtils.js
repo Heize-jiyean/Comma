@@ -1,9 +1,9 @@
 const DiaryModel = require('../models/Diary')
+const spawn = require('child_process').spawn;
 
 
 // 여러날자의 일기의 감정을 분류
 exports.calculateEmotionPercentages = (Data) => {
-    console.log(Data);
     const total = { joy: 0, surprise: 0, anger: 0, anxiety: 0, hurt: 0, sadness: 0 };
     Data.forEach(entry => {
         total.joy += parseFloat(entry.joy);
@@ -23,7 +23,6 @@ exports.calculateEmotionPercentages = (Data) => {
         hurt: totalSum > 0 ? (total.hurt / totalSum) * 100 : 0,
         sadness: totalSum > 0 ? (total.sadness / totalSum) * 100 : 0
     };
-    console.log(totalPercentages);
     return totalPercentages;
 }
 
@@ -81,4 +80,24 @@ exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
     }
 
     return allPercentages;
+}
+
+
+exports.analyzeAndNotify = async (content, diaryId) => {
+    try {
+        // 감정분석
+        const result = await spawn('python', ['./python/main.py', content]);
+        result.stdout.on('data', (data) => {
+            const rs = data.toString();
+            try {
+                const emotionResult = JSON.parse(rs);
+                DiaryModel.registerEmotion(diaryId, emotionResult);
+                
+            } catch (e) {
+                console.error("감정분석 오류");
+            }
+        });
+    } catch (error) {
+        console.error("감정분석 실행 오류", error);
+    }
 }

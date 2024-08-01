@@ -30,9 +30,6 @@ exports.register = async (req, res) => {
                 return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
             }
             const { articleData } = req.body;
-            console.log(articleData);
-           
-    
             const savedArticleId = await ArticleModel.register(articleData);
 
             return res.json({ success: true, redirect: `/article/${savedArticleId}` });

@@ -25,6 +25,7 @@
     "mysql2": "^3.10.2",
     "nodemailer": "^6.9.14",
     "passport": "^0.7.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "ws": "^8.18.0"
   }
 }

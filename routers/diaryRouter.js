@@ -11,6 +11,7 @@ router.get('/new', diaryController.new);
 router.post('/register', diaryController.register);
 
 router.get('/:diaryId', diaryController.view);
+router.get('/checkStatus/:diaryId', diaryController.checkStatus);
 router.put('/visibility/:diaryId', diaryController.toggleVisibility);
 
 router.delete('/:diaryId', diaryController.delete);

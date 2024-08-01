@@ -74,6 +74,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    const emotions = { 
+        joy: <%= diary.joy %>, 
+        surprise: <%= diary.surprise %>, 
+        anger: <%= diary.anger %>, 
+        anxiety: <%= diary.anxiety %>, 
+        hurt: <%= diary.hurt %>, 
+        sadness: <%= diary.sadness %>
+    };
+
     function togglePrivacy(diaryId) {
         const isPublic = document.getElementById('publicCheckbox').checked;
         fetch(`/diary/visibility/${diaryId}`, {
@@ -108,7 +117,6 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Success:', data);
             if (data.success && data.redirect) {
                 window.location.href = data.redirect;
             }
@@ -118,15 +126,6 @@
             alert('삭제 중 오류 발생.');
         });
     }
-
-    const emotions = { 
-        joy: <%= diary.joy %>, 
-        surprise: <%= diary.surprise %>, 
-        anger: <%= diary.anger %>, 
-        anxiety: <%= diary.anxiety %>, 
-        hurt: <%= diary.hurt %>, 
-        sadness: <%= diary.sadness %>
-    };
     const ctx = document.getElementById('emotionChart').getContext('2d');
     const emotionChart = new Chart(ctx, {
         type: 'pie',
@@ -148,6 +147,35 @@
             }
         }
     });
+
+    
+    const diaryId = <%= diary.diary_id %>;
+    function checkAnalysisStatus(diaryId) {
+        fetch(`/diary/checkStatus/${diaryId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.analyzed) {
+                    window.location.href = `/diary/${data.diaryId}`;
+                } else {
+                    setTimeout(() => checkAnalysisStatus(diaryId), 5000); // 5초 후에 다시 확인
+                }
+            })
+            .catch(error => {
+                console.error('Error checking analysis status:', error);
+            });
+    }
+    // 감정 분석 상태가 완료되지 않았을 때만 확인
+    if (
+        parseFloat(emotions.joy) === 0.00 && 
+        parseFloat(emotions.surprise) === 0.00 && 
+        parseFloat(emotions.anger) === 0.00 && 
+        parseFloat(emotions.anxiety) === 0.00 && 
+        parseFloat(emotions.hurt) === 0.00 && 
+        parseFloat(emotions.sadness) === 0.00
+        ) {
+        checkAnalysisStatus(diaryId);
+    }
+
 </script>
 </body>
 </html>

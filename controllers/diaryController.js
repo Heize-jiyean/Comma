@@ -1,8 +1,12 @@
 const DiaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
 const AccessCheck = require('../utils/authUtils');
-const spawn = require('child_process').spawn;
+const EmotionData = require('../utils/emotionUtils');
 
+function setDefaultImage(image_url) {
+    if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
+    return image_url;
+}
 
 exports.new = async (req, res) => {
     try {
@@ -29,6 +33,7 @@ exports.new = async (req, res) => {
     }
 }
 
+
 exports.register = async (req, res) => {
     try {
         if (req.session.user) {
@@ -41,23 +46,8 @@ exports.register = async (req, res) => {
             const savedDiaryId = await DiaryModel.register(diaryData);
             res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
 
-            // 감정분석
-            const result = await spawn('python', ['./python/main.py', diaryData.content]);
-            result.stdout.on('data', (data) => {
-                const rs = data.toString();
-                try {
-                    const emotionResult = JSON.parse(rs);
-                    console.log(emotionResult);
-
-                    DiaryModel.registerEmotion(savedDiaryId, emotionResult);
-
-                } catch (e) {
-                    console.error("감정분석 오류");
-                }
-            });
-    
-
-            return;
+            // 감정분석 후 WebSocket을 통해 메시지 전송
+            EmotionData.analyzeAndNotify(diaryData.content, savedDiaryId);
         }
         else return res.render("login/login");
     } catch (error) {
@@ -200,7 +190,19 @@ exports.list = async (req, res) => {
     }
 }
 
-function setDefaultImage(image_url) {
-    if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
-    return image_url;
-}
+// 감정분석 상태 확인 컨트롤러
+exports.checkStatus = async (req, res) => {
+    const { diaryId } = req.params;
+    try {
+        const diary = await DiaryModel.findById(diaryId);
+        if (diary.joy == 0.00 && diary.surprise == 0.00 && diary.anger == 0.00 && diary.anxiety == 0.00 && diary.hurt == 0.00 && diary.sadness == 0.00) {
+            console.log(diary);
+            res.json({ analyzed: false });
+        } else {
+            res.json({ analyzed: true, diaryId: diaryId });
+        }
+    } catch (error) {
+        console.error("Error checking diary status:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+};

@@ -39,7 +39,6 @@ exports.registerEmotion = async (diaryID, emotions) => {
             emotions.슬픔,
             diaryID
         ]);
-        console.log(diaryID, result);
 
         if (db && db.end) db.end();
         return;
