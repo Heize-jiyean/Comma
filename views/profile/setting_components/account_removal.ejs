@@ -21,7 +21,7 @@
         display: flex;
         justify-content: flex-end;
     }
-    #saveButton {
+    .save-button {
         background-color: #5FD068;
         color: white;
         border: none;
@@ -30,10 +30,10 @@
         cursor: pointer;
         border-radius: 5px;
     }
-    #saveButton:hover {
+    .save-button:hover {
         background-color: #45a049;
     }
-    #saveButton:disabled {
+    .save-button:disabled {
         background-color: #E4E5EA;
         color: #A1A4AC;
         cursor: not-allowed;
@@ -46,7 +46,7 @@
     <input type="password" id="password" >
 </div>
 <div class="btn-container">
-    <button type="button" id="saveButton" disabled>탈퇴하기</button>
+    <button type="button" class="save-button" id="saveButton" disabled>탈퇴하기</button>
 </div>
 
 <script>

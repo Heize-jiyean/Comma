@@ -1,9 +1,16 @@
 <style>
+    .title {
+        font-size: 20px;
+        font-weight: 700;
+        border-bottom: 1px solid #D6D7DA;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+    }
     .photo-container {
-        margin-bottom: 20px;
+        margin-bottom: 40px;
     }
 
-    #photo-preview {
+    .photo-preview {
         width: 100px;
         height: 100px;
         border: 1px solid #ccc;
@@ -47,7 +54,7 @@
         cursor: not-allowed;
         border-radius: 5px;
     }
-    #saveButton {
+    .save-button {
         background-color: #5FD068;
         color: white;
         border: none;
@@ -56,10 +63,10 @@
         cursor: pointer;
         border-radius: 5px;
     }
-    #saveButton:hover {
+    .save-button:hover {
         background-color: #45a049;
     }
-    #saveButton:disabled {
+    .save-button:disabled {
         background-color: #E4E5EA;
         color: #A1A4AC;
         cursor: not-allowed;
@@ -68,55 +75,63 @@
 
 <!-- TODO: 프로필 사진 설정 추가 필요 -->
 <div class="photo-container">
-    <div id="photo-preview"></div>
+    <div class="title">프로필 이미지</div>
+    <div class="photo-preview"></div>
     <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*" onchange="previewProfilePhoto()">
-</div>
-<div class="form-group">
-    <label for="user-id">아이디</label>
-    <input type="text" id="user-id" name="user-id" value="<%= loginUser.id %>" readonly>
-</div>
-<div class="form-group">
-    <label for="nickname">닉네임</label>
-    <input type="text" id="nickname" name="nickname" value="<%= loginUser.nickname %>" data-initial-value="<%= loginUser.nickname %>">
-</div>
-<div class="form-group">
-    <label for="email">이메일</label>
-    <input type="email" id="email" name="email" value="<%= loginUser.email %>" readonly>
-</div>
-<div class="form-group">
-    <label for="gender">성별</label>
-    <select id="gender" name="gender" data-initial-value="<%= loginUser.gender %>"">
-        <option value="male" <%= loginUser.gender === 'male' ? 'selected' : '' %>>남</option>
-        <option value="female" <%= loginUser.gender === 'female' ? 'selected' : '' %>>여</option>
-    </select>
-</div>
-<div class="form-group">
-    <label for="birthYear">출생연도</label>
-    <select id="birthYear" name="birthYear" value="<%= loginUser.age %>" data-initial-value="<%= loginUser.age %>"></select>
-</div>
-<div class="form-group">
-    <label for="bio">소개</label>
-    <input type="text" id="bio" name="bio" value="<%= loginUser.bio %>" data-initial-value="<%= loginUser.bio %>">
-</div>
-<% if (loginRole === 'patient') { %>
-    <div class="form-group">
-        <label for="job">직업</label>
-        <input type="text" id="job" name="job" value="<%= loginUser.job %>" data-initial-value="<%= loginUser.job %>">
+    <div class="btn-container">
+        <button type="button" class="save-button" id="photoSaveButton" disabled>이미지 저장</button>
     </div>
-<% } else { %>
+</div>
+<div class="info-container">
+    <div class="title">프로필 정보</div>
     <div class="form-group">
-        <label for="specialty">전문의</label>
-        <input type="text" id="specialty" name="specialty" value="<%= loginUser.specialty %>" data-initial-value="<%= loginUser.specialty %>">
+        <label for="user-id">아이디</label>
+        <input type="text" id="user-id" name="user-id" value="<%= loginUser.id %>" readonly>
     </div>
     <div class="form-group">
-        <label for="experience">경력</label>
-        <input type="text" id="experience" name="experience" value="<%= loginUser.experience %>"" data-initial-value="<%= loginUser.experience %>">
+        <label for="nickname">닉네임</label>
+        <input type="text" id="nickname" name="nickname" value="<%= loginUser.nickname %>" data-initial-value="<%= loginUser.nickname %>">
     </div>
-<% } %>
+    <div class="form-group">
+        <label for="email">이메일</label>
+        <input type="email" id="email" name="email" value="<%= loginUser.email %>" readonly>
+    </div>
+    <div class="form-group">
+        <label for="gender">성별</label>
+        <select id="gender" name="gender" data-initial-value="<%= loginUser.gender %>"">
+            <option value="male" <%= loginUser.gender === 'male' ? 'selected' : '' %>>남</option>
+            <option value="female" <%= loginUser.gender === 'female' ? 'selected' : '' %>>여</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="birthYear">출생연도</label>
+        <select id="birthYear" name="birthYear" value="<%= loginUser.age %>" data-initial-value="<%= loginUser.age %>"></select>
+    </div>
+    <div class="form-group">
+        <label for="bio">소개</label>
+        <input type="text" id="bio" name="bio" value="<%= loginUser.bio %>" data-initial-value="<%= loginUser.bio %>">
+    </div>
+    <% if (loginRole === 'patient') { %>
+        <div class="form-group">
+            <label for="job">직업</label>
+            <input type="text" id="job" name="job" value="<%= loginUser.job %>" data-initial-value="<%= loginUser.job %>">
+        </div>
+    <% } else { %>
+        <div class="form-group">
+            <label for="specialty">전문의</label>
+            <input type="text" id="specialty" name="specialty" value="<%= loginUser.specialty %>" data-initial-value="<%= loginUser.specialty %>">
+        </div>
+        <div class="form-group">
+            <label for="experience">경력</label>
+            <input type="text" id="experience" name="experience" value="<%= loginUser.experience %>"" data-initial-value="<%= loginUser.experience %>">
+        </div>
+    <% } %>
+    
+    <div class="btn-container">
+        <button type="button" class="save-button" id="infoSaveButton" disabled>정보 저장</button>
+    </div>
+</div>
 
-<div class="btn-container">
-    <button type="button" id="saveButton" disabled>편집 완료</button>
-</div>
 
 <script>
     const loginRole = "<%= loginRole %>";
@@ -138,10 +153,10 @@
         }
     });
 
-    // 편집완료 버튼 활성화 상태를 동적으로 관리
+    // 정보 저장 버튼 활성화 상태를 동적으로 관리
     document.addEventListener("DOMContentLoaded", function() {
         const inputs = document.querySelectorAll('input:not([readonly]), select');
-        const saveButton = document.getElementById('saveButton');
+        const infoSaveButton = document.getElementById('infoSaveButton');
         
         let changeCount = 0;
         let fieldChanged = new Map();  // 각 필드의 변경 상태를 추적하기 위한 Map
@@ -160,13 +175,13 @@
                     fieldChanged.set(this, false);
                     changeCount--;
                 }
-                saveButton.disabled = (changeCount === 0);  // 변경된 필드가 없으면 버튼 비활성화
+                infoSaveButton.disabled = (changeCount === 0);  // 변경된 필드가 없으면 버튼 비활성화
             });
         });
     });
 
-    // 편집완료 버튼 눌렀을 때 실행됨
-    saveButton.addEventListener('click', function() {
+    // 정보 저장 버튼 눌렀을 때 실행됨
+    infoSaveButton.addEventListener('click', function() {
         const nickname = document.getElementById('nickname').value;
         const birthYear = document.getElementById('birthYear').value;
         const gender = document.getElementById('gender').value;
