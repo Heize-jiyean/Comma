@@ -203,8 +203,58 @@ exports.loginCounselor = async (email, password) => {
     }
 };
 
-// 환자 프로필 업데이트
-exports.updatePatientProfileInfo = async (patientId, profileData) => {
+// 환자 프로필 이미지 업데이트
+exports.updatePatientProfilePhoto = async (patientId, profilePhotoData) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            UPDATE patient
+            SET profile_picture = ?
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [
+            profilePhotoData.profile_picture,
+            patientId
+        ])
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return;
+
+    } catch (error) {
+        console.error('UserModel.updatePatientProfilePhoto 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 프로필 이미지 업데이트
+exports.updateCounselorProfilePhoto = async (counselorId, profilePhotoData) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            UPDATE counselor
+            SET profile_picture = ?
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [
+            profilePhotoData.profile_picture,
+            counselorId
+        ])
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return;
+
+    } catch (error) {
+        console.error('UserModel.updateCounselorProfilePhoto 오류:', error);
+        throw error;
+    }
+}
+
+// 환자 프로필 정보 업데이트
+exports.updatePatientProfileInfo = async (patientId, profileInfoData) => {
     try {
         const db = await require('../main').connection();
 
@@ -218,11 +268,11 @@ exports.updatePatientProfileInfo = async (patientId, profileData) => {
             WHERE patient_id = ?`;
 
         const [result] = await db.query(sql, [
-            profileData.nickname,
-            profileData.age,
-            profileData.gender,
-            profileData.bio,
-            profileData.job,
+            profileInfoData.nickname,
+            profileInfoData.age,
+            profileInfoData.gender,
+            profileInfoData.bio,
+            profileInfoData.job,
             patientId
         ]);
 
@@ -236,8 +286,8 @@ exports.updatePatientProfileInfo = async (patientId, profileData) => {
     }
 }
 
-// 상담사 프로필 업데이트
-exports.updateCounselorProfileInfo = async (counselorId, profileData) => {
+// 상담사 프로필 정보 업데이트
+exports.updateCounselorProfileInfo = async (counselorId, profileInfoData) => {
     try {
         const db = await require('../main').connection();
 
@@ -252,12 +302,12 @@ exports.updateCounselorProfileInfo = async (counselorId, profileData) => {
             WHERE counselor_id = ?`;
 
         const [result] = await db.query(sql, [
-            profileData.nickname,
-            profileData.age,
-            profileData.gender,
-            profileData.bio,
-            profileData.specialty,
-            profileData.experience,
+            profileInfoData.nickname,
+            profileInfoData.age,
+            profileInfoData.gender,
+            profileInfoData.bio,
+            profileInfoData.specialty,
+            profileInfoData.experience,
             counselorId
         ]);
 

@@ -20,6 +20,9 @@ router.get('/counselor/:counselorId', profileController.counselorProfilePage);
 // [GET] 프로필 설정 - 프로필 편집 페이지
 router.get('/settings/profileEdit', profileController.profileEditPage);
 
+// [PUT] 프로필 설정 - 프로필 편집 처리 (프로필 이미지)
+router.put('/settings/profilePhotoEdit', profileController.profilePhotoEdit);
+
 // [PUT] 프로필 설정 - 프로필 편집 처리 (프로필 정보)
 router.put('/settings/profileInfoEdit', profileController.profileInfoEdit);
 

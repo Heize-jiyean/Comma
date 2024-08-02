@@ -271,6 +271,28 @@ exports.profileEditPage = async(req, res) => {
     }
 }
 
+// 프로필 설정 - 프로필 편집 처리 (프로필 이미지)
+exports.profilePhotoEdit = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+
+    try {
+        const { profilePhotoData } = req.body;
+
+        if (loginRole === 'patient') {
+            UserModel.updatePatientProfilePhoto(loginId, profilePhotoData);
+        } else if (loginRole === 'counselor') {
+            UserModel.updateCounselorProfilePhoto(loginId, profilePhotoData);
+        }
+
+        res.status(200).json({ success: true });
+
+    } catch (error) {
+        console.log("프로필 설정 - 프로필 편집 처리 (프로필 이미지) 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
 // 프로필 설정 - 프로필 편집 처리 (프로필 정보)
 exports.profileInfoEdit = async(req, res) => {
     const loginId = req.session.user.id;
