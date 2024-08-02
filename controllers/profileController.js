@@ -280,9 +280,9 @@ exports.profileInfoEdit = async(req, res) => {
         const { profileInfoData } = req.body;
 
         if (loginRole === 'patient') {
-            UserModel.updatePatientProfile(loginId, profileInfoData);
+            UserModel.updatePatientProfileInfo(loginId, profileInfoData);
         } else if (loginRole === 'counselor') {
-            UserModel.updateCounselorProfile(loginId, profileInfoData);
+            UserModel.updateCounselorProfileInfo(loginId, profileInfoData);
         }
         
         res.status(200).json({ success: true });

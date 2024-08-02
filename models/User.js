@@ -204,7 +204,7 @@ exports.loginCounselor = async (email, password) => {
 };
 
 // 환자 프로필 업데이트
-exports.updatePatientProfile = async (patientId, profileData) => {
+exports.updatePatientProfileInfo = async (patientId, profileData) => {
     try {
         const db = await require('../main').connection();
 
@@ -231,13 +231,13 @@ exports.updatePatientProfile = async (patientId, profileData) => {
         return;
 
     } catch (error) {
-        console.error('UserModel.updatePatientProfile 오류:', error);
+        console.error('UserModel.updatePatientProfileInfo 오류:', error);
         throw error;
     }
 }
 
 // 상담사 프로필 업데이트
-exports.updateCounselorProfile = async (counselorId, profileData) => {
+exports.updateCounselorProfileInfo = async (counselorId, profileData) => {
     try {
         const db = await require('../main').connection();
 
@@ -266,7 +266,7 @@ exports.updateCounselorProfile = async (counselorId, profileData) => {
         return;
 
     } catch (error) {
-        console.error('UserModel.updateCounselorProfile 오류:', error);
+        console.error('UserModel.updateCounselorProfileInfo 오류:', error);
         throw error;
     }
 }
