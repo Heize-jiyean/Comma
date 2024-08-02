@@ -156,9 +156,30 @@
 </div>
 
 
-<script>
-    const loginUser = "<%= loginUser %>";
+<script type="module">
+    // 파이어베이스 관련
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAoZC_XqFl5HIJ1v3NYGWrCc5CH3FEvva0",
+        authDomain: "comma-5a85c.firebaseapp.com",
+        projectId: "comma-5a85c",
+        storageBucket: "comma-5a85c.appspot.com",
+        messagingSenderId: "193588412726",
+        appId: "1:193588412726:web:2c6994dbe833fff855f397"
+    };
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    // 페이지 변수
     const loginRole = "<%= loginRole %>";
+    let loginId;
+    if (loginRole === 'patient') {
+        loginId = "<%= loginUser.patient_id %>"
+    } else if (loginRole === 'counselor') {
+        loginId =  "<%= loginUser.counselor_id %>"
+    }
     const hasProfileImage = "<%= hasProfileImage %>";
     const photoSaveButton = document.getElementById('photoSaveButton');
     const infoSaveButton = document.getElementById('infoSaveButton');
@@ -167,6 +188,7 @@
     const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
 
     document.addEventListener("DOMContentLoaded", function() {
+        console.log(loginId);
         initializeDeleteButton();
         setBirthdayYearSelect();
         monitorProfilePhotoChange();
@@ -255,6 +277,61 @@
                 }
                 infoSaveButton.disabled = (changeCount === 0);  // 변경된 필드가 없으면 버튼 비활성화
             });
+        });
+    }
+
+    // 이미지 저장 버튼 눌렀을 때 실행됨
+    photoSaveButton.addEventListener('click', async () => {
+        let image_url = null;
+
+        if (photoInput.files.length > 0) {
+            const file = photoInput.files[0];
+            image_url = await uploadImage(file);
+        }
+
+        const profilePhotoData = {
+            profile_picture: image_url
+        }
+
+        sendPhotoDataToServer(profilePhotoData);
+    })
+
+    // 파이어베이스에 이미지를 올리기 위한 함수
+    async function uploadImage(file) {
+        const dateString = new Date().toISOString().split('T')[0];
+        const filename = `${file.name}_${loginRole}_${loginId}_${dateString}`;
+        const storageRef = ref(storage, 'profile/' + filename);
+
+        try {
+            const snapshot = await uploadBytes(storageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            return null;
+        }
+    }
+
+    // 서버로 프로필 이미지 PUT하는 함수
+    function sendPhotoDataToServer(data) {
+        fetch('/profile/settings/profilePhotoEdit', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ profilePhotoData: data })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('프로필 이미지 편집 완료');
+                window.location.reload();
+            } else {
+                alert(data.message);
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     }
 
