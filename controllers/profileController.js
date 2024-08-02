@@ -4,6 +4,8 @@ const GuestbookModel = require('../models/Guestbook');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
 
+const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
+
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -248,11 +250,19 @@ exports.profileEditPage = async(req, res) => {
             loginUser = await UserModel.getCounselorByCounselorId(loginId);
         }
 
+        let hasProfileImage = true;
+        if (!loginUser.profile_picture) {
+            console.log("프사 없음");
+            loginUser.profile_picture = DEFAULT_PROFILE_IMAGE;
+            hasProfileImage = false;
+        }
+
         // 렌더링
         res.render("profile/setting.ejs", { 
             page: 'profileEdit', 
             loginRole,
-            loginUser
+            loginUser,
+            hasProfileImage
         });
 
     } catch (error) {
@@ -261,24 +271,24 @@ exports.profileEditPage = async(req, res) => {
     }
 }
 
-// 프로필 설정 - 프로필 편집 처리
-exports.profileEdit = async(req, res) => {
+// 프로필 설정 - 프로필 편집 처리 (프로필 정보)
+exports.profileInfoEdit = async(req, res) => {
     const loginId = req.session.user.id;
     const loginRole = req.session.user.role;
     
     try {
-        const { profileData } = req.body;
+        const { profileInfoData } = req.body;
 
         if (loginRole === 'patient') {
-            UserModel.updatePatientProfile(loginId, profileData);
+            UserModel.updatePatientProfile(loginId, profileInfoData);
         } else if (loginRole === 'counselor') {
-            UserModel.updateCounselorProfile(loginId, profileData);
+            UserModel.updateCounselorProfile(loginId, profileInfoData);
         }
         
         res.status(200).json({ success: true });
 
     } catch (error) {
-        console.log("프로필 설정 - 프로필 편집 처리 오류:", error);
+        console.log("프로필 설정 - 프로필 편집 처리 (프로필 정보) 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }

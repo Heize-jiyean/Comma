@@ -20,8 +20,8 @@ router.get('/counselor/:counselorId', profileController.counselorProfilePage);
 // [GET] 프로필 설정 - 프로필 편집 페이지
 router.get('/settings/profileEdit', profileController.profileEditPage);
 
-// [PUT] 프로필 설정 - 프로필 편집 처리
-router.put('/settings/profileEdit', profileController.profileEdit);
+// [PUT] 프로필 설정 - 프로필 편집 처리 (프로필 정보)
+router.put('/settings/profileInfoEdit', profileController.profileInfoEdit);
 
 // [GET] 프로필 설정 - 비밀번호 변경 페이지
 router.get('/settings/passwordChange', profileController.passwordChangePage);
