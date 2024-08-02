@@ -188,7 +188,6 @@
     const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
 
     document.addEventListener("DOMContentLoaded", function() {
-        console.log(loginId);
         initializeDeleteButton();
         setBirthdayYearSelect();
         monitorProfilePhotoChange();
@@ -197,11 +196,12 @@
 
     // 사진 삭제버튼 초기화
     function initializeDeleteButton() {
-        if (!hasProfileImage) {
-            deleteButton.disabled;
-        } 
+        if (hasProfileImage === "false") {
+            deleteButton.disabled = true;
+        } else {
+            deleteButton.disabled = false;
+        }
     }
-
     // 생년월일 폼 설정
     function setBirthdayYearSelect() {
         const birthYearSelect = document.getElementById('birthYear');
