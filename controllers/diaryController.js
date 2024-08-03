@@ -60,7 +60,7 @@ exports.view = async (req, res) => {
     try {
         const diaryId = req.params.diaryId;
 
-        let diary = await diaryModel.findById(diaryId); // const
+        let diary = await DiaryModel.findById(diaryId); // const
         const patient = await UserModel.getPatientByPatientId(diary.patient_id); // ??Cannot read properties of null
 
         if (!diary) return res.render("main");
