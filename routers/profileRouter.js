@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const profileController = require("../controllers/profileController");
+const chartController = require("../controllers/profileController");
+
 
 
 // [GET] 환자 프로필 페이지 반환
@@ -14,6 +16,18 @@ router.get('/patient/:patientId/guestbooks', profileController.listAllGuestbooks
 
 // [GET] 상담사 프로필 페이지 반환
 router.get('/counselor/:counselorId', profileController.counselorProfilePage);
+
+// [GET] 프로필 수정 - 프로필 편집 페이지
+router.get('/settings/profileEdit', profileController.profileEditPage);
+
+// [GET] 프로필 수정 - 비밀번호 변경 페이지
+router.get('/settings/passwordChange', profileController.passwordChangePage);
+
+// [GET] 프로필 수정 - 회원 탈퇴 페이지
+router.get('/settings/accountRemoval', profileController.accounttRemovalPage);
+
+// [GET] 환자 감정 차트 페이지 
+router.get('/patient/:patientId/emotion-chart', profileController.charts)
 
 
 module.exports = router;

@@ -1,0 +1,121 @@
+<!-- 방명록 수정 페이지 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>방명록 수정</title>
+    <style>
+        body {
+            font-family: 'Pretendard-Regular', sans-serif;
+            background-color: #F4F5F8;
+            margin: 0;
+            padding: 0;
+        }
+        .guestbook-container {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #B3B4B9;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .guestbook-container h2 {
+            font-weight: 700;
+            font-size: 28px;
+            color: black;
+            margin-bottom: 16px;
+        }
+        .guestbook-container form {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .guestbook-container input[type="text"], .guestbook-container textarea {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #B3B4B9;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .guestbook-container textarea {
+            resize: none;
+            height: 200px;
+        }
+        .submit-button-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center; 
+        }
+        .button {
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        #cancel-button {
+            background-color: #B0BEC5; 
+            margin-right: 10px; 
+        }
+        #submit-button {
+            background-color: #5FD068; 
+        }
+        .button:disabled {
+            background-color: #E4E5EA;
+            color: #A1A4AC;
+            cursor: not-allowed;
+        }
+    </style>
+    
+    
+</head>
+<body>
+    <div class="guestbook-container">
+        <h2>방명록 수정</h2>
+        <form id="guestbook-form">
+            <input type="text" id="titleInput" name="title" value="<%= guestbook.title %>" required>
+            <textarea id="contentInput" name="content" required><%= guestbook.content %></textarea>
+            <div class="submit-button-container">
+                <div class="submit-button-container">
+                    <!-- <button id="cancel-button" class="button" onclick="location.href='/guestbook/view/<%= guestbook.guestbook_id %>'">취소</button> -->
+                    <!-- <button id="cancel-button" class="button" onclick="window.location.href='/guestbook/view/<%= guestbook.guestbook_id %>'">취소</button> -->
+                    <button id="cancel-button" type="button" class="button" onclick="location.href='/guestbook/<%= guestbook.guestbook_id %>'">취소</button>
+                    <button id="submit-button" class="button" type="submit">수정 완료</button>
+                </div>
+                
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('submit-button').addEventListener('click', async () => {
+            const title = document.getElementById('titleInput').value;
+            const content = document.getElementById('contentInput').value;
+            const guestbookId = '<%= guestbook.guestbook_id %>';
+            
+            fetch(`/guestbook/update/${guestbookId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.redirect) {
+                    window.location.href = data.redirect;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버 오류가 발생했습니다.');
+            });
+        });
+    </script>
+</body>
+</html>

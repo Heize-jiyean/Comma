@@ -1,0 +1,86 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스택드 바 차트</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #emotionMonthlyBarChart {
+            width: 100% !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="emotionMonthlyBarChart"></canvas>
+</body>
+
+<script>
+    // 서버에서 전달된 데이터를 EJS 템플릿으로 사용
+    const barChartData = <%- JSON.stringify(barChartData) %>;
+
+    // 데이터를 Chart.js 형식으로 변환
+    const chartLabels = Object.keys(barChartData);
+    const datasets = [
+        {
+            label: '기쁨',
+            data: chartLabels.map(key => barChartData[key].joy),
+            backgroundColor: '#FFAFCC',
+            barThickness: 20,
+        },
+        {
+            label: '당황',
+            data: chartLabels.map(key => barChartData[key].surprise),
+            backgroundColor: '#E9DF00',
+            barThickness: 20,
+        },
+        {
+            label: '분노',
+            data: chartLabels.map(key => barChartData[key].anger),
+            backgroundColor: '#FF4A4A',
+            barThickness: 20,
+        },
+        {
+            label: '불안',
+            data: chartLabels.map(key => barChartData[key].anxiety),
+            backgroundColor: '#FF9B52',
+            barThickness: 20,
+        },
+        {
+            label: '상처',
+            data: chartLabels.map(key => barChartData[key].hurt),
+            backgroundColor: '#62CC79',
+            barThickness: 20,
+        },
+        {
+            label: '슬픔',
+            data: chartLabels.map(key => barChartData[key].sadness),
+            backgroundColor: '#8588D5',
+            barThickness: 20,
+        }
+    ];
+
+    const chartContext = document.getElementById('emotionMonthlyBarChart').getContext('2d');
+    const barChart = new Chart(chartContext, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: datasets
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    stacked: true,
+                    afterFit: (scale) => {
+                        scale.height = Math.max(scale.height, 20 * chartLabels.length); // Adjust based on the number of labels
+                    }
+                }
+            }
+        }
+    });
+</script>

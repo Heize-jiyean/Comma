@@ -1,6 +1,6 @@
 const diaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
-const AccessCheck = require('../middlewares/auth');
+const AccessCheck = require('../utils/authUtils');
 
 
 exports.new = async (req, res) => {
@@ -29,6 +29,7 @@ exports.register = async (req, res) => {
         // 감정분석
 
         const savedDiaryId = await diaryModel.register(diaryData);
+        ////////////////////////////
         return res.json({ success: true, redirect: `/diary/${savedDiaryId}` });
     } catch (error) {
         console.error("registerDiary 오류:", error);
