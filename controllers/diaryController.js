@@ -18,11 +18,11 @@ exports.new = async (req, res) => {
 
             const patientId = req.session.user.id;
             const date = new Date();
-            const todayDiary = await DiaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
-            if (todayDiary) {
-                const redirect = `/diary/${todayDiary.diary_id}`;
-                return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
-            }
+            // const todayDiary = await DiaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
+            // if (todayDiary) {
+            //     const redirect = `/diary/${todayDiary.diary_id}`;
+            //     return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
+            // }
 
             res.render('diary/new', {patientId});
         }
@@ -119,7 +119,7 @@ exports.delete = async (req, res) => {
         if (req.session.user) {
             const diaryId = req.params.diaryId;
             const diary = await DiaryModel.findById(diaryId); 
-            const patient = await UserModel.getPatientById(diary.patient_id);
+            const patient = await UserModel.getPatientByPatientId(diary.patient_id);
             
             if (!AccessCheck.checkPatientId(req.session.user.role, req.session.user.id, diary.patient_id)) {
                 const referer = req.get('Referer') || '/';
@@ -196,7 +196,6 @@ exports.checkStatus = async (req, res) => {
     try {
         const diary = await DiaryModel.findById(diaryId);
         if (diary.joy == 0.00 && diary.surprise == 0.00 && diary.anger == 0.00 && diary.anxiety == 0.00 && diary.hurt == 0.00 && diary.sadness == 0.00) {
-            console.log(diary);
             res.json({ analyzed: false });
         } else {
             res.json({ analyzed: true, diaryId: diaryId });

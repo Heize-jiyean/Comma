@@ -331,7 +331,7 @@ exports.findAllByPatientId = async(patientId) => {
         return rows;
 
     } catch (error) {
-        console.log("Diary.findAllByPatientId() 쿼리 실행 중 오류: ", error)
+        console.error("Diary.findAllByPatientId() 쿼리 실행 중 오류: ", error)
     }
 }
 
@@ -354,7 +354,7 @@ exports.findLatestFourByPatientId = async (patientId) => {
         return rows;
 
     } catch (error) {
-        console.log("Diary.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
+        console.error("Diary.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
     }
 }
 
