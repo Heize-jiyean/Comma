@@ -66,9 +66,6 @@ exports.view = async (req, res) => {
             htmlContent = await response.text(); // HTML 콘텐츠 가져오기
         }
 
-        console.log(article);
-
-
         let interaction = { liked: false, bookmarked: false };
         let user = { role: null, id: null };
         if (req.session.user) {
