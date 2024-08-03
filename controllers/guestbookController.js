@@ -1,5 +1,6 @@
 const GuestbookModel = require('../models/Guestbook');
 const UserModel = require('../models/User'); 
+const CommentModel = require('../models/Comment');
 const AccessCheck = require('../utils/authUtils');
 
 // 방명록 작성 페이지 반환
@@ -64,12 +65,16 @@ exports.register = async (req, res) => {
     }
 }
 
+
 // 방명록 상세조회
+const moment = require('moment-timezone');
+
 exports.view = async (req, res) => {
     try {
         const guestbookId = req.params.guestbookId;
         let guestbook = await GuestbookModel.findById(guestbookId);
-        let patientUserId = await GuestbookModel.getPatientIdByGuestbookId(guestbookId);  // 새로운 함수 호출
+        let patientUserId = await GuestbookModel.getPatientIdByGuestbookId(guestbookId);
+        let comments = await GuestbookModel.getCommentsByGuestbookId(guestbookId);
 
         if (!guestbook) {
             return res.status(404).send("방명록을 찾을 수 없습니다.");
@@ -81,19 +86,21 @@ exports.view = async (req, res) => {
 
         const loggedInUser = req.session.user;
         const isOwner = loggedInUser && (loggedInUser.role === 'counselor' && loggedInUser.id === guestbook.counselor_id);
+        const isPatient = loggedInUser && (loggedInUser.role === 'patient' && loggedInUser.id == guestbook.patient_id);
 
         res.render('guestbook/view', {
             guestbook,
             isOwner,
             loggedInUser,
-            patientUserId  // 뷰로 환자의 ID 전달
+            patientUserId,
+            comments,
+            isPatient
         });
     } catch (error) {
         console.error("viewGuestbook 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 };
-
 
 // 방명록 수정 페이지 반환
 exports.edit = async (req, res) => {
@@ -134,8 +141,6 @@ exports.update = async (req, res) => {
 };
 
 
-
-
 // 방명록 삭제하기
 exports.delete = async (req, res) => {
     try {
@@ -163,5 +168,30 @@ exports.delete = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 };
+
+// 댓글작성
+exports.addComment = async (req, res) => {
+    try {
+        const { guestbookId, content } = req.body;
+        const authorId = req.session.user.id;
+        const authorType = req.session.user.role;
+
+        // UTC 시간을 KST로 변환
+        const createdAtKST = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
+
+        if (authorType === 'counselor') {
+            await CommentModel.createCounselorComment({ guestbook_id: guestbookId, author_id: authorId, content: content, created_at: createdAtKST });
+        } else if (authorType === 'patient') {
+            await CommentModel.createPatientComment({ guestbook_id: guestbookId, author_id: authorId, content: content, created_at: createdAtKST });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error("addComment 오류:", error);
+        res.status(500).json({ success: false, message: "서버 오류가 발생했습니다." });
+    }
+};
+
+
 
 

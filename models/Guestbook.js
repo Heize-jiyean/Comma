@@ -270,3 +270,33 @@ exports.delete = async (guestbookId) => {
         console.error("Guestbook.delete() 쿼리 실행 중 오류:", error);
     }
 };
+
+
+// 방명록 ID로 댓글 불러오는 함수
+exports.getCommentsByGuestbookId = async (guestbookId) => {
+    try {
+        const db = await require('../main').connection(); 
+        let sql = `
+            SELECT 'counselor' as author_type, cc.comment_id, cc.content, cc.created_at, c.nickname as author_name, c.profile_picture as author_image
+            FROM comment_counselor cc
+            JOIN counselor c ON cc.counselor_id = c.counselor_id
+            WHERE cc.guestbook_id = ?
+            UNION ALL
+            SELECT 'patient' as author_type, cp.comment_id, cp.content, cp.created_at, p.nickname as author_name, p.profile_picture as author_image
+            FROM comment_patient cp
+            JOIN patient p ON cp.patient_id = p.patient_id
+            WHERE cp.guestbook_id = ?
+            ORDER BY created_at DESC
+        `;
+        const [rows] = await db.query(sql, [guestbookId, guestbookId]);
+
+        if (db && db.end) db.end();
+        return rows;
+    } catch (error) {
+        console.error("getCommentsByGuestbookId() 쿼리 실행 중 오류:", error);
+        if (db && db.end) db.end();
+        return null;
+    }
+};
+
+
