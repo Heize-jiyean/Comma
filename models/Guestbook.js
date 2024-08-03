@@ -239,6 +239,24 @@ exports.countByCounselorId = async (counselorId) => {
     }
 }
 
+// 방명록 수정,업데이트
+exports.update = async (guestbookId, guestbookData) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `UPDATE guestbook SET title = ?, content = ? WHERE guestbook_id = ?`;
+
+        const [result] = await db.query(sql, [guestbookData.title, guestbookData.content, guestbookId]);
+
+        if (db && db.end) db.end();
+        return result.affectedRows;
+    } catch (error) {
+        console.error("Guestbook.update() 쿼리 실행 중 오류:", error);
+        if (db && db.end) db.end();
+        return null;
+    }
+};
+
+
 // 방명록 삭제 처리함수
 exports.delete = async (guestbookId) => {
     try {

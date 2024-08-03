@@ -71,6 +71,45 @@ exports.view = async (req, res) => {
 };
 
 
+// 방명록 수정 페이지 반환
+exports.edit = async (req, res) => {
+    try {
+        const guestbookId = req.params.guestbookId;
+        let guestbook = await GuestbookModel.findById(guestbookId);
+
+        if (!guestbook) {
+            return res.status(404).send("방명록을 찾을 수 없습니다.");
+        }
+
+        res.render('guestbook/edit', {
+            guestbook
+        });
+    } catch (error) {
+        console.error("editGuestbook 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+};
+
+// 방명록 수정 처리
+exports.update = async (req, res) => {
+    try {
+        const guestbookId = req.params.guestbookId;
+        const { title, content } = req.body;
+
+        let result = await GuestbookModel.update(guestbookId, { title, content });
+
+        if (result) {
+            res.json({ success: true, redirect: `/guestbook/${guestbookId}` });
+        } else {
+            res.status(404).send("업데이트할 방명록을 찾을 수 없습니다.");
+        }
+    } catch (error) {
+        console.error("updateGuestbook 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+};
+
+
 
 
 // 방명록 삭제하기
