@@ -52,7 +52,7 @@ exports.createCounselor = async (user) => {
 };
 
 // 환자정보 아이디로 가져오기
-exports.getPatientById = async (patientId) => {
+exports.getPatientByPatientId = async (patientId) => {
     try {
         const db = await require('../main').connection();
         let sql = `
@@ -66,7 +66,7 @@ exports.getPatientById = async (patientId) => {
 
         return rows.length > 0 ? rows[0] : null;
     } catch (error) {
-        console.error("UserModel.createUser() 쿼리 실행 중 오류:", error);
+        console.error("UserModel.getPatientByPatientId() 쿼리 실행 중 오류:", error);
         throw error;
     }
 };
@@ -202,6 +202,252 @@ exports.loginCounselor = async (email, password) => {
     }
 };
 
+// 환자 프로필 이미지 업데이트
+exports.updatePatientProfilePhoto = async (patientId, profilePhotoData) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            UPDATE patient
+            SET profile_picture = ?
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [
+            profilePhotoData.profile_picture,
+            patientId
+        ])
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return;
+
+    } catch (error) {
+        console.error('UserModel.updatePatientProfilePhoto 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 프로필 이미지 업데이트
+exports.updateCounselorProfilePhoto = async (counselorId, profilePhotoData) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            UPDATE counselor
+            SET profile_picture = ?
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [
+            profilePhotoData.profile_picture,
+            counselorId
+        ])
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return;
+
+    } catch (error) {
+        console.error('UserModel.updateCounselorProfilePhoto 오류:', error);
+        throw error;
+    }
+}
+
+// 환자 프로필 정보 업데이트
+exports.updatePatientProfileInfo = async (patientId, profileInfoData) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            UPDATE patient
+            SET nickname = ?,
+                age = ?,
+                gender = ?,
+                bio = ?,
+                job = ?
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [
+            profileInfoData.nickname,
+            profileInfoData.age,
+            profileInfoData.gender,
+            profileInfoData.bio,
+            profileInfoData.job,
+            patientId
+        ]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return;
+
+    } catch (error) {
+        console.error('UserModel.updatePatientProfileInfo 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 프로필 정보 업데이트
+exports.updateCounselorProfileInfo = async (counselorId, profileInfoData) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            UPDATE counselor
+            SET nickname = ?,
+                age = ?,
+                gender = ?,
+                bio = ?,
+                specialty = ?,
+                experience = ?
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [
+            profileInfoData.nickname,
+            profileInfoData.age,
+            profileInfoData.gender,
+            profileInfoData.bio,
+            profileInfoData.specialty,
+            profileInfoData.experience,
+            counselorId
+        ]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return;
+
+    } catch (error) {
+        console.error('UserModel.updateCounselorProfileInfo 오류:', error);
+        throw error;
+    }
+}
+
+// 환자 비밀번호 확인 
+exports.checkPatientPassword = async (patientId, inputPassword) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            SELECT password
+            FROM patient
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [patientId]);
+        const passwordMatch = await bcrypt.compare(inputPassword, result[0].password);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return passwordMatch;
+
+    } catch (error) {
+        console.log('UserModel.checkPatientPassword 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 비밀번호 확인
+exports.checkCounselorPassword = async (counselorId, inputPassword) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            SELECT password
+            FROM counselor
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [counselorId]);
+        const passwordMatch = await bcrypt.compare(inputPassword, result[0].password);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return passwordMatch;
+
+    } catch (error) {
+        console.log('UserModel.checkCounselorPassword 오류:', error);
+        throw error;
+    }
+}
+
+// 환자 비밀번호 변경
+exports.updatePatientPassword = async(patientId, newPassword) => {
+    try {
+        const db = await require('../main').connection();
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        let sql = `
+            UPDATE patient
+            SET password = ?
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [hashedPassword, patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result.affectedRows === 1;
+
+    } catch (error) {
+        console.log('UserModel.updatePatientPassword 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 비밀번호 변경
+exports.updateCounselorPassword = async(counselorId, newPassword) => {
+    try {
+        const db = await require('../main').connection();
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        let sql = `
+            UPDATE counselor
+            SET password = ?
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [hashedPassword, counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result.affectedRows === 1;
+
+    } catch (error) {
+        console.log('UserModel.updateCounselorPassword 오류:', error);
+        throw error;
+    }
+}
+
+
+// 환자 계정 탈퇴
+exports.removePatient = async (patientId) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            DELETE FROM patient
+            WHERE patient_id = ?`;
+
+        const [result] = await db.query(sql, [patientId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return (result.affectedRows === 1);
+
+    } catch (error) {
+        console.log('UserModel.removePatient 오류:', error);
+        throw error;
+    }
+}
+
+// 상담사 계정 탈퇴
+exports.removeCounselor = async (counselorId) => {
+    try {
+        const db = await require('../main').connection();
+        let sql = `
+            DELETE FROM counselor
+            WHERE counselor_id = ?`;
+
+        const [result] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return (result.affectedRows === 1);
+
+    } catch (error) {
+        console.log('UserModel.removeCounselor 오류:', error);
+        throw error;
+    }
+}
 exports.saveResetToken = async (userId, token, expires) => {
     try {
         const db = await require('../main').connection();

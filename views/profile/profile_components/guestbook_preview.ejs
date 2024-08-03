@@ -92,8 +92,9 @@
     <!-- 방명록 헤더 -->
     <div class="guestbook-container-header">
         <h2>방명록</h2>
-        <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
-        <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
+        <% if (loginRole === 'counselor') { %>
+            <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
+        <% } %>
     </div>
     <!-- 방명록 목록 -->
     <div class="guestbook-list">
@@ -131,7 +132,7 @@
 </div>
 
 <script>
-    document.getElementById('writeGuestbookButton').addEventListener('click', function() {
+    document.getElementById('writeGuestbookButton')?.addEventListener('click', function() {
         const patientId = '<%= patientUser.id %>';
         window.location.href = `/guestbook/new/${patientId}`;
     });

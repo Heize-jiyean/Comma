@@ -60,8 +60,8 @@ exports.view = async (req, res) => {
     try {
         const diaryId = req.params.diaryId;
 
-        let diary = await DiaryModel.findById(diaryId); // const
-        const patient = await UserModel.getPatientById(diary.patient_id); // ??Cannot read properties of null
+        let diary = await diaryModel.findById(diaryId); // const
+        const patient = await UserModel.getPatientByPatientId(diary.patient_id); // ??Cannot read properties of null
 
         if (!diary) return res.render("main");
         if (req.session.user) {
