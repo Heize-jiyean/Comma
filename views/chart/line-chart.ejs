@@ -20,7 +20,10 @@
     const emotionData = <%- JSON.stringify(lineChartEmotionData) %>;
 
     // 날짜별 데이터를 분리
-    const labels = emotionData.map(entry => entry.date);
+    const labels = emotionData.map(entry => {
+        const date = new Date(entry.created_at);
+        return `${date.getMonth() + 1}/${date.getDate().toString().padStart(2, '0')}`; // MM-DD 형식
+    });
     const joyData = emotionData.map(entry => entry.joy);
     const surpriseData = emotionData.map(entry => entry.surprise);
     const angerData = emotionData.map(entry => entry.anger);
@@ -105,7 +108,7 @@
                         text: 'Percentage'
                     },
                     suggestedMin: 0,
-                    suggestedMax: 100
+                    suggestedMax: 1
                 }
             }
         }

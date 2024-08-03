@@ -71,17 +71,24 @@
                         <a class="nav-link" href="/hospital">병원</a>
                     </li>
                     <% if (user) { %>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/mypage">마이페이지</a>
-                        </li>
+                        <% if (user.role === 'patient') { %>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/profile/patient/<%= user.custom_id %>">프로필</a>
+                            </li>
+                        <% } else if (user.role === 'counselor') { %>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/profile/counselor/<%= user.custom_id %>">프로필</a>
+                            </li>
+                        <% } %>
                     <% } else { %>
                         <li class="nav-item">
-                            <a class="nav-link" href="/auth/login">마이페이지</a>
+                            <a class="nav-link" href="/auth/login">프로필</a>
                         </li>
                     <% } %>
                     <% if (user) { %>
                     <li class="nav-item">
-                        <a class="nav-link" href="/auth/logout">로그아웃</a>
+                        <a class="nav-link" href="#" id="logout-button">로그아웃</a>
+                        <span id="logout-loading" style="display: none;">로그아웃 중...</span>
                     </li>
                     <% } else { %>
                     <li class="nav-item">
@@ -96,5 +103,6 @@
         </ul>
         <div class="header-border"></div>
     </div>
+    <script src="/js/main.js"></script>
 </body>
 </html>

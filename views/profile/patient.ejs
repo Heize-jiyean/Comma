@@ -28,10 +28,10 @@
         </div>
         <div class="content-container">
             <div class="content-column">
-                <%- include('./profile_components/diary_preview', { diaries: diaries }) %>
+                <%- include('./profile_components/diary_preview', { diaries: diaries, loginRole: loginRole }) %>
             </div>
             <div class="content-column">
-                <%- include('./profile_components/guestbook_preview', { guestbooks: guestbooks, showCounselorInfo: true }) %>
+                <%- include('./profile_components/guestbook_preview', { guestbooks: guestbooks, showCounselorInfo: true, loginRole: loginRole }) %>
             </div>
         </div>
     </div>
