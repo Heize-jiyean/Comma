@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아티클 작성 페이지</title>
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #F4F5F8; }
+    .container { display: flex; justify-content: center; margin: auto; max-width: 1280px; }
+    .panel { margin: 20px; padding: 20px; width: 80%; background: #FFFFFF; border-radius: 30px; }
+
+    .title { display: flex; align-items: center; }
+    .title h1 { font-size: 28px; margin: 10px; font-weight: bold; margin-bottom: 15px; }
+    .title p { margin: 0 0 0 10px; font-size: 14px; color: #888; }
+
+    .profile-link { text-decoration: none; color: black; }
+    .profile-link:hover, .profile-link:hover * { color: #4B8673; }
+    .profile-container { display: flex; align-items: center; gap: 15px; margin: 10px; }
+    #profile-image { width: 40px; height: 40px; border-radius: 50%; background-size: cover;
+      overflow: hidden; border: 1px solid #D6D7DA; object-fit: cover; }
+    .profile-container p { margin: 0; line-height: 1; font-size: 18px; }
+    #profile-small { font-size: 0.9rem; color: #333; margin-top: 5px; }
+
+    hr { margin: 20px 0; }
+    .content { padding: 10px; }
+    .content img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+    .interaction { margin: 20px; display: flex; gap: 10px; }
+    .interaction button { background: #FFFFFF; border: 1px solid #D3D3D3; border-radius: 5px; padding: 5px 10px; cursor: pointer; 
+      font-size: 15px; display: flex; align-items: center; gap: 5px; transition: background-color 0.3s, border-color 0.3s; }
+    .interaction button:hover { background: #f7f7f7; border-color: #A9A9A9; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="panel">
+        <div class="title">
+            <h1><%= article.title %></h1>
+            <p><%= new Date(article.created_at).toLocaleDateString('ko-KR') %></p>
+        </div>
+        <a href="/profile/counselor/<%= counselor.id %>" class="profile-link">
+            <div class="profile-container">
+                <img id="profile-image" src="<%= counselor.profile_picture %>" alt="프로필 이미지">
+                <div class="profile-info">
+                    <p><%= counselor.nickname %></p>
+                    <p id="profile-small"><%= counselor.specialty %></p>
+                </div>
+            </div>
+        </a>
+        <hr>
+        <div class="content">
+            <%- htmlContent %>
+        </div>
+
+        <div class="interaction">
+            <button id="likeButton" title="좋아요">
+                <i id="likeIcon" class="<%= interaction.liked ? 'fas' : 'far' %> fa-heart" style="color: red;"></i> 좋아요
+            </button>
+            <button id="bookmarkButton" title="북마크">
+                <i id="bookmarkIcon" class="<%= interaction.bookmarked ? 'fas' : 'far' %> fa-bookmark"></i> 북마크
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+<script>
+const likeButton = document.getElementById('likeButton');
+const likeIcon = document.getElementById('likeIcon');
+const bookmarkButton = document.getElementById('bookmarkButton');
+const bookmarkIcon = document.getElementById('bookmarkIcon');
+
+const articleId = '<%= article.article_id %>';
+const userRole = '<%= user.role %>';
+const userId = '<%= user.id %>';
+
+// 좋아요 버튼 이벤트 리스너
+likeButton.addEventListener('click', function() {
+  if (userId == 'null' || userId == '') { // 로그인 여부 확인
+    alert('로그인이 필요합니다.');
+    window.location.href = '/auth/login';
+    return;
+  }
+
+  fetch('/article/like', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ articleId, patientId: userId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.liked) {
+      likeIcon.classList.remove('far'); // 빈 하트 아이콘 클래스 제거
+      likeIcon.classList.add('fas'); // 채워진 하트 아이콘 클래스 추가
+      alert('좋아요를 등록했습니다');
+    } else if (!data.liked) {
+      likeIcon.classList.remove('fas'); // 채워진 하트 아이콘 클래스 제거
+      likeIcon.classList.add('far'); // 빈 하트 아이콘 클래스 추가
+      alert('좋아요 등록을 해제했습니다');
+    }
+  })
+  .catch(error => console.error('좋아요 변경 중 오류 발생:', error));
+});
+
+// 북마크 버튼 이벤트 리스너
+bookmarkButton.addEventListener('click', function() {
+if (userId == 'null' || userId == '') { // 로그인 여부 확인
+  alert('로그인이 필요합니다.');
+  window.location.href = '/auth/login';
+  return;
+}
+fetch('/article/bookmark', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ articleId, patientId: userId })
+})
+.then(response => response.json())
+.then(data => {
+  if (data.bookmarked) {
+    bookmarkIcon.classList.remove('far'); // 빈 북마크 아이콘 클래스 제거
+    bookmarkIcon.classList.add('fas'); // 채워진 북마크 아이콘 클래스 추가
+    bookmarkIcon.style.color = 'black'; // 북마크 아이콘 색상을 검은색으로 설정
+    alert('북마크를 등록했습니다');
+  } else if (!data.bookmarked) {
+    bookmarkIcon.classList.remove('fas'); // 채워진 북마크 아이콘 클래스 제거
+    bookmarkIcon.classList.add('far'); // 빈 북마크 아이콘 클래스 추가
+    bookmarkIcon.style.color = ''; // 북마크 아이콘 색상 초기화
+    alert('북마크 등록을 해제했습니다');
+  }
+})
+.catch(error => console.error('북마크 변경 중 오류 발생:', error));
+});
+
+</script>
