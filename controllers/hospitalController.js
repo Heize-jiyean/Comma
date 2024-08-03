@@ -6,9 +6,12 @@ exports.loadingMainPage = async (req, res) => {
     try {
         const reviews = await ReviewModel.getLatestReviews();
         const hospitals = await hospitalModel.getAllHospitals();
-        res.locals.reviews = reviews;
-        res.locals.hospitals = hospitals;
-        res.render('hospital/hospital');
+        res.render('hospital/hospital', { 
+            reviews: reviews,
+            hospitals: hospitals, // JSON.stringify 제거
+            naverMapClientId: process.env.NAVER_MAP_CLIENT_ID || '',
+            hospitalName: ''
+        });
     } catch (error) {
         console.error('Error loading main page:', error);
         res.status(500).send('Internal Server Error');
@@ -29,6 +32,15 @@ exports.getHospitalLocation = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// 검색어 자동 완성
+exports.getAutoComplete = async (req, res) => {
+    const query = req.query.query;
+    if (query) {
+        const suggestions = await hospitalModel.getAutocomplete(query);
+        res.json({ suggestions });
+    }
+}
 
 // 병원 별 코멘트 가져오기
 exports.getCommentByHospital = async (req, res) => {
@@ -53,3 +65,17 @@ exports.renderRegisterPage = (req, res) => {
         hospitalName: hospitalName
     });
 };
+
+//리뷰 제출
+exports.submitReview = async (req, res) => {
+    try {
+        const { hospital_id, patient_id, content } = req.body;
+        const reviewId = await ReviewModel.createReview({ hospital_id, patient_id, content });
+        const newReview = await ReviewModel.getReviewsByHospitalId(hospital_id);
+        res.status(201).json(newReview);
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+//console.log('Exporting controller functions:', Object.keys(exports));
