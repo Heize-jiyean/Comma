@@ -86,3 +86,19 @@ exports.getReviewsByHospitalId = async (hospitalId) => {
         throw new Error('Error fetching reviews by hospital ID: ' + err.message);
     }
 };
+
+// 리뷰 등록 함수
+exports.createReview = async (reviewData) => {
+    try {
+        const db = await require('../main').connection();
+        const [result] = await db.query(`
+            INSERT INTO review (hospital_id, patient_id, content, created_at)
+            VALUES (?, ?, ?, NOW())
+        `, [reviewData.hospital_id, reviewData.patient_id, reviewData.content]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+        return result.insertId;
+    } catch (err) {
+        throw new Error('Error creating review: ' + err.message);
+    }
+};

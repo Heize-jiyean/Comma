@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>병원 정보 및 리뷰</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript"
         src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=<%= naverMapClientId %>&submodules=geocoder"></script>
     <link rel="stylesheet" href="/css/hospital/hospital.css">
@@ -18,6 +17,11 @@
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search">
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
+                <container class="rel_search">
+                    <ul class="pop_rel_keywords">
+                        
+                    </ul>
+                </container>
             </div>
         </div>
         
@@ -53,7 +57,52 @@
         </div>
     </div>
 
+    <!-- 리뷰 모달 -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">리뷰 등록</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="hospitalForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">병원 이름</label>
+                            <input type="text" class="form-control" id="name" name="name" required readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">리뷰 내용</label>
+                            <p class="text-muted">이용하신 병원의 리뷰를 상세하게 적어주시면, 다른 환자분들의 병원 이용에 많은 도움이 됩니다.</p>
+                            <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+                        </div>
+                        <input type="hidden" id="hospital_id" name="hospital_id">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="submitReview()">리뷰 등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <input type="hidden" id="hospitalsData" value='<%= JSON.stringify(hospitals) %>' />
     <script src="/js/hospital.js"></script>
+
+    <script>
+    // 모달이 열릴 때 병원 이름과 ID를 설정
+    document.getElementById('reviewModal').addEventListener('show.bs.modal', function (event) {
+        // 이벤트가 버튼에 의해 트리거된 경우
+        if (event.relatedTarget) {
+            const button = event.relatedTarget;
+            const hospitalName = button.getAttribute('data-hospital-name');
+            const hospitalId = button.getAttribute('data-hospital-id');
+            document.getElementById('name').value = hospitalName;
+            document.getElementById('hospital_id').value = hospitalId;
+        }
+        // 그렇지 않은 경우 (JavaScript에서 직접 모달을 열 때)는 아무 작업도 하지 않음
+    });
+    </script>
 </body>
 </html>
