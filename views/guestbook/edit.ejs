@@ -82,8 +82,6 @@
             <textarea id="contentInput" name="content" required><%= guestbook.content %></textarea>
             <div class="submit-button-container">
                 <div class="submit-button-container">
-                    <!-- <button id="cancel-button" class="button" onclick="location.href='/guestbook/view/<%= guestbook.guestbook_id %>'">취소</button> -->
-                    <!-- <button id="cancel-button" class="button" onclick="window.location.href='/guestbook/view/<%= guestbook.guestbook_id %>'">취소</button> -->
                     <button id="cancel-button" type="button" class="button" onclick="location.href='/guestbook/<%= guestbook.guestbook_id %>'">취소</button>
                     <button id="submit-button" class="button" type="submit">수정 완료</button>
                 </div>

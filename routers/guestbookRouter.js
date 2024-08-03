@@ -22,4 +22,7 @@ router.post('/update/:guestbookId', guestbookController.update);
 // [DELETE] 방명록 삭제 
 router.delete('/:guestbookId', guestbookController.delete);
 
+// [POST] 방명록 댓글 작성
+router.post('/add-comment', guestbookController.addComment);
+
 module.exports = router;  
