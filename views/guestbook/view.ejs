@@ -7,19 +7,22 @@
 <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: #F4F5F8; }
-    .container { display: flex; flex-direction: column; margin: auto; max-width: 1280px; padding: 30px; }
-    .top-section { display: flex; justify-content: space-between; background: #FFFFFF; border-radius: 15px; margin-bottom: 40px; }
-    .panel { padding: 20px; flex: 1; }
+    .container { display: flex; margin: auto; max-width: 1280px; padding: 30px; }
+    .main-content { flex: 1; display: flex; flex-direction: column; background: #FFFFFF; border-radius: 15px; margin-right: 20px; max-height: 500px; overflow-y: auto; }
+    .sidebar { width: 350px; display: flex; flex-direction: column; background: #FFFFFF; border-radius: 15px; padding: 20px; max-height: 500px; overflow-y: auto; }
+    .panel { padding: 20px; flex: 1; display: flex; flex-direction: column; }
 
     .title, .content, .created_at { margin-bottom: 10px; }
     .title-container { display: flex; justify-content: space-between; align-items: center; }
     .title h1, .content p, .created_at { margin: 0; padding: 10px; }
     .title h1 { font-size: 24px; font-weight: bold; }
-    .content { font-size: 16px; white-space: pre-wrap; max-height: 350px; overflow-y: auto; }
+    .content { font-size: 16px; white-space: pre-wrap; flex: 1; overflow-y: auto; }
     .content-container { margin: 35px; margin-left: 0px; display: flex; flex-direction: column; position: relative; }
     .profile-container { display: flex; align-items: center; }
     .profile-container img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
     label { font-size: 0.9rem; color: #333; }
+
+    .edit-delete-container { display: flex; justify-content: flex-end; margin-top: auto; padding: 20px 0 0; }
 
     .edit-btn, .delete-btn {
         padding: 8px 16px;
@@ -34,11 +37,42 @@
         transition: all 0.3s ease;
     }
     .edit-btn:hover, .delete-btn:hover {
-        background-color: #ECEFF1; /* 호버 시 배경 색 변경 */
+        background-color: #ECEFF1;
+    }
+
+    .comments-section { margin-top: 20px; }
+    .comment { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ececec; }
+    .comment-author { display: flex; align-items: center; margin-bottom: 5px; }
+    .comment-author img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+    .comment-author span { font-weight: bold; margin-right: 10px; }
+    .comment-content p { margin: 0; }
+    .comment-date { font-size: 12px; color: #888; margin-left: 10px; }
+
+    textarea#comment-content {
+        width: 100%;
+        height: 60px;
+        padding: 10px;
+        margin-bottom: 10px;
+        resize: none;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    button[type="submit"] {
+        padding: 10px 20px;
+        background-color: #5FD068;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #0fcf1f;
     }
 </style>
 <script>
-    function handleDelete(guestbookId, patientUserId) {  // patientUserId 파라미터 추가
+    function handleDelete(guestbookId, patientUserId) {
         if (confirm('정말로 삭제하시겠습니까?')) {
             fetch(`/guestbook/${guestbookId}`, {
                 method: 'DELETE'
@@ -47,7 +81,6 @@
             .then(data => {
                 if (data.success && data.redirect) {
                     alert('방명록이 삭제되었습니다.');
-                    console.log(data.redirect);
                     window.location.href = data.redirect;
                 }
             })
@@ -57,13 +90,41 @@
             });
         }
     }
-</script>
 
-    
+    document.addEventListener("DOMContentLoaded", function() {
+        var commentForm = document.getElementById('comment-form');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const content = document.getElementById('comment-content').value;
+                const guestbookId = '<%= guestbook.guestbook_id %>';
+
+                fetch('/guestbook/add-comment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ guestbookId: guestbookId, content: content })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('댓글 추가 실패');
+                    }
+                })
+                .catch(error => {
+                    console.error('댓글 추가 중 에러 발생:', error);
+                });
+            });
+        }
+    });
+</script>
 </head>
 <body>
 <div class="container">
-    <div class="top-section">
+    <div class="main-content">
         <div class="panel content-container">
             <div class="profile-container">
                 <img src="<%= guestbook.author_profile_image %>" alt="Author Profile Image">
@@ -72,14 +133,39 @@
             <hr>
             <div class="title-container">
                 <div class="title"><h1><%= guestbook.title %></h1></div>
-                <div class="created_at"><%= new Date(guestbook.created_at).toLocaleDateString('ko-KR') %></div>
+                <div class="created_at"><%= new Date(guestbook.created_at).toLocaleString('ko-KR') %></div>
             </div>
             <div class="content"><p><%= guestbook.content %></p></div>
             <% if (isOwner) { %>
-                <div style="text-align: right; margin-top: 20px;">
+                <div class="edit-delete-container">
                     <button class="edit-btn" onclick="location.href='/guestbook/edit/<%= guestbook.guestbook_id %>'">수정</button>
                     <button class="delete-btn" onclick="handleDelete('<%= guestbook.guestbook_id %>', '<%= patientUserId %>')">삭제</button>
                 </div>
+            <% } %>
+        </div>
+    </div>
+    <div class="sidebar">
+        <div class="comments-section">
+            <% if (comments && comments.length > 0) { %>
+                <% comments.forEach(comment => { %>
+                    <div class="comment">
+                        <div class="comment-author">
+                            <img src="<%= comment.author_image %>" alt="Author Image">
+                            <span><%= comment.author_name %></span>
+                            <span class="comment-date"><%= new Date(comment.created_at).toLocaleString('ko-KR') %></span>
+                        </div>
+                        <div class="comment-content">
+                            <p><%= comment.content %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } %>
+            <% if (isOwner || isPatient) { %>
+                <form id="comment-form" method="post" action="/guestbook/add-comment">
+                    <textarea id="comment-content" name="content" placeholder="댓글을 입력하세요..." required></textarea>
+                    <input type="hidden" name="guestbookId" value="<%= guestbook.guestbook_id %>">
+                    <button type="submit">댓글 작성</button>
+                </form>
             <% } %>
         </div>
     </div>
