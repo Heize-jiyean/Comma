@@ -10,17 +10,55 @@
     .container { display: flex; flex-direction: column; margin: auto; max-width: 1280px; padding: 30px; }
     .top-section { display: flex; justify-content: space-between; background: #FFFFFF; border-radius: 15px; margin-bottom: 40px; }
     .panel { padding: 20px; flex: 1; }
-    
+
     .title, .content, .created_at { margin-bottom: 10px; }
     .title-container { display: flex; justify-content: space-between; align-items: center; }
     .title h1, .content p, .created_at { margin: 0; padding: 10px; }
     .title h1 { font-size: 24px; font-weight: bold; }
-    .content  { font-size: 16px; white-space: pre-wrap; max-height: 350px; overflow-y: auto; }
+    .content { font-size: 16px; white-space: pre-wrap; max-height: 350px; overflow-y: auto; }
     .content-container { margin: 35px; margin-left: 0px; display: flex; flex-direction: column; position: relative; }
     .profile-container { display: flex; align-items: center; }
     .profile-container img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
     label { font-size: 0.9rem; color: #333; }
+
+    .edit-btn, .delete-btn {
+        padding: 8px 16px;
+        margin-left: 10px;
+        border: 2px solid #B0BEC5; 
+        background-color: #FFFFFF; 
+        color: black;
+        border-radius: 13px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .edit-btn:hover, .delete-btn:hover {
+        background-color: #ECEFF1; /* 호버 시 배경 색 변경 */
+    }
 </style>
+<script>
+    function handleDelete(guestbookId, patientUserId) {  // patientUserId 파라미터 추가
+        if (confirm('정말로 삭제하시겠습니까?')) {
+            fetch(`/guestbook/${guestbookId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.redirect) {
+                    alert('방명록이 삭제되었습니다.');
+                    window.location.href = data.redirect;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버 오류가 발생했습니다.');
+            });
+        }
+    }
+</script>
+
+    
 </head>
 <body>
 <div class="container">
@@ -36,6 +74,12 @@
                 <div class="created_at"><%= new Date(guestbook.created_at).toLocaleDateString('ko-KR') %></div>
             </div>
             <div class="content"><p><%= guestbook.content %></p></div>
+            <% if (isOwner) { %>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="edit-btn" onclick="location.href='/guestbook/edit/<%= guestbook.guestbook_id %>'">수정</button>
+                    <button class="delete-btn" onclick="handleDelete('<%= guestbook.guestbook_id %>', '<%= patientUserId %>')">삭제</button>
+                </div>
+            <% } %>
         </div>
     </div>
 </div>

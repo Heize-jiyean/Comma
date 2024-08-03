@@ -1,7 +1,8 @@
 const UserModel = require('../models/User');
 const DiaryModel = require('../models/Diary')
 const GuestbookModel = require('../models/Guestbook');
-const AccessCheck = require('../middlewares/auth');
+const AccessCheck = require('../utils/authUtils');
+const EmotionData = require('../utils/emotionUtils');
 
 
 // 환자 프로필 페이지 반환
@@ -113,7 +114,6 @@ exports.listAllDiaries = async (req, res) => {
             if (Previews) {
                 Previews.forEach(preview => {
                     preview.image_url = setDefaultImage(preview.image_url);
-                    // preview.profile_picture = 프로필 기본이미지 설정
                 });
             }
     
@@ -175,4 +175,77 @@ exports.listAllGuestbooks = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 
+}
+
+
+// 프로필 수정 - 프로필 편집 페이지 밚환
+exports.profileEditPage = async(req, res) => {
+    try {
+        
+        // 렌더링
+        res.render("profile/setting.ejs", { page: 'profileEdit' });
+
+    } catch (error) {
+        console.error("프로필 수정 - 프로필 편집 페이지 반환 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+// 프로필 수정 - 비밀번호 변경 페이지 반환
+exports.passwordChangePage = async(req, res) => {
+    try {
+        // 렌더링
+        res.render("profile/setting.ejs", { page: 'passwordChange' });
+    } catch (error) {
+        console.log("프로필 수정 - 비밀번호 변경 페이지 반환 오류: ", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+// 프로필 수정 -탈퇴 페이지 밚환
+exports.accounttRemovalPage = async(req, res) => {
+    try {
+        // 렌더링
+        res.render("profile/setting.ejs", { page: 'accountRemoval' });
+    } catch (error) {
+        console.log("프로필 수정 - 탈퇴 페이지 반환 오류: ", error);
+    }
+}
+
+// 감정 차트 반환페이지 
+exports.charts = async (req, res) => {
+    try {
+        // 환자 정보 가져오기
+        const patientId = req.params.patientId;
+        const patientUser = await UserModel.getPatientByUserId(patientId);
+    
+        let Data = [];
+        // 데이터 불러오기 
+        if (req.query.year && req.query.month) {
+            Data = await DiaryModel.getEmotionDataByMonth(patientUser.patient_id, req.query.year, req.query.month);
+        }
+        else {
+            Data = await DiaryModel.getEmotionData(patientUser.patient_id);
+        }
+
+        const Percentages = await EmotionData.calculateEmotionPercentages(Data);
+        const descriptionEmotions = await  EmotionData.generateEmotionSummary(Percentages);
+        const monthlyPercentages = await EmotionData.calculateMonthlyEmotionPercentages(patientUser);
+
+        // console.log(Percentages);
+        // console.log(monthlyPercentages);
+
+
+
+        res.render('profile/emotion-chart', 
+            {patientUser, type: 'patient',
+            lineChartEmotionData: Data, 
+            doughnutChartEmotionData: Percentages,
+            barChartData: monthlyPercentages,
+            descriptionEmotions
+        });
+    } catch (error) {
+        console.error("newDiary 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
 }

@@ -1,0 +1,13 @@
+pandas
+numpy==1.23.1
+scikit-learn
+torch>=1.8.1
+gluonnlp==0.8.0
+tqdm
+sentencepiece
+transformers
+mxnet
+-f https://dist.mxnet.io/python/cpu
+git+https://github.com/SKTBrain/KoBERT.git#egg=kobert_tokenizer&subdirectory=kobert_hf
+firebase_admin
+requests

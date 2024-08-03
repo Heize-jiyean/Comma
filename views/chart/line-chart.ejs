@@ -1,0 +1,117 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Analysis Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #emotionLineChart {
+            width: 850px !important;
+            height: 400px !important;
+
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="emotionLineChart"></canvas>
+</body>
+<script>
+    // EJS 변수를 JavaScript 변수로 변환
+    const emotionData = <%- JSON.stringify(lineChartEmotionData) %>;
+
+    // 날짜별 데이터를 분리
+    const labels = emotionData.map(entry => {
+        const date = new Date(entry.created_at);
+        return `${date.getMonth() + 1}/${date.getDate().toString().padStart(2, '0')}`; // MM-DD 형식
+    });
+    const joyData = emotionData.map(entry => entry.joy);
+    const surpriseData = emotionData.map(entry => entry.surprise);
+    const angerData = emotionData.map(entry => entry.anger);
+    const anxietyData = emotionData.map(entry => entry.anxiety);
+    const hurtData = emotionData.map(entry => entry.hurt);
+    const sadnessData = emotionData.map(entry => entry.sadness);
+
+    // Line Chart
+    const lineCtx = document.getElementById('emotionLineChart').getContext('2d');
+    const emotionLineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: '기쁨',
+                    data: joyData,
+                    borderColor: '#FFAFCC',
+                    backgroundColor: 'rgba(255, 175, 204, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '당황',
+                    data: surpriseData,
+                    borderColor: '#FFF84F',
+                    backgroundColor: 'rgba(255, 248, 79, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '분노',
+                    data: angerData,
+                    borderColor: '#FF4A4A',
+                    backgroundColor: 'rgba(255, 74, 74, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '불안',
+                    data: anxietyData,
+                    borderColor: '#FF9B52',
+                    backgroundColor: 'rgba(255, 155, 82, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '상처',
+                    data: hurtData,
+                    borderColor: '#62CC79',
+                    backgroundColor: 'rgba(98, 204, 121, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '슬픔',
+                    data: sadnessData,
+                    borderColor: '#8588D5',
+                    backgroundColor: 'rgba(133, 136, 213, 0.2)',
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                    text: 'Emotion Analysis for the Last 30 Days'
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: false,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: false,
+                        text: 'Percentage'
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 1
+                }
+            }
+        }
+    });
+</script>
+

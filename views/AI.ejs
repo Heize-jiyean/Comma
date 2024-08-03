@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Form</title>
+    <style>
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            padding-top: 20px;
+        }
+
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+            max-width: 100%;
+        }
+
+        .form-container label {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .form-container textarea {
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 100%;
+            height: 150px;
+            resize: vertical;
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #5FD068;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-container button:hover {
+            background-color: #4CAF50;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 16px;
+            max-width: 600px;
+        }
+
+        .loading {
+            font-style: italic;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <form id="dataForm">
+            <label for="inputField">하고 싶은 말을 입력하세요.</label>
+            <textarea id="inputField" name="inputField" rows="5"></textarea>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="result"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const form = document.getElementById('dataForm');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const inputField = document.getElementById('inputField').value;
+            
+            resultDiv.innerHTML = '<p class="loading">결과를 불러오는 중입니다...</p>';
+
+            try {
+                const response = await fetch('/AI', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ inputField })
+                });
+
+                if (!response.ok) {
+                    throw new Error('서버에서 오류가 발생했습니다.');
+                }
+
+                const result = await response.json();
+
+                // 결과를 그래프로 표시하는 함수 호출
+                displayChart(result);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                resultDiv.innerHTML = '<p>결과를 가져오는 동안 문제가 발생했습니다.</p>';
+            }
+        });
+
+        function displayChart(result) {
+            const labels = Object.keys(result);
+            const data = Object.values(result);
+
+            const ctx = document.createElement('canvas');
+            resultDiv.innerHTML = '';
+            resultDiv.appendChild(ctx);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Emotion Probabilities',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Probability'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

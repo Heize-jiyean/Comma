@@ -11,6 +11,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
+const cors = require('cors');
 
 // 지도 API 미들웨어
 app.use((req, res, next) => {
@@ -67,8 +68,16 @@ app.use(session({
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');  // 서비스 계정 키 파일의 경로
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount), 
+  storageBucket: 'comma-5a85c.appspot.com'
 });
+
+// CORS 미들웨어 설정
+const corsOptions = {
+  origin: 'http://localhost:3000', // 클라이언트 도메인
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 
 // EJS 설정
 app.set('view engine', 'ejs');
@@ -135,6 +144,10 @@ app.use("/guestbook", guestbookRouter);
 
 const hospitalRouter = require('./routers/hospitalRouters');
 app.use("/hospital", hospitalRouter);
+
+const articleRouter = require('./routers/articleRouters');
+app.use("/article", articleRouter);
+
 
 // 404 에러 핸들러
 app.use((req, res, next) => {

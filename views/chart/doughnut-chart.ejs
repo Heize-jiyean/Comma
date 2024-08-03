@@ -1,0 +1,62 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Analysis Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #emotionDoughnutChart {
+            width: 400px !important;
+            height: 400px !important;
+
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="emotionDoughnutChart"></canvas>
+</body>
+<script>
+        const emotionPercentages = <%- JSON.stringify(doughnutChartEmotionData) %>;
+
+        const data = {
+            labels: ['기쁨', '당황', '분노', '불안', '상처', '슬픔'],
+            datasets: [{
+                data: [
+                    emotionPercentages.joy,
+                    emotionPercentages.surprise,
+                    emotionPercentages.anger,
+                    emotionPercentages.anxiety,
+                    emotionPercentages.hurt,
+                    emotionPercentages.sadness
+                ],
+                backgroundColor: ['#FFAFCC', '#FFF84F', '#FF4A4A', '#FF9B52', '#62CC79', '#8588D5'],
+                borderColor: ['rgba(255, 175, 204, 0.2)', 'rgba(255, 248, 79, 0.2)', 'rgba(255, 74, 74, 0.2)', 'rgba(255, 155, 82, 0.2)', 'rgba(98, 204, 121, 0.2)', 'rgba(133, 136, 213, 0.2)'],
+                borderWidth: 5
+            }]
+        };
+
+        const config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'left',
+                        labels: {
+                            font: { size: 16 },
+                            padding: 15,
+                        }
+                    },
+                    title: {
+                        display: false,
+                        text: 'Emotion Analysis for the Last 20 Days'
+                    }
+                }
+            }
+        };
+
+        const ctx = document.getElementById('emotionDoughnutChart').getContext('2d');
+        new Chart(ctx, config);
+    </script>
+
