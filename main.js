@@ -141,6 +141,41 @@ app.use("/guestbook", guestbookRouter);
 const hospitalRouter = require('./routers/hospitalRouters');
 app.use("/hospital", hospitalRouter);
 
+//AI 테스트용 코드(예시 코드 제공을 위해 추가 -> 확인 후 지워주세요.)
+const AI_get = async (req, res) => {
+  try {
+    res.render('AI')
+  } catch (error) {
+      console.error("AI 오류:", error);
+      res.status(500).send("서버 오류가 발생했습니다.");
+  }
+};
+
+const AI_post = async (req, res) => {
+  try {
+    const userData = req.body.inputField;
+
+    const result = spawn('python', ['./python/main.py', userData]);
+
+    result.stdout.on('data', (data) => {
+      const rs = data.toString();
+      try {
+          const parsedResult = JSON.parse(rs);
+          res.json(parsedResult);
+      } catch (e) {
+          res.status(500).json({ error: 'Failed to parse Python script output' });
+      }
+    });
+  } catch (error) {
+      console.error("AI 오류:", error);
+      res.status(500).send("서버 오류가 발생했습니다.");
+  }
+};
+
+app.get('/AI', AI_get);
+app.post('/AI', AI_post);
+//
+
 // 404 에러 핸들러
 app.use((req, res, next) => {
   res.status(404).json({ error: 'Not Found', message: 'The requested resource was not found.' });
