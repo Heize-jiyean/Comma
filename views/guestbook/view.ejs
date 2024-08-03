@@ -47,7 +47,6 @@
             .then(data => {
                 if (data.success && data.redirect) {
                     alert('방명록이 삭제되었습니다.');
-                    console.log(data.redirect);
                     window.location.href = data.redirect;
                 }
             })
