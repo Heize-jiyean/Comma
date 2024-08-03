@@ -1,5 +1,6 @@
 # Ignore .env files
 *.env
+*.venv
 
 #
 serviceAccountKey.json
