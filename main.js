@@ -7,6 +7,7 @@ const methodOverride = require("method-override");
 const app = express();
 const path = require('path');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const port = 3000;
 const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
@@ -39,12 +40,28 @@ exports.connection = async () => {
   }
 };
 
+// Session store 설정
+const options = {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PW,
+  database: process.env.DB_NAME
+};
+
+const sessionStore = new MySQLStore(options);
+
 // session 설정
 app.use(session({
+  key: 'session_cookie_name',
   secret: process.env.SECRET_KEY || 'fallback_secret_key',
+  store: sessionStore,
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production', // HTTPS를 사용하는 경우에만 true로 설정
+    maxAge: 5 * 60 * 60 * 1000 // 5시간
+  }
 }));
 
 // Firebase SDK 설정
@@ -82,14 +99,12 @@ app.use((req, res, next) => {
   next();
 });
 
-
 // user 변수 설정을 위한 미들웨어 (통합)
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
 
-/////////////////////////////////////////
 // 테스트 : 세션 확인
 app.get('/session-data', (req, res) => {
   if (req.session.user) {
@@ -103,7 +118,6 @@ app.get('/session-data', (req, res) => {
       });
   }
 });
-/////////////////////////////////////////
 
 app.use(methodOverride("_method"));
 
@@ -146,8 +160,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
 
-
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
   console.log('Final check NAVER_MAP_CLIENT_ID:', process.env.NAVER_MAP_CLIENT_ID);
 });
+
+// 클라이언트 측 JavaScript를 위한 코드 (로그아웃 기능)
+app.use(express.static('public'));
+

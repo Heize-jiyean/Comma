@@ -35,6 +35,17 @@
             background-color: #4FBF58;
             color: white;
         }
+        .forgot-password {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .forgot-password a {
+            color: #dc3545;
+            text-decoration: none;
+        }
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +72,9 @@
             <div class="login-footer">
                 <p>계정이 없으신가요? <a href="/auth/signup">회원가입</a></p>
             </div>
+            <div class="forgot-password">
+                <a href="/auth/forgot-password" id="forgot-password-link">비밀번호 찾기</a>
+            </div>
         </div>
     </div>
 
@@ -84,20 +98,30 @@
 
                 const result = await response.json();
 
-                if (!response.ok) {
+                if (result.success) {
+                    // 서버에서 받은 리다이렉트 URL로 페이지 이동
+                    window.location.href = result.redirectUrl;
+                } else {
                     if (result.field === 'email') {
                         document.getElementById('email-error').innerText = result.error;
                     } else if (result.field === 'password') {
                         document.getElementById('password-error').innerText = result.error;
+                    } else {
+                        // 일반적인 에러 메시지 표시
+                        alert(result.error || '로그인에 실패했습니다.');
                     }
                     document.getElementById('email').value = '';
                     document.getElementById('password').value = '';
-                } else {
-                    window.location.href = '/';
                 }
             } catch (error) {
                 console.error('Login error:', error);
+                alert('로그인 중 오류가 발생했습니다.');
             }
+        });
+
+        document.getElementById('forgot-password-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = this.href;
         });
     </script>
 </body>

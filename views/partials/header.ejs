@@ -81,7 +81,8 @@
                     <% } %>
                     <% if (user) { %>
                     <li class="nav-item">
-                        <a class="nav-link" href="/auth/logout">로그아웃</a>
+                        <a class="nav-link" href="#" id="logout-button">로그아웃</a>
+                        <span id="logout-loading" style="display: none;">로그아웃 중...</span>
                     </li>
                     <% } else { %>
                     <li class="nav-item">
@@ -96,5 +97,6 @@
         </ul>
         <div class="header-border"></div>
     </div>
+    <script src="/js/main.js"></script>
 </body>
 </html>
