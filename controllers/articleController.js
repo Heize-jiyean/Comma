@@ -4,6 +4,11 @@ const ArticleInteractionModel = require('../models/ArticleInteraction');
 const UserModel = require('../models/User');
 const fetch = require('node-fetch'); // node-fetch 모듈을 사용하여 fetch를 구현
 
+function setDefaultImage(image_url) {
+    if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
+    return image_url;
+}
+
 exports.new = async (req, res) => {
     try {
         if (req.session.user) {
@@ -60,6 +65,9 @@ exports.view = async (req, res) => {
             }
             htmlContent = await response.text(); // HTML 콘텐츠 가져오기
         }
+
+        console.log(article);
+
 
         let interaction = { liked: false, bookmarked: false };
         let user = { role: null, id: null };
@@ -125,37 +133,28 @@ exports.view = async (req, res) => {
 //     }
 // }
 
-// // 상담사 메인화면 일기 리스트
-// exports.list = async (req, res) => {
-//     try {
-//         if (req.session.user) {
-//             // if (!AccessCheck.checkCounselorRole(req.session.user.role)) {
-//             //     const referer = req.get('Referer') || '/';
-//             //     return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
-//             //  }
-//             // 개발편의를 위해 잠시 주석처리
+// 상담사 메인화면 일기 리스트
+exports.list = async (req, res) => {
+    try {
+        //const option = req.query.option ? req.query.option : "all"; // 좋아순/최신순
+        const currentPage = req.query.page ? parseInt(req.query.page) : 1;
 
-//              const option = req.query.option ? req.query.option : "all";
-//              let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-     
-//              const totalPages = Math.ceil( await diaryModel.countOfFindAll(option, 1) / 9);
-//              let Previews = await diaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
-     
-//              if (Previews) {
-//                  Previews.forEach(preview => {
-//                      preview.image_url = setDefaultImage(preview.image_url);
-//                      // preview.profile_picture = 프로필 기본이미지 설정
-//                  });
-//              }
-             
-//              res.render('main-counselor', {Previews, currentPage, totalPages});
-//         }
-//         else return res.render("login/login");
-//     } catch (error) {
-//         console.error("listAllDiaries 오류:", error);
-//         res.status(500).send("서버 오류가 발생했습니다.");
-//     }
-// }
+        const totalPages = Math.ceil( await ArticleModel.countOfFindAll() / 9);
+        let Previews = await ArticleModel.PreviewFindAll(currentPage); // 임시 상담사 설정
+
+        if (Previews) {
+            Previews.forEach(preview => {
+                preview.image_url = setDefaultImage(preview.image_url);
+                // preview.profile_picture = 프로필 기본이미지 설정
+            });
+        }
+        
+        res.render('article/articles', {Previews, currentPage, totalPages});
+    } catch (error) {
+        console.error("listAllDiaries 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
 
 
 // 좋아요 토글 

@@ -54,3 +54,48 @@ exports.increasedViews = async (articleId) => {
     }
 };
 
+exports.PreviewFindAll = async (page) => {
+    try {
+        const db = await require('../main').connection();        
+
+        const pageSize = 9;
+        let offset = pageSize * (page - 1);
+
+        let sql = `
+            SELECT 
+                a.*,
+                c.nickname,
+                c.profile_picture
+            FROM 
+                article a 
+            JOIN 
+                counselor c ON a.counselor_id = c.counselor_id
+            ORDER BY a.created_at DESC LIMIT ? OFFSET ?
+            ;`;      
+        const [rows] = await db.query(sql, [pageSize, offset]);
+
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows : null;
+
+    } catch (error) {
+        console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
+    }
+}
+exports.countOfFindAll = async () => {
+    try {
+        const db = await require('../main').connection();        
+        let sql = `
+            SELECT 
+                COUNT(*) AS total
+            FROM 
+                article
+            ;`;      
+        const [rows] = await db.query(sql);
+
+        if (db && db.end) db.end();
+        return rows[0].total;
+
+    } catch (error) {
+        console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
+    }
+}

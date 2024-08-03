@@ -315,9 +315,6 @@ exports.countOfFindByPatientId = async (patientId, role) => {
     }
 };
 
-
-
-
 exports.findAllByPatientId = async(patientId) => {
     try {
         const db = await require('../main').connection();

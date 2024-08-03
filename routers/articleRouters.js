@@ -10,7 +10,7 @@ router.use(bodyParser.json());
 router.get('/new', articleController.new);
 router.post('/register', articleController.register);
 
-// router.get('/', articleController.list);
+router.get('/', articleController.list);
 router.get('/:articleId', articleController.view);
 
 // router.delete('/:articleId', articleController.delete);
