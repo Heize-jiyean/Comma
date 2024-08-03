@@ -18,11 +18,11 @@ exports.new = async (req, res) => {
 
             const patientId = req.session.user.id;
             const date = new Date();
-            const todayDiary = await DiaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
-            if (todayDiary) {
-                const redirect = `/diary/${todayDiary.diary_id}`;
-                return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
-            }
+            // const todayDiary = await DiaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
+            // if (todayDiary) {
+            //     const redirect = `/diary/${todayDiary.diary_id}`;
+            //     return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
+            // }
 
             res.render('diary/new', {patientId});
         }
