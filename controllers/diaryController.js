@@ -47,7 +47,7 @@ exports.register = async (req, res) => {
             res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
 
             // 감정분석 후 WebSocket을 통해 메시지 전송
-            EmotionData.analyzeAndNotify(diaryData.content, savedDiaryId);
+            EmotionData.analyzeAndNotify(diaryData.content, diaryData.title, savedDiaryId);
         }
         else return res.render("login/login");
     } catch (error) {
@@ -172,7 +172,7 @@ exports.list = async (req, res) => {
              let currentPage = req.query.page ? parseInt(req.query.page) : 1;
      
              const totalPages = Math.ceil( await DiaryModel.countOfFindAll(option, 1) / 9);
-             let Previews = await DiaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
+             let Previews = await DiaryModel.PreviewfindAll(currentPage, option, req.session.user.id); // 임시 상담사 설정
      
              if (Previews) {
                  Previews.forEach(preview => {

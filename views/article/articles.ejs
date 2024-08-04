@@ -11,10 +11,21 @@
     .card-link:hover { color: #4B8673; }
     .card-body { margin: 10px; height: 160px;}
     .text-muted { padding-right: 12px; }
+
+    .button-container { display: flex; justify-content: flex-end; width: 100%; margin-bottom: 20px; }
+    .button-link { background-color: #5FD068; padding: 7px 13px; border-radius: 10px;
+        border: 1px solid #ccc; color: white; text-decoration: none; display: inline-block; text-align: center; }
+    .button-link:hover { background-color: #4caf50; color: white; }
 </style>
 </head>
 
 <div class="articles">
+    <% if (user.role === 'counselor') { %>
+    <div class="button-container">
+        <a href="/article/new" class="button-link">아티클 작성</a>
+    </div>
+    <% } %>
+
     <% if (!Previews || Previews.length === 0) { %>
         <p>No posts found.</p>
     <% } else { %>
@@ -24,7 +35,7 @@
                 <a href="/article/<%= Preview.article_id %>" class="card-link">
                 <div class="card">
                     <div class="card-img-container">
-                        <img src="<%= Preview.image_url %>" class="card-img-top" alt="Post Image">
+                        <img src="<%= Preview.thumbnail_url %>" class="card-img-top" alt="Post Image">
                     </div>
                     <div class="card-body">
                         <h5 class="card-title" style="font-weight: bold" ><%= Preview.title %></h5>

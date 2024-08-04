@@ -4,12 +4,13 @@ exports.register = async (article) => {
         const db = await require('../main').connection(); 
 
         let sql = `
-            INSERT INTO article (counselor_id, title, content) 
-            VALUES (?, ?, ?)`;
+            INSERT INTO article (counselor_id, title, content, thumbnail_url) 
+            VALUES (?, ?, ?, ?)`;
         const [result] = await db.query(sql, [
             article.counselor_id,
             article.title,
-            article.content
+            article.content,
+            article.thumbnail_url
         ]);
 
         if (db && db.end) db.end();
@@ -99,3 +100,20 @@ exports.countOfFindAll = async () => {
         console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
     }
 }
+
+exports.delete = async (articleId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            DELETE FROM article
+            WHERE article_id = ?`;
+        await db.query(sql, [articleId]);
+        
+        if (db && db.end) db.end();
+        return articleId;
+
+    } catch (error) {
+        console.error("Diary.delete() 쿼리 실행 중 오류:", error);
+    }
+};

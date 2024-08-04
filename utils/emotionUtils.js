@@ -83,9 +83,10 @@ exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
 }
 
 
-exports.analyzeAndNotify = async (content, diaryId) => {
+exports.analyzeAndNotify = async (content, title, diaryId) => {
     try {
         // 감정분석
+        content = content + title;
         const result = await spawn('python', ['./python/main.py', content]);
         result.stdout.on('data', (data) => {
             const rs = data.toString();

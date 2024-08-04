@@ -170,7 +170,12 @@ exports.PreviewfindAll = async (page, option, counselorId) => {
 
         let rows, fields;
         if (option == 'all') { [rows, fields] = await db.query(sql, [pageSize, offset]); }
-        else { [rows, fields] = await db.query(sql, [counselorId, pageSize, offset]); }
+        else { [rows, fields] = await db.query(sql, [counselorId, pageSize, offset]); 
+            console.log(rows);
+        }
+
+        console.log(page, option, counselorId);
+        console.log(rows);
 
         if (db && db.end) db.end();
         return rows.length > 0 ? rows : null;
