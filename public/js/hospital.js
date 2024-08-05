@@ -128,15 +128,25 @@ const startCheckingInput = () => {
     }, 500); // 0.5초마다 체크
 };
 
-// 입력값 확인 시작
-startCheckingInput();
-
 // 입력값 확인 중단 함수
 const stopCheckingInput = () => {
     if (checkInputInterval) {
         clearInterval(checkInputInterval);
+        checkInputInterval = null; // 인터벌 ID 초기화
     }
 };
+
+
+// 검색 필드가 포커스를 잃었을 때 입력값 확인 시작
+searchInput.addEventListener('focus', () => {
+    startCheckingInput();
+});
+
+// 검색 필드가 포커스를 얻었을 때 입력값 확인 중단
+searchInput.addEventListener('blur', () => {
+    stopCheckingInput();
+    relContainer.classList.add("hide"); // 포커스 시 추천 검색어 리스트 숨기기
+});
 
 // 병원 관련 자동검색어 완성 함수
 const loadData = async (input) => {
@@ -161,7 +171,7 @@ const updateAutocompleteList = (suggestions) => {
         suggestions.forEach((suggestion) => {
             const li = document.createElement('li');
             li.textContent = suggestion;
-            li.addEventListener('click', () => {
+            li.addEventListener('mousedown', () => {
                 searchInput.value = suggestion;  // 검색어를 입력 필드에 설정
                 relContainer.classList.add("hide");  // 추천 검색어 리스트 숨기기
                 form.requestSubmit();  // 폼 제출 트리거 (이벤트 방지하지 않음)
