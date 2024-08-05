@@ -36,7 +36,7 @@ if (hospitals.length > 0) {
         // 기본 제공 마커 생성
         const marker = new naver.maps.Marker({
             position: position,
-            title: hospital.name // 마커에 툴팁 텍스트 추가
+            title: hospital.name
         });
 
         // 인포윈도우에 병원 이름 추가
@@ -150,31 +150,29 @@ searchInput.addEventListener('blur', () => {
 
 // 병원 관련 자동검색어 완성 함수
 const loadData = async (input) => {
-    console.log('Fetching data for:', input); // 요청 로그
     try {
         const response = await fetch(`/hospital/autocomplete?query=${encodeURIComponent(input)}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log('Data received:', data); // 응답 데이터 로그
         updateAutocompleteList(data.suggestions);
     } catch (error) {
         console.error('Error fetching data:', error);
     }
 };
 
-// 검색어 자동완성 목록을 업데이트합니다
+// 검색어 자동완성 목록을 업데이트
 const updateAutocompleteList = (suggestions) => {
     ul.innerHTML = ''; // 기존 목록 초기화
     if (suggestions.length > 0) {
         suggestions.forEach((suggestion) => {
             const li = document.createElement('li');
             li.textContent = suggestion;
-            li.addEventListener('mousedown', () => {
-                searchInput.value = suggestion;  // 검색어를 입력 필드에 설정
-                relContainer.classList.add("hide");  // 추천 검색어 리스트 숨기기
-                form.requestSubmit();  // 폼 제출 트리거 (이벤트 방지하지 않음)
+            li.addEventListener('mousedown', () => { // 입력 즉시 폼이 제출되도록 mousedown 사용
+                searchInput.value = suggestion;
+                relContainer.classList.add("hide");
+                form.requestSubmit();
             });
             ul.appendChild(li);
         });
