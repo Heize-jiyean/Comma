@@ -130,15 +130,16 @@ exports.update = async (req, res) => {
         let result = await GuestbookModel.update(guestbookId, { title, content });
 
         if (result) {
-            res.json({ success: true, redirect: `/guestbook/${guestbookId}` });
+            return res.json({ success: true, redirect: `/guestbook/${guestbookId}` });
         } else {
-            res.status(404).send("업데이트할 방명록을 찾을 수 없습니다.");
+            return res.status(404).send("업데이트할 방명록을 찾을 수 없습니다.");
         }
     } catch (error) {
         console.error("updateGuestbook 오류:", error);
-        res.status(500).send("서버 오류가 발생했습니다.");
+        return res.status(500).send("서버 오류가 발생했습니다.");
     }
 };
+
 
 
 // 방명록 삭제하기
