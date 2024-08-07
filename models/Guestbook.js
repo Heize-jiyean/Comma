@@ -248,13 +248,15 @@ exports.update = async (guestbookId, guestbookData) => {
         const [result] = await db.query(sql, [guestbookData.title, guestbookData.content, guestbookId]);
 
         if (db && db.end) db.end();
-        return result.affectedRows;
+        return result.affectedRows > 0; // true 또는 false 반환
     } catch (error) {
         console.error("Guestbook.update() 쿼리 실행 중 오류:", error);
         if (db && db.end) db.end();
-        return null;
+        throw new Error("데이터베이스 오류 발생");
     }
 };
+
+
 
 
 // 방명록 삭제 처리함수
