@@ -39,9 +39,9 @@ exports.new = async (req, res) => {
 }
 
 // 방명록 작성 내용 등록
-exports.register = async (req, res) => {
-    const loginId = req.session.user.id;
+const moment = require('moment-timezone');
 
+exports.register = async (req, res) => {
     try {
         const { guestbookData } = req.body;
         console.log(guestbookData);
@@ -49,13 +49,17 @@ exports.register = async (req, res) => {
         const patientId = req.params.patientId; 
         const patientUser = await UserModel.getPatientByUserId(patientId);
 
-        const counselorId = loginId;
+        const counselorId = req.session.user.id;  // 현재 로그인된 상담사 ID 사용
+        // 방명록 작성 시간을 KST로 설정
+        const createdAt = moment().tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
 
-        newGuestbookData = {
+        const newGuestbookData = {
             patient_id: patientUser.patient_id,
             counselor_id: counselorId,
-            ...guestbookData
-        }
+            title: guestbookData.title,
+            content: guestbookData.content,
+            created_at: createdAt, // KST로 변환된 시간
+        };
 
         const savedGuestbookId = await GuestbookModel.register(newGuestbookData);
         return res.json({ success: true, redirect: `/guestbook/${savedGuestbookId}` });
@@ -63,12 +67,10 @@ exports.register = async (req, res) => {
         console.error("registerGuestbook 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
-}
+};
 
 
 // 방명록 상세조회
-const moment = require('moment-timezone');
-
 exports.view = async (req, res) => {
     try {
         const guestbookId = req.params.guestbookId;
@@ -130,15 +132,17 @@ exports.update = async (req, res) => {
         let result = await GuestbookModel.update(guestbookId, { title, content });
 
         if (result) {
-            res.json({ success: true, redirect: `/guestbook/${guestbookId}` });
+            return res.json({ success: true, redirect: `/guestbook/${guestbookId}` });
         } else {
-            res.status(404).send("업데이트할 방명록을 찾을 수 없습니다.");
+            return res.status(404).send("업데이트할 방명록을 찾을 수 없습니다.");
         }
     } catch (error) {
         console.error("updateGuestbook 오류:", error);
-        res.status(500).send("서버 오류가 발생했습니다.");
+        return res.status(500).send("서버 오류가 발생했습니다.");
     }
 };
+
+
 
 
 // 방명록 삭제하기
@@ -170,27 +174,65 @@ exports.delete = async (req, res) => {
 };
 
 // 댓글작성
+// exports.addComment = async (req, res) => {
+//     try {
+//         const { guestbookId, content } = req.body;
+//         const authorId = req.session.user.id;
+//         const authorType = req.session.user.role;
+
+//         // UTC 시간을 KST로 변환
+//         const createdAtKST = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
+
+//         if (authorType === 'counselor') {
+//             await CommentModel.createCounselorComment({ guestbook_id: guestbookId, author_id: authorId, content: content, created_at: createdAtKST });
+//         } else if (authorType === 'patient') {
+//             await CommentModel.createPatientComment({ guestbook_id: guestbookId, author_id: authorId, content: content, created_at: createdAtKST });
+//         }
+
+//         res.json({ success: true });
+//     } catch (error) {
+//         console.error("addComment 오류:", error);
+//         res.status(500).json({ success: false, message: "서버 오류가 발생했습니다." });
+//     }
+// };
+
+// 댓글작성
 exports.addComment = async (req, res) => {
     try {
         const { guestbookId, content } = req.body;
         const authorId = req.session.user.id;
         const authorType = req.session.user.role;
+        let commentData;
 
         // UTC 시간을 KST로 변환
         const createdAtKST = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
 
         if (authorType === 'counselor') {
-            await CommentModel.createCounselorComment({ guestbook_id: guestbookId, author_id: authorId, content: content, created_at: createdAtKST });
+            commentData = await CommentModel.createCounselorComment({ guestbook_id: guestbookId, author_id: authorId, content: content });
         } else if (authorType === 'patient') {
-            await CommentModel.createPatientComment({ guestbook_id: guestbookId, author_id: authorId, content: content, created_at: createdAtKST });
+            commentData = await CommentModel.createPatientComment({ guestbook_id: guestbookId, author_id: authorId, content: content });
         }
 
-        res.json({ success: true });
+        // 댓글 데이터 전송
+        if (commentData) {
+            res.json({ 
+                success: true,
+                comment: {
+                    author_image: req.session.user.profile_picture,
+                    author_name: req.session.user.nickname,
+                    created_at: commentData.created_at,
+                    content: commentData.content
+                }
+            });
+        } else {
+            res.status(400).json({ success: false, message: "댓글 추가 실패" });
+        }
     } catch (error) {
         console.error("addComment 오류:", error);
         res.status(500).json({ success: false, message: "서버 오류가 발생했습니다." });
     }
 };
+
 
 
 

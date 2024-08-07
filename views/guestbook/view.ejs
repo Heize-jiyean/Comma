@@ -92,34 +92,61 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        var commentForm = document.getElementById('comment-form');
-        if (commentForm) {
-            commentForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const content = document.getElementById('comment-content').value;
-                const guestbookId = '<%= guestbook.guestbook_id %>';
+    var commentForm = document.getElementById('comment-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const content = document.getElementById('comment-content').value;
+            const guestbookId = '<%= guestbook.guestbook_id %>';
 
-                fetch('/guestbook/add-comment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ guestbookId: guestbookId, content: content })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        alert('댓글 추가 실패');
-                    }
-                })
-                .catch(error => {
-                    console.error('댓글 추가 중 에러 발생:', error);
-                });
+            fetch('/guestbook/add-comment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ guestbookId: guestbookId, content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 새로운 댓글을 동적으로 추가하는 부분
+                    const newComment = document.createElement('div');
+                    newComment.classList.add('comment');
+
+                    const commentAuthor = document.createElement('div');
+                    commentAuthor.classList.add('comment-author');
+                    commentAuthor.innerHTML = `
+                        <img src="${data.comment.author_image}" alt="Author Image">
+                        <span>${data.comment.author_name}</span>
+                        <span class="comment-date">${new Date(data.comment.created_at).toLocaleString('ko-KR')}</span>
+                    `;
+                    newComment.appendChild(commentAuthor);
+
+                    const commentContent = document.createElement('div');
+                    commentContent.classList.add('comment-content');
+                    commentContent.innerHTML = `<p>${data.comment.content}</p>`;
+                    newComment.appendChild(commentContent);
+
+                    const commentsSection = document.querySelector('.comments-section');
+                    commentsSection.insertBefore(newComment, commentsSection.firstChild);
+
+                    // 댓글 입력 필드 초기화
+                    document.getElementById('comment-content').value = '';
+                } else {
+                    alert('댓글 추가 실패');
+                }
+            })
+            .catch(error => {
+                console.error('댓글 추가 중 에러 발생:', error);
+                alert('서버 오류가 발생했습니다.');
             });
-        }
-    });
+        });
+    }
+});
+
+
+
+
 </script>
 </head>
 <body>
