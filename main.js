@@ -125,8 +125,15 @@ app.use(methodOverride("_method"));
 app.use(layouts);
 
 // 페이지 라우팅
+
+// 메인페이지 설정
+const mainController = require('./controllers/mainController');
 app.get('/', (req, res) => {
-  res.render('main');
+  if (req.session.user) {
+    if (req.session.user.role === 'patient') mainController.main_patient(req, res);
+    else if (req.session.user.role === 'counselor') mainController.main_counselor(req, res);
+  } 
+  else mainController.main(req, res); // 사용자가 로그인하지 않았을 경우
 });
 
 // 라우트 설정

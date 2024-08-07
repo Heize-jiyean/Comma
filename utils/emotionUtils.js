@@ -64,7 +64,7 @@ exports.generateEmotionSummary = (percentageData) => {
 exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
     const allPercentages = {};
     //const startDate = new Date(patientUser.registration_time); 
-    const startDate = new Date(new Date().getFullYear(), 3, 1); // 임시데이터
+    const startDate = new Date(new Date().getFullYear(), new Date().getMonth() -3, 1); // 4개월 전부터
     const endDate = new Date();
 
     let currentDate = new Date(startDate);

@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const profileController = require("../controllers/profileController");
-const chartController = require("../controllers/profileController");
-
 
 
 // [GET] 환자 프로필 페이지 반환
@@ -39,7 +37,7 @@ router.get('/settings/accountRemoval', profileController.accountRemovalPage);
 router.post('/settings/accountRemoval', profileController.accountRemoval);
 
 // [GET] 환자 감정 차트 페이지 
-router.get('/patient/:patientId/emotion-chart', profileController.charts)
-
+//router.get('/profile/patient/:patientId/line-chart-partial', profileController.getLineChartPartial);
+router.get('/patient/:patientId/emotion-chart', profileController.charts);
 
 module.exports = router;

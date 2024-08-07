@@ -57,13 +57,11 @@
             <div class="line-chart">
                 <div class="line-chart-header">
                     <p style="margin-left: 20px">나의 최근 감정 변화를 살펴 보세요.</p>
-                    <!--콤보박스
                     <div class="combo-box">
                         <label for="month-select">날자 선택: </label>
                         <select id="month-select" name="month-select" onchange="sendMonthSelection()">
                         </select>
                     </div>
-                    -->
                 </div>
                 <%- include('../chart/line-chart') %>
             </div><hr style="margin-top: 50px">
@@ -103,40 +101,68 @@
 </html>
 
 <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            populateMonthSelect();
-        });
+    document.addEventListener('DOMContentLoaded', (event) => {
+        populateMonthSelect();
+    });
 
-        function populateMonthSelect() {
-            const select = document.getElementById('month-select');
-            const registrationDate = new Date('<%= patientUser.registration_time %>');
-            const currentDate = new Date();
-            const months = [];
+    function populateMonthSelect() {
+        const select = document.getElementById('month-select');
+        const registrationDate = new Date('<%= patientUser.registration_time %>');
+        const currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth() + 1; 
 
-            for (let year = registrationDate.getFullYear(); year <= currentDate.getFullYear(); year++) {
-                const startMonth = (year === registrationDate.getFullYear()) ? registrationDate.getMonth() + 1 : 1;
-                const endMonth = (year === currentDate.getFullYear()) ? currentDate.getMonth() + 1 : 12;
+        // 현재 URL에서 year와 month 쿼리 파라미터 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryYear = urlParams.get('year');
+        const queryMonth = urlParams.get('month');
 
-                for (let month = endMonth; month >= startMonth; month--) {
-                    months.push(`${year}년 ${month}월`);
-                }
+        // 쿼리 파라미터가 존재하면 해당 값을 기본 선택값으로 설정
+        if (queryYear && queryMonth) {
+            currentYear = parseInt(queryYear);
+            currentMonth = parseInt(queryMonth);
+        }
+
+        const months = [];
+        for (let year = registrationDate.getFullYear(); year <= currentDate.getFullYear(); year++) {
+            const startMonth = (year === registrationDate.getFullYear()) ? registrationDate.getMonth() + 1 : 1;
+            const endMonth = (year === currentDate.getFullYear()) ? currentDate.getMonth() + 1 : 12;
+
+            for (let month = startMonth; month <= endMonth; month++) {
+                months.push(`${year}년 ${month}월`);
             }
-
-            months.forEach(month => {
-                const option = document.createElement('option');
-                option.value = month;
-                option.textContent = month;
-                select.appendChild(option);
-            });
         }
 
-        function sendMonthSelection() {
-            const select = document.getElementById('month-select');
-            const patient_id = "<%= patientUser.id %>";
-            const selected = select.value;
-            const [selectedYear, selectedMonthPart] = selected.split('년 ');
-            const selectedMonth = selectedMonthPart.replace('월', '').trim();
+        // 옵션을 콤보박스에 추가하고 현재 연도와 월로 기본값 설정
+        months.forEach(month => {
+            const option = document.createElement('option');
+            option.value = month;
+            option.textContent = month;
+            select.appendChild(option);
 
-            window.location.href = `/profile/patient/${patient_id}/emotion-chart?year=${selectedYear}&month=${selectedMonth}`;             
-        }
-    </script>
+            // 쿼리 파라미터 값 또는 현재 날짜로 기본 선택값 설정
+            if (month === `${currentYear}년 ${currentMonth}월`) {
+                option.selected = true;
+            }
+        });
+    }
+
+    function sendMonthSelection() {
+        const select = document.getElementById('month-select');
+        const patient_id = "<%= patientUser.id %>";
+        const selected = select.value;
+        const [selectedYear, selectedMonthPart] = selected.split('년 ');
+        const selectedMonth = selectedMonthPart.replace('월', '').trim();
+
+        window.location.href = `/profile/patient/${patient_id}/emotion-chart?year=${selectedYear}&month=${selectedMonth}`;
+
+        // fetch(`/profile/patient/${patient_id}/line-chart-partial?year=${selectedYear}&month=${selectedMonth}`)
+        //     .then(response => response.text())
+        //     .then(html => {
+        //         document.getElementById('line-chart-container').innerHTML = html;
+        //     })
+        //     .catch(error => {
+        //         console.error('Error fetching emotion data:', error);
+        //     });
+    }
+</script>

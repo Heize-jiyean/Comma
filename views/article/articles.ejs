@@ -12,6 +12,7 @@
     .card-body { margin: 10px; height: 160px;}
     .text-muted { padding-right: 12px; }
 
+    .sort-combobox { margin-left: 20px; margin: 10px; display: flex; justify-content: flex-start; width: 100%;}
     .button-container { display: flex; justify-content: flex-end; width: 100%; margin-bottom: 20px; }
     .button-link { background-color: #5FD068; padding: 7px 13px; border-radius: 10px;
         border: 1px solid #ccc; color: white; text-decoration: none; display: inline-block; text-align: center; }
@@ -25,6 +26,15 @@
         <a href="/article/new" class="button-link">아티클 작성</a>
     </div>
     <% } %>
+    <div class="sort-combobox">
+        <label for="theme_id">정렬 선택: </label>
+        <select id="sortSelect" onchange="searchPosts()" style="margin-left: 10px;">
+            <option value="latest">최신순</option>
+            <option value="views">조회순</option>
+            <option value="likes">좋아요순</option>
+            <option value="bookmarks">북마크순</option>
+        </select>
+    </div>
 
     <% if (!Previews || Previews.length === 0) { %>
         <p>No posts found.</p>
@@ -53,3 +63,24 @@
 <nav aria-label="Article pagination">
     <%- include('../components/pagination') %>
 </nav>
+
+<script>
+    function searchPosts(page) {
+        const sortValue = document.getElementById("sortSelect").value;
+        window.location.href = `/article?sort=${sortValue}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        setSortByFromQuery();
+    });
+    function setSortByFromQuery() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortBy = urlParams.get('sort');
+        const sortSelect = document.getElementById('sortSelect');
+
+        if (sortBy) {
+            sortSelect.value = sortBy;
+        }
+    }
+
+</script>

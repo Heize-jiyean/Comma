@@ -170,12 +170,7 @@ exports.PreviewfindAll = async (page, option, counselorId) => {
 
         let rows, fields;
         if (option == 'all') { [rows, fields] = await db.query(sql, [pageSize, offset]); }
-        else { [rows, fields] = await db.query(sql, [counselorId, pageSize, offset]); 
-            console.log(rows);
-        }
-
-        console.log(page, option, counselorId);
-        console.log(rows);
+        else { [rows, fields] = await db.query(sql, [counselorId, pageSize, offset]); }
 
         if (db && db.end) db.end();
         return rows.length > 0 ? rows : null;
@@ -234,11 +229,10 @@ exports.countOfFindAll = async (option, counselorId) => {
 
 
 // 환자 프로필 용
-exports.PreviewfindByPatientId = async (page, patientId, role) => {
+exports.PreviewfindByPatientId = async (page, patientId, role, pageSize) => {
     try {
         const db = await require('../main').connection(); 
 
-        const pageSize = 9;
         let offset = pageSize * (page - 1);
         let sql;
 

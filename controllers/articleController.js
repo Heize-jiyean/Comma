@@ -129,14 +129,14 @@ exports.delete = async (req, res) => {
     }
 }
 
-// 상담사 메인화면 일기 리스트
+// 아티클 리스트
 exports.list = async (req, res) => {
     try {
-        //const option = req.query.option ? req.query.option : "all"; // 좋아순/최신순
+        const sortBy = req.query.sort ? req.query.sort : "latest"; // 좋아순/최신순
         const currentPage = req.query.page ? parseInt(req.query.page) : 1;
 
-        const totalPages = Math.ceil( await ArticleModel.countOfFindAll() / 9);
-        let Previews = await ArticleModel.PreviewFindAll(currentPage); // 임시 상담사 설정
+        const totalPages = Math.ceil( await ArticleModel.countOfFindAll(sortBy) / 9);
+        let Previews = await ArticleModel.PreviewFindAll(currentPage, sortBy); // 임시 상담사 설정
 
         if (Previews) {
             Previews.forEach(preview => {
