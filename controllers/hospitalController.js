@@ -6,18 +6,19 @@ exports.loadingMainPage = async (req, res) => {
     try {
         const reviews = await ReviewModel.getLatestReviews();
         const hospitals = await hospitalModel.getAllHospitals();
+        console.log('Session user:', req.session.user);
         res.render('hospital/hospital', { 
             reviews: reviews,
-            hospitals: hospitals, // JSON.stringify 제거
+            hospitals: hospitals,
             naverMapClientId: process.env.NAVER_MAP_CLIENT_ID || '',
-            hospitalName: ''
+            hospitalName: '',
+            patientId: req.session.user ? req.session.user.id : null  // patient_id 대신 id 사용
         });
     } catch (error) {
         console.error('Error loading main page:', error);
         res.status(500).send('Internal Server Error');
     }
 };
-
 // 병원 위치 로딩
 exports.getHospitalLocation = async (req, res) => {
     try {
@@ -69,7 +70,13 @@ exports.renderRegisterPage = (req, res) => {
 //리뷰 제출
 exports.submitReview = async (req, res) => {
     try {
-        const { hospital_id, patient_id, content } = req.body;
+        if (!req.session.user || !req.session.user.id) {
+            return res.status(401).json({ error: 'User not authenticated' });
+        }
+
+        const { hospital_id, content } = req.body;
+        const patient_id = req.session.user.id;  // patient_id 대신 id 사용
+
         const reviewId = await ReviewModel.createReview({ hospital_id, patient_id, content });
         const newReview = await ReviewModel.getReviewsByHospitalId(hospital_id);
         res.status(201).json(newReview);
@@ -78,4 +85,3 @@ exports.submitReview = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-//console.log('Exporting controller functions:', Object.keys(exports));

@@ -88,6 +88,9 @@
     </div>
 
     <input type="hidden" id="hospitalsData" value='<%= JSON.stringify(hospitals) %>' />
+    <script>
+        const currentPatientId = '<%= patientId %>' || null;
+    </script>
     <script src="/js/hospital.js"></script>
 
     <script>

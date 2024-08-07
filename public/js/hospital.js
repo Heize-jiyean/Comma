@@ -36,7 +36,7 @@ if (hospitals.length > 0) {
         // 기본 제공 마커 생성
         const marker = new naver.maps.Marker({
             position: position,
-            title: hospital.name
+            title: hospital.name // 마커에 툴팁 텍스트 추가
         });
 
         // 인포윈도우에 병원 이름 추가
@@ -66,7 +66,6 @@ if (hospitals.length > 0) {
         });
     });
 }
-
 
 // 맵이 idle 상태일 때 보이는 영역의 마커를 업데이트
 naver.maps.Event.addListener(map, 'idle', function () {
@@ -128,51 +127,43 @@ const startCheckingInput = () => {
     }, 500); // 0.5초마다 체크
 };
 
+// 입력값 확인 시작
+startCheckingInput();
+
 // 입력값 확인 중단 함수
 const stopCheckingInput = () => {
     if (checkInputInterval) {
         clearInterval(checkInputInterval);
-        checkInputInterval = null; // 인터벌 ID 초기화
     }
 };
 
-
-// 검색 필드가 포커스를 잃었을 때 입력값 확인 시작
-searchInput.addEventListener('focus', () => {
-    startCheckingInput();
-});
-
-// 검색 필드가 포커스를 얻었을 때 입력값 확인 중단
-searchInput.addEventListener('blur', () => {
-    stopCheckingInput();
-    relContainer.classList.add("hide"); // 포커스 시 추천 검색어 리스트 숨기기
-});
-
 // 병원 관련 자동검색어 완성 함수
 const loadData = async (input) => {
+    console.log('Fetching data for:', input); // 요청 로그
     try {
         const response = await fetch(`/hospital/autocomplete?query=${encodeURIComponent(input)}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
+        console.log('Data received:', data); // 응답 데이터 로그
         updateAutocompleteList(data.suggestions);
     } catch (error) {
         console.error('Error fetching data:', error);
     }
 };
 
-// 검색어 자동완성 목록을 업데이트
+// 검색어 자동완성 목록을 업데이트합니다
 const updateAutocompleteList = (suggestions) => {
     ul.innerHTML = ''; // 기존 목록 초기화
     if (suggestions.length > 0) {
         suggestions.forEach((suggestion) => {
             const li = document.createElement('li');
             li.textContent = suggestion;
-            li.addEventListener('mousedown', () => { // 입력 즉시 폼이 제출되도록 mousedown 사용
-                searchInput.value = suggestion;
-                relContainer.classList.add("hide");
-                form.requestSubmit();
+            li.addEventListener('click', () => {
+                searchInput.value = suggestion;  // 검색어를 입력 필드에 설정
+                relContainer.classList.add("hide");  // 추천 검색어 리스트 숨기기
+                form.requestSubmit();  // 폼 제출 트리거 (이벤트 방지하지 않음)
             });
             ul.appendChild(li);
         });
@@ -270,6 +261,11 @@ async function collectCommentHospital(hospital_id) {
         const response = await fetch(`/hospital/comment?query=${encodeURIComponent(hospital_id)}`);
 
         if (!response.ok) {
+            const data = await response.json();
+            if (data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+                return;
+            }
             throw new Error('Network response was not ok');
         }
 
@@ -315,7 +311,7 @@ function updateReviewList(reviews) {
     }
 }
 
-//리뷰 제출 함수
+// 리뷰 제출 함수
 async function submitReview() {
     const form = document.getElementById('hospitalForm');
     if (!form.checkValidity()) {
@@ -326,7 +322,6 @@ async function submitReview() {
     const formData = new FormData(form);
     const reviewData = {
         hospital_id: formData.get('hospital_id'),
-        patient_id: 1, // 임시로 1로 설정. 실제로는 로그인한 사용자의 ID를 사용해야 합니다.
         content: formData.get('description')
     };
 
@@ -340,7 +335,8 @@ async function submitReview() {
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Network response was not ok');
         }
 
         const newReviews = await response.json();
@@ -354,6 +350,29 @@ async function submitReview() {
         form.reset();
     } catch (error) {
         console.error('Error:', error);
-        alert('리뷰 제출 중 오류가 발생했습니다.');
+        alert('리뷰 제출 중 오류가 발생했습니다: ' + error.message);
     }
 }
+
+// 페이지 로드 시 실행되는 함수
+function checkAuthStatus() {
+    fetch('/hospital')
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    if (data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                    }
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 정상적인 데이터 처리
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+//
