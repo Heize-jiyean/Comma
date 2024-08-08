@@ -269,15 +269,15 @@ async function collectCommentHospital(hospital_id) {
             throw new Error('Network response was not ok');
         }
 
-        const reviews = await response.json();
-        updateReviewList(reviews);
+        const { reviews, currentUserId } = await response.json();
+        updateReviewList(reviews, currentUserId);
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
 // 리뷰 목록을 업데이트하는 함수
-function updateReviewList(reviews) {
+function updateReviewList(reviews, currentUserId) {
     const commentList = document.querySelector('.comment-list');
     commentList.innerHTML = ''; // 기존 내용을 비웁니다.
 
@@ -286,11 +286,19 @@ function updateReviewList(reviews) {
             const comment = document.createElement('div');
             comment.className = 'comment card mb-3';
 
+            // 조건부로 삭제 버튼을 추가합니다.
+            const deleteButtonHtml = review.patient_id === currentUserId 
+                ? `<p class="delete-review" onclick="deleteReview(${review.review_id})" style="cursor: pointer;">x</p>`
+                : '';
+
             comment.innerHTML = `
                 <div class="card-body">
-                    <div class="hospital">
-                        <h4>${review.hospital_name}</h4>
-                        <p>${review.hospital_address}</p>
+                    <div class="profile d-flex justify-content-between align-items-center">
+                        <div class="hospital">
+                            <h4>${review.hospital_name}</h4>
+                            <p>${review.hospital_address}</p>
+                        </div>
+                        ${deleteButtonHtml}
                     </div>
                     <div class="profile d-flex justify-content-between align-items-center">
                         <div class="photo-container d-flex align-items-center">
@@ -353,6 +361,18 @@ async function submitReview() {
         alert('리뷰 제출 중 오류가 발생했습니다: ' + error.message);
     }
 }
+
+// 리뷰 삭제 함수
+function deleteReview(reviewId) {
+    if (confirm('이 리뷰를 삭제하시겠습니까?')) {
+        fetch(`/hospital/${reviewId}`, {
+            method: 'DELETE',
+        }).then(data => {
+            window.location.reload();
+        })
+    }
+}
+
 
 // 페이지 로드 시 실행되는 함수
 function checkAuthStatus() {

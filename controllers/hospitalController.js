@@ -47,8 +47,9 @@ exports.getAutoComplete = async (req, res) => {
 exports.getCommentByHospital = async (req, res) => {
     try {
         const query = req.query.query;
+        const currentUserId = req.session.userId;
         const reviews = await ReviewModel.getReviewsByHospital(query);
-        res.json(reviews);
+        res.json({ reviews, currentUserId });
     } catch (error) {
         console.error('Error fetching hospital comments:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -82,6 +83,23 @@ exports.submitReview = async (req, res) => {
         res.status(201).json(newReview);
     } catch (error) {
         console.error('Error submitting review:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+//리뷰 삭제
+exports.deleteReview = async (req, res) => {
+    try {
+        if (!req.session.user || !req.session.user.id) {
+            return res.status(401).json({ error: 'User not authenticated' });
+        }
+
+        const reviewId = req.params.reviewId;
+        await ReviewModel.deleteReview(reviewId);
+        res.status(200).json({ message: "리뷰가 성공적으로 삭제되었습니다." });
+
+    } catch (error) {
+        console.error('Error deleting review:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

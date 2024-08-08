@@ -12,5 +12,6 @@ router.get('/autocomplete', hospitalController.getAutoComplete);
 router.get('/comment', isLoggedIn, hospitalController.getCommentByHospital);
 router.get('/register', isLoggedIn, hospitalController.renderRegisterPage);
 router.post('/review/submit', isLoggedIn, hospitalController.submitReview);
+router.delete('/:reviewId', isLoggedIn, hospitalController.deleteReview);
 
 module.exports = router;
