@@ -184,7 +184,7 @@ exports.toggleLike = async (req, res) => {
             }
 
             //추천 시스템 관련
-            if (role=='patient') {
+            if (req.session.user.role=='patient') {
                 const likeData = await ArticleInteractionModel.findLikeByPatient(patientId);
                 const response = await axios.post('http://localhost:5000/similarity_like', { pid: patientId, likeId: likeData });
                 const vectorResult = response.data;
