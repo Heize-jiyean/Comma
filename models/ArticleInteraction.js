@@ -46,11 +46,24 @@ exports.deleteLike = async (articleId, patientId) => {
         console.error("ArticleInteraction.deleteLike() 쿼리 실행 중 오류:", error);
     }
 }
+
 // 특정 멤버의 좋아요 전체 조회
+exports.findLikeByPatient = async (patientId) => {
+    try {
+        const db = await require('../main').connection(); 
 
+        let sql = `SELECT article_id FROM article_like WHERE patient_id = ?`;
+        let [rows] = await db.query(sql, [patientId]); 
 
+        if (db && db.end) db.end();
+        
+        const articleIds = rows.map(row => row.article_id);
+        return articleIds.length > 0 ? articleIds : [];
 
-
+    } catch (error) {
+        console.error("ArticleInteraction.createLike() 쿼리 실행 중 오류:", error);
+    }
+};
 
 // 북마크 검색
 exports.findBookmarkByPatientAndArticle = async (articleId, patientId) => {
