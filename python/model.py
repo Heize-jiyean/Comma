@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 import gluonnlp as nlp
-from kobert_tokenizer import KoBERTTokenizer
 from transformers import BertModel
 import numpy as np
 
