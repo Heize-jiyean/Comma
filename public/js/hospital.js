@@ -67,7 +67,6 @@ if (hospitals.length > 0) {
     });
 }
 
-
 // 맵이 idle 상태일 때 보이는 영역의 마커를 업데이트
 naver.maps.Event.addListener(map, 'idle', function () {
     updateMarkers(map, markerInfo);
@@ -262,18 +261,23 @@ async function collectCommentHospital(hospital_id) {
         const response = await fetch(`/hospital/comment?query=${encodeURIComponent(hospital_id)}`);
 
         if (!response.ok) {
+            const data = await response.json();
+            if (data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+                return;
+            }
             throw new Error('Network response was not ok');
         }
 
-        const reviews = await response.json();
-        updateReviewList(reviews);
+        const { reviews, currentUserId } = await response.json();
+        updateReviewList(reviews, currentUserId);
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
 // 리뷰 목록을 업데이트하는 함수
-function updateReviewList(reviews) {
+function updateReviewList(reviews, currentUserId) {
     const commentList = document.querySelector('.comment-list');
     commentList.innerHTML = ''; // 기존 내용을 비웁니다.
 
@@ -282,11 +286,19 @@ function updateReviewList(reviews) {
             const comment = document.createElement('div');
             comment.className = 'comment card mb-3';
 
+            // 조건부로 삭제 버튼을 추가합니다.
+            const deleteButtonHtml = review.patient_id === currentUserId 
+                ? `<p class="delete-review" onclick="deleteReview(${review.review_id})" style="cursor: pointer;">x</p>`
+                : '';
+
             comment.innerHTML = `
                 <div class="card-body">
-                    <div class="hospital">
-                        <h4>${review.hospital_name}</h4>
-                        <p>${review.hospital_address}</p>
+                    <div class="profile d-flex justify-content-between align-items-center">
+                        <div class="hospital">
+                            <h4>${review.hospital_name}</h4>
+                            <p>${review.hospital_address}</p>
+                        </div>
+                        ${deleteButtonHtml}
                     </div>
                     <div class="profile d-flex justify-content-between align-items-center">
                         <div class="photo-container d-flex align-items-center">
@@ -307,7 +319,7 @@ function updateReviewList(reviews) {
     }
 }
 
-//리뷰 제출 함수
+// 리뷰 제출 함수
 async function submitReview() {
     const form = document.getElementById('hospitalForm');
     if (!form.checkValidity()) {
@@ -318,7 +330,6 @@ async function submitReview() {
     const formData = new FormData(form);
     const reviewData = {
         hospital_id: formData.get('hospital_id'),
-        patient_id: 1, // 임시로 1로 설정. 실제로는 로그인한 사용자의 ID를 사용해야 합니다.
         content: formData.get('description')
     };
 
@@ -332,7 +343,8 @@ async function submitReview() {
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Network response was not ok');
         }
 
         const newReviews = await response.json();
@@ -346,6 +358,41 @@ async function submitReview() {
         form.reset();
     } catch (error) {
         console.error('Error:', error);
-        alert('리뷰 제출 중 오류가 발생했습니다.');
+        alert('리뷰 제출 중 오류가 발생했습니다: ' + error.message);
     }
 }
+
+// 리뷰 삭제 함수
+function deleteReview(reviewId) {
+    if (confirm('이 리뷰를 삭제하시겠습니까?')) {
+        fetch(`/hospital/${reviewId}`, {
+            method: 'DELETE',
+        }).then(data => {
+            window.location.reload();
+        })
+    }
+}
+
+
+// 페이지 로드 시 실행되는 함수
+function checkAuthStatus() {
+    fetch('/hospital')
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    if (data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                    }
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 정상적인 데이터 처리
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+//

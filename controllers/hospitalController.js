@@ -6,11 +6,13 @@ exports.loadingMainPage = async (req, res) => {
     try {
         const reviews = await ReviewModel.getLatestReviews();
         const hospitals = await hospitalModel.getAllHospitals();
+        console.log('Session user:', req.session.user);
         res.render('hospital/hospital', { 
             reviews: reviews,
-            hospitals: hospitals, // JSON.stringify 제거
+            hospitals: hospitals,
             naverMapClientId: process.env.NAVER_MAP_CLIENT_ID || '',
-            hospitalName: ''
+            hospitalName: '',
+            patientId: req.session.user ? req.session.user.id : null  // patient_id 대신 id 사용
         });
     } catch (error) {
         console.error('Error loading main page:', error);
@@ -46,8 +48,9 @@ exports.getAutoComplete = async (req, res) => {
 exports.getCommentByHospital = async (req, res) => {
     try {
         const query = req.query.query;
+        const currentUserId = req.session.userId;
         const reviews = await ReviewModel.getReviewsByHospital(query);
-        res.json(reviews);
+        res.json({ reviews, currentUserId });
     } catch (error) {
         console.error('Error fetching hospital comments:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -69,7 +72,13 @@ exports.renderRegisterPage = (req, res) => {
 //리뷰 제출
 exports.submitReview = async (req, res) => {
     try {
-        const { hospital_id, patient_id, content } = req.body;
+        if (!req.session.user || !req.session.user.id) {
+            return res.status(401).json({ error: 'User not authenticated' });
+        }
+
+        const { hospital_id, content } = req.body;
+        const patient_id = req.session.user.id;  // patient_id 대신 id 사용
+
         const reviewId = await ReviewModel.createReview({ hospital_id, patient_id, content });
         const newReview = await ReviewModel.getReviewsByHospitalId(hospital_id);
         res.status(201).json(newReview);
@@ -78,4 +87,31 @@ exports.submitReview = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-//console.log('Exporting controller functions:', Object.keys(exports));
+
+//리뷰 삭제
+exports.deleteReview = async (req, res) => {
+    try {
+        if (!req.session.user || !req.session.user.id) {
+            return res.status(401).json({ error: 'User not authenticated' });
+        }
+
+        const reviewId = req.params.reviewId;
+        await ReviewModel.deleteReview(reviewId);
+        res.status(200).json({ message: "리뷰가 성공적으로 삭제되었습니다." });
+
+    } catch (error) {
+        console.error('Error deleting review:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// 새로운 함수 추가
+exports.checkLoginAndLoadPage = (req, res) => {
+    if (req.session.user && req.session.user.id) {
+        // 사용자가 로그인한 경우, 기존의 loadingMainPage 함수 로직을 실행
+        this.loadingMainPage(req, res);
+    } else {
+        // 사용자가 로그인하지 않은 경우
+        res.render('login/login-required');
+    }
+};
