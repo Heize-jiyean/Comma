@@ -1,16 +1,11 @@
-# 서버 구축
 flask
 
-# DB 연결
 python-dotenv
 mysql-connector-python
 
-# 모델 파일 다운로드
 firebase_admin
 requests
---upgrade certifi
 
-# 감정 분석
 pandas
 numpy==1.23.1
 scikit-learn
@@ -23,5 +18,4 @@ mxnet
 -f https://dist.mxnet.io/python/cpu
 git+https://github.com/SKTBrain/KoBERT.git#egg=kobert_tokenizer&subdirectory=kobert_hf
 
-# 추천 시스템
 sentence_transformers
