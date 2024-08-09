@@ -53,25 +53,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-// DB connection
-exports.connection = async () => {
-  try {
-      const db = await mysql.createPool({
-          host: process.env.DB_HOST,
-          user: process.env.DB_USER,
-          password: process.env.DB_PW,
-          port: process.env.DB_PORT,
-          database: process.env.DB_NAME,
-          waitForConnections: true,
-          insecureAuth: true,
-      });
-      return db;
-  } catch (error) {
-      console.error("데이터베이스 연결 오류:", error);
-      throw error;
-  }
-};
-
 // EJS 설정
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -91,7 +72,6 @@ app.use((req, res, next) => {
   console.log(`Received request: ${req.method} ${req.originalUrl}`);
   next();
 });
-
 
 // user 변수 설정을 위한 미들웨어 (통합)
 app.use((req, res, next) => {
@@ -186,7 +166,6 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
-
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
