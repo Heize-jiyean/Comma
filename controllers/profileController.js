@@ -501,8 +501,6 @@ exports.addScrap = async(req, res) => {
     const loginRole = req.session.user.role;
     const targetId = req.params.targetId;
 
-    console.log("addScrap까지는 옴")
-
     try {
         if (loginRole === 'patient') {
             targetUser = await UserModel.getCounselorByUserId(targetId);
@@ -525,9 +523,31 @@ exports.addScrap = async(req, res) => {
 }
 
 // 관심 환자, 관심 상담사 해제
-// exports.removeScrap = async(req, res) => {
+exports.removeScrap = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    const targetId = req.params.targetId;
 
-// }
+    try {
+        if (loginRole === 'patient') {
+            targetUser = await UserModel.getCounselorByUserId(targetId);
+            result = await UserModel.removeScrapCounselor(loginId, targetUser.counselor_id);
+        } else if (loginRole === 'counselor') {
+            targetUser = await UserModel.getPatientByUserId(targetId);
+            result = await UserModel.removeScrapPatient(targetUser.patient_id, loginId);
+        }
+
+        if (result) {
+            res.status(200).json({ success: true, message: "성공적으로 등록되었습니다." });
+        } else {
+            res.status(400).json({ success: false, message: "등록에 실패했습니다." });
+        }
+
+    } catch (error) {
+        console.error("removeScrap 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
 
 
 // 상담사 방명록 모아보기 페이지 반환
