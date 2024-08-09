@@ -141,6 +141,7 @@ exports.update = async (req, res) => {
 };
 
 
+
 // 방명록 삭제하기
 exports.delete = async (req, res) => {
     try {

@@ -1,0 +1,108 @@
+<style>
+    .article-container {
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #D6D7DA;
+        padding: 40px;
+        margin-bottom: 20px;
+    }
+    .article-container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #D6D7DA;
+    }
+    .article-container h2 {
+        font-weight: 700;
+        font-size: 28px;
+        color: black;
+        margin: 0;
+    }
+    .article-item {
+        margin-top: 10px;
+        border-bottom: 1px solid #D6D7DA;
+    }
+    .article-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .article-title h3 {
+        margin: 8px 0;
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .article-title span {
+        font-size: 18px;
+        color: #888;
+    }
+    .article-item p {
+        font-size: 18px;
+    }
+    .write-article-button {
+        padding: 10px 20px;
+        background-color: #5FD068;
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 20px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .view-all-button {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        background-color: #E9F8EA;
+        color: #4B8673;
+        border: none;
+        border-radius: 16px;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 40px;
+    }
+</style>
+
+<div class="article-container">
+    <!-- 아티클 헤더 -->
+    <div class="article-container-header">
+        <h2>아티클 목록</h2>
+        <% if (loginRole === 'counselor') { %>
+            <button class="write-article-button" id="writeArticleButton">아티클 작성</button>
+        <% } %>
+    </div>
+    <!-- 아티클 목록 -->
+    <div class="article-list">
+    <% if (articles && articles.length > 0) { %>
+        <% articles.forEach(article => { %>
+        <div class="article-item">
+            <a href="/article/<%= article.article_id %>" style="text-decoration: none; color: inherit;">
+                <div class="article-title">
+                    <h3>
+                        <%= article.title %>
+                    </h3>
+                    <span><%= new Date(article.created_at).toLocaleDateString() %></span>
+                </div>
+                <p><%= article.content.length > 60 ? article.content.substring(0, 60) + '...' : article.content %></p>
+            </a>
+        </div>
+        <% }) %>
+    <% } else { %>
+        <p>아티클이 없습니다.</p>
+    <% } %>
+    </div>
+    <button class="view-all-button" id="viewAllArticlesButton">전체보기</button>
+</div>
+
+<script>
+    document.getElementById('writeArticleButton')?.addEventListener('click', function() {
+        window.location.href = `/article/new`;
+    });
+    document.getElementById('viewAllArticlesButton').addEventListener('click', function() {
+        const counselorId = '<%= counselorUser.id %>';
+        window.location.href = `/profile/counselor/${counselorId}/articles`;
+    })
+</script>
