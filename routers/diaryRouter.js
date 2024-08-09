@@ -4,7 +4,7 @@ const diaryController = require('../controllers/diaryController');
 
 router.use(express.json());
 
-//상담사 메인화면 임시 라우터
+//상담사 메인화면 라우터
 router.get('/', diaryController.list);
 
 router.get('/new', diaryController.new);

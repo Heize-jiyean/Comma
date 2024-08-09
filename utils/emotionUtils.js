@@ -64,7 +64,7 @@ exports.generateEmotionSummary = (percentageData) => {
 exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
     const allPercentages = {};
     //const startDate = new Date(patientUser.registration_time); 
-    const startDate = new Date(new Date().getFullYear(), 3, 1); // 임시데이터
+    const startDate = new Date(new Date().getFullYear(), new Date().getMonth() -3, 1); // 4개월 전부터
     const endDate = new Date();
 
     let currentDate = new Date(startDate);
@@ -83,9 +83,10 @@ exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
 }
 
 
-exports.analyzeAndNotify = async (content, diaryId) => {
+exports.analyzeAndNotify = async (content, title, diaryId) => {
     try {
         // 감정분석
+        content = content + title;
         const result = await spawn('python', ['./python/main.py', content]);
         result.stdout.on('data', (data) => {
             const rs = data.toString();
