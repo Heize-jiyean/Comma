@@ -16,8 +16,8 @@ router.get('/:guestbookId', guestbookController.view);
 // [GET] 방명록 수정 페이지 반환
 router.get('/edit/:guestbookId', guestbookController.edit);
 
-// [POST] 방명록 수정 처리
-router.post('/update/:guestbookId', guestbookController.update);
+// [PUT] 방명록 수정 처리
+router.put('/update/:guestbookId', guestbookController.update);
 
 // [DELETE] 방명록 삭제 
 router.delete('/:guestbookId', guestbookController.delete);

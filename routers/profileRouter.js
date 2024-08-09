@@ -15,6 +15,10 @@ router.get('/patient/:patientId/guestbooks', profileController.listAllGuestbooks
 // [GET] 상담사 프로필 페이지 반환
 router.get('/counselor/:counselorId', profileController.counselorProfilePage);
 
+// [GET] 상담사 방명록 전체보기 페이지
+router.get('/counselor/:counselorId/guestbooks', profileController.listAllGuestbooksByCounselor);
+
+
 // [GET] 프로필 설정 - 프로필 편집 페이지
 router.get('/settings/profileEdit', profileController.profileEditPage);
 
@@ -37,7 +41,10 @@ router.get('/settings/accountRemoval', profileController.accountRemovalPage);
 router.post('/settings/accountRemoval', profileController.accountRemoval);
 
 // [GET] 환자 감정 차트 페이지 
-//router.get('/profile/patient/:patientId/line-chart-partial', profileController.getLineChartPartial);
 router.get('/patient/:patientId/emotion-chart', profileController.charts);
+
+// [POST] 관심 환자, 관심 상담사 등록
+router.post('/scrap/:targetId', profileController.addScrap);
+
 
 module.exports = router;

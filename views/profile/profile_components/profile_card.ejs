@@ -148,13 +148,21 @@
         <% if ((user.role === 'patient') && (user.custom_id === patientUser.id)) { %>
             <button class="setting-button" id="settingButton">프로필 수정하기</button>
         <% } else if (user.role === 'counselor') { %>
-            <button class="interest-button">관심 환자로 등록하기</button>
+            <% if (isCounselorScrapPatient) { %>
+                <button class="interest-button" disabled>이미 관심 환자로 등록됨</button>
+            <% } else { %>
+                <button class="interest-button" id="scrapPatientButton">관심 환자로 등록하기</button>
+            <% } %>
         <% } %>
     <% } else if (type === 'counselor') { %>
         <% if ((user.role === 'counselor') && (user.custom_id === counselorUser.id)) { %>
             <button class ="setting-button" id="settingButton">프로필 수정하기</button>
         <% } else if (user.role === 'patient') { %>
-            <button class="interest-button">관심 상담사로 등록하기</button>
+            <% if (isPatientScrapCounselor) { %>
+                <button class="interest-button" disabled>이미 관심 상담사로 등록됨</button>
+            <% } else { %>
+                <button class="interest-button" id="scrapCounselorButton">관심 상담사로 등록하기</button>
+            <% } %>
         <% } %>
     <% } %>
 
@@ -165,3 +173,50 @@
         window.location.href = `/profile/settings/profileEdit`;
     })
 </script>
+
+<% if (type === 'patient' && patientUser) { %>
+    <script>
+        document.getElementById('scrapPatientButton')?.addEventListener('click', function() {
+            const patientUserId = '<%= patientUser.id %>';
+            fetch(`/profile/scrap/${patientUserId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('등록 성공');
+                } else {
+                    alert('등록 실패');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+    <% } %>
+    
+    <% if (type === 'counselor' && counselorUser) { %>
+    <script>
+        document.getElementById('scrapCounselorButton')?.addEventListener('click', function() {
+            const counselorUserId = '<%= counselorUser.id %>';
+            fetch(`/profile/scrap/${counselorUserId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('성공적으로 등록되었습니다.');
+                } else {
+                    alert('등록에 실패했습니다.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+    <% } %>
+    
