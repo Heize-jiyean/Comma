@@ -229,11 +229,10 @@ exports.countOfFindAll = async (option, counselorId) => {
 
 
 // 환자 프로필 용
-exports.PreviewfindByPatientId = async (page, patientId, role) => {
+exports.PreviewfindByPatientId = async (page, patientId, role, pageSize) => {
     try {
         const db = await require('../main').connection(); 
 
-        const pageSize = 9;
         let offset = pageSize * (page - 1);
         let sql;
 

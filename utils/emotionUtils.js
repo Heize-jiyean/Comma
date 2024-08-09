@@ -1,6 +1,5 @@
-const DiaryModel = require('../models/Diary')
-const spawn = require('child_process').spawn;
-
+const DiaryModel = require('../models/Diary');
+const axios = require('axios');
 
 // 여러날자의 일기의 감정을 분류
 exports.calculateEmotionPercentages = (Data) => {
@@ -64,7 +63,7 @@ exports.generateEmotionSummary = (percentageData) => {
 exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
     const allPercentages = {};
     //const startDate = new Date(patientUser.registration_time); 
-    const startDate = new Date(new Date().getFullYear(), 3, 1); // 임시데이터
+    const startDate = new Date(new Date().getFullYear(), new Date().getMonth() -3, 1); // 4개월 전부터
     const endDate = new Date();
 
     let currentDate = new Date(startDate);
@@ -82,22 +81,14 @@ exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
     return allPercentages;
 }
 
-
-exports.analyzeAndNotify = async (content, diaryId) => {
+// 감정 분석
+exports.analyzeAndNotify = async (content, title, diaryId) => {
     try {
-        // 감정분석
-        const result = await spawn('python', ['./python/main.py', content]);
-        result.stdout.on('data', (data) => {
-            const rs = data.toString();
-            try {
-                const emotionResult = JSON.parse(rs);
-                DiaryModel.registerEmotion(diaryId, emotionResult);
-                
-            } catch (e) {
-                console.error("감정분석 오류");
-            }
-        });
-    } catch (error) {
-        console.error("감정분석 실행 오류", error);
+        content = content + title;
+        const response = await axios.post('http://localhost:5000/classification', { sentence: content });
+        const emotionResult = response.data;
+        DiaryModel.registerEmotion(diaryId, emotionResult);
+    } catch (e) {
+        console.error("Emotion analysis error", e);
     }
 }

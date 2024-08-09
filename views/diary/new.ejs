@@ -151,7 +151,7 @@ async function uploadImage(file) {
     const patient_id = document.querySelector('input[name="patientId"]').value;
     const dateString = new Date().toISOString().split('T')[0];
     const filename = `${file.name}_${patient_id}_${dateString}`;
-    const storageRef = ref(storage, 'images/' + filename);
+    const storageRef = ref(storage, 'diaries/' + filename);
 
     try {
         const snapshot = await uploadBytes(storageRef, file);

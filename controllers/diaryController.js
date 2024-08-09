@@ -47,7 +47,7 @@ exports.register = async (req, res) => {
             res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
 
             // 감정분석 후 WebSocket을 통해 메시지 전송
-            EmotionData.analyzeAndNotify(diaryData.content, savedDiaryId);
+            EmotionData.analyzeAndNotify(diaryData.content, diaryData.title, savedDiaryId);
         }
         else return res.render("login/login");
     } catch (error) {
@@ -158,30 +158,29 @@ exports.delete = async (req, res) => {
     }
 }
 
-// 상담사 메인화면 일기 리스트
+// 일기 리스트
 exports.list = async (req, res) => {
     try {
         if (req.session.user) {
-            // if (!AccessCheck.checkCounselorRole(req.session.user.role)) {
-            //     const referer = req.get('Referer') || '/';
-            //     return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
-            //  }
-            // 개발편의를 위해 잠시 주석처리
-
-             const option = req.query.option ? req.query.option : "all";
-             let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-     
-             const totalPages = Math.ceil( await DiaryModel.countOfFindAll(option, 1) / 9);
-             let Previews = await DiaryModel.PreviewfindAll(currentPage, option, 1); // 임시 상담사 설정
-     
-             if (Previews) {
-                 Previews.forEach(preview => {
-                     preview.image_url = setDefaultImage(preview.image_url);
-                     // preview.profile_picture = 프로필 기본이미지 설정
-                 });
-             }
-             
-             res.render('main-counselor', {Previews, currentPage, totalPages});
+            if (req.session.user.role == 'counselor') {
+                const option = req.query.option ? req.query.option : "all";
+                let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+        
+                const totalPages = Math.ceil( await DiaryModel.countOfFindAll(option, 1) / 9);
+                let Previews = await DiaryModel.PreviewfindAll(currentPage, option, req.session.user.id);
+        
+                if (Previews) {
+                    Previews.forEach(preview => {
+                        preview.image_url = setDefaultImage(preview.image_url);
+                    });
+                }
+                
+                res.render('main-counselor', {Previews, currentPage, totalPages});
+            }
+            else if (req.session.user.role == 'patient') {
+                const patient_userID = req.session.user.custom_id;
+                res.redirect(`/profile/patient/${patient_userID}/diaries`); 
+            }
         }
         else return res.render("login/login");
     } catch (error) {

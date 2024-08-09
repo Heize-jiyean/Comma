@@ -5,26 +5,12 @@
     <title>상담사 프로필 페이지</title>
     <link rel="stylesheet" href="/css/profile/dashboard.css">
     <style>
-        .guestbook-container {
-            background: #fff;
-            border-radius: 20px;
-            border: 1px solid #D6D7DA;
-            padding: 40px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .guestbook-container-header {
+        .content-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #D6D7DA;
+            gap: 20px;
         }
-        .guestbook-container h2 {
-            font-weight: 700;
-            font-size: 28px;
-            color: black;
-            margin: 0;
+        .content-column {
+            flex: 1;
         }
     </style>
 </head>
@@ -34,19 +20,11 @@
             <%- include('./profile_components/profile_card') %>
         </div>
         <div class="content-container">
-            <div class="guestbook-container">
-                <!-- 방명록 헤더 -->
-                <div class="guestbook-container-header">
-                    <% if (loginRole === 'counselor') { %>
-                        <h2><%= counselorUser.nickname %> 상담사가 쓴 방명록</h2>
-                    <% } else if (loginRole === 'patient') { %>
-                        <h2><%= counselorUser.nickname %> 상담사가 나에게 쓴 방명록</h2>
-                    <% } %>
-                </div>
-                <!-- 방명록 목록 -->
-                <div class="guestbook-list">
-                    <%- include('../guestbook/guestbooks', { guestbooks: guestbooks, showCounselorInfo: false, currentPage: currentPage }) %>
-                </div>
+            <div class="content-column">
+                <%- include('./profile_components/article_preview', { articles: articles, loginRole: loginRole }) %>
+            </div>
+            <div class="content-column">
+                <%- include('./profile_components/guestbook_preview', { guestbooks: guestbooks, showCounselorInfo: false, loginRole: loginRole, counselorUser: counselorUser }) %>
             </div>
         </div>
     </div>

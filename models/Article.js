@@ -4,12 +4,13 @@ exports.register = async (article) => {
         const db = await require('../main').connection(); 
 
         let sql = `
-            INSERT INTO article (counselor_id, title, content) 
-            VALUES (?, ?, ?)`;
+            INSERT INTO article (counselor_id, title, content, thumbnail_url) 
+            VALUES (?, ?, ?, ?)`;
         const [result] = await db.query(sql, [
             article.counselor_id,
             article.title,
-            article.content
+            article.content,
+            article.thumbnail_url
         ]);
 
         if (db && db.end) db.end();
@@ -54,7 +55,7 @@ exports.increasedViews = async (articleId) => {
     }
 };
 
-exports.PreviewFindAll = async (page) => {
+exports.PreviewFindAll = async (page, sortBy) => {
     try {
         const db = await require('../main').connection();        
 
@@ -65,13 +66,29 @@ exports.PreviewFindAll = async (page) => {
             SELECT 
                 a.*,
                 c.nickname,
-                c.profile_picture
+                c.profile_picture,
+                (SELECT COUNT(*) FROM article_like WHERE article_like.article_id = a.article_id) AS like_count,
+                (SELECT COUNT(*) FROM article_bookmark WHERE article_bookmark.article_id = a.article_id) AS bookmark_count
             FROM 
                 article a 
             JOIN 
-                counselor c ON a.counselor_id = c.counselor_id
-            ORDER BY a.created_at DESC LIMIT ? OFFSET ?
-            ;`;      
+                counselor c ON a.counselor_id = c.counselor_id `;      
+
+        switch (sortBy) {
+            case 'views':
+                sql += `ORDER BY a.views DESC`;
+                break;
+            case 'likes':
+                sql += `ORDER BY like_count DESC`;
+                break;
+            case 'bookmarks':
+                sql += `ORDER BY bookmark_count DESC`;
+                break;
+            default:
+                sql += `ORDER BY a.created_at DESC`;
+                break;
+        }    
+        sql += ` LIMIT ? OFFSET ?`;
         const [rows] = await db.query(sql, [pageSize, offset]);
 
         if (db && db.end) db.end();
@@ -81,20 +98,111 @@ exports.PreviewFindAll = async (page) => {
         console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
     }
 }
-exports.countOfFindAll = async () => {
+exports.countOfFindAll = async (sortBy) => {
     try {
         const db = await require('../main').connection();        
         let sql = `
             SELECT 
                 COUNT(*) AS total
             FROM 
-                article
-            ;`;      
+                article a `;      
+        switch (sortBy) {
+            case 'views':
+                sql += `ORDER BY a.views DESC`;
+                break;
+            case 'likes':
+                sql += `ORDER BY (SELECT COUNT(*) FROM article_like WHERE article_like.article_id = a.article_id) DESC`;
+                break;
+            case 'bookmarks':
+                sql += `ORDER BY (SELECT COUNT(*) FROM article_bookmark WHERE article_bookmark.article_id = a.article_id) DESC`;
+                break;
+            default:
+                sql += `ORDER BY a.created_at DESC`;
+                break;
+        }    
         const [rows] = await db.query(sql);
 
         if (db && db.end) db.end();
         return rows[0].total;
 
+    } catch (error) {
+        console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
+    }
+}
+
+//프로필에 사용
+exports.findLatestFourByCounselorId = async (counselorId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            SELECT * 
+            FROM article
+            WHERE counselor_id = ?
+            ORDER BY created_at DESC
+            LIMIT 4`; // 최신 4개의 아티클만 가져옵니다.
+        
+        const [rows] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) db.end();
+        return rows;
+
+    } catch (error) {
+        console.error("Article.findLatestFourByCounselorId() 쿼리 실행 중 오류:", error);
+    }
+};
+
+exports.delete = async (articleId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            DELETE FROM article
+            WHERE article_id = ?`;
+        await db.query(sql, [articleId]);
+        
+        if (db && db.end) db.end();
+        return articleId;
+
+    } catch (error) {
+        console.error("Diary.delete() 쿼리 실행 중 오류:", error);
+    }
+};
+
+exports.RecommendTop3 = async (pid) => {
+    try {
+        const db = await require('../main').connection();        
+
+        let sql = `
+            SELECT 
+                a.*,
+                c.nickname,
+                c.profile_picture,
+                sl.similarity
+            FROM 
+                article a 
+            JOIN 
+                counselor c ON a.counselor_id = c.counselor_id
+            LEFT JOIN
+                similarity_like sl ON a.article_id = sl.article_id AND sl.patient_id = ?
+            ;`;
+        const [rows] = await db.query(sql, [pid]);
+
+        if (db && db.end) db.end();
+
+        if (rows.length > 0) {
+            rows.forEach(row => {
+                let noise = Math.random() * 0.1;
+                row.similarity = row.similarity ? row.similarity + noise : noise;
+            });
+
+            rows.sort((a, b) => b.similarity - a.similarity);
+
+            return rows.slice(0, 3);
+        } else {
+            return null;
+        }
+        
     } catch (error) {
         console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
     }
