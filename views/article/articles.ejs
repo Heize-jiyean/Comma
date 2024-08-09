@@ -21,7 +21,7 @@
 </head>
 
 <div class="articles">
-    <% if (user.role === 'counselor') { %>
+    <% if (user && user.role === 'counselor') { %>
     <div class="button-container">
         <a href="/article/new" class="button-link">아티클 작성</a>
     </div>
