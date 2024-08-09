@@ -5,8 +5,7 @@ const { isLoggedIn } = require('../middleware/auth');
 
 console.log('hospitalController:', hospitalController);  // 디버깅을 위해 추가
 
-
-router.get('/', isLoggedIn, hospitalController.loadingMainPage);
+router.get('/', hospitalController.checkLoginAndLoadPage);
 router.get('/search', isLoggedIn, hospitalController.getHospitalLocation);
 router.get('/autocomplete', hospitalController.getAutoComplete);
 router.get('/comment', isLoggedIn, hospitalController.getCommentByHospital);

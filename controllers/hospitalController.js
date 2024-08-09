@@ -19,6 +19,7 @@ exports.loadingMainPage = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
 // 병원 위치 로딩
 exports.getHospitalLocation = async (req, res) => {
     try {
@@ -101,5 +102,16 @@ exports.deleteReview = async (req, res) => {
     } catch (error) {
         console.error('Error deleting review:', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// 새로운 함수 추가
+exports.checkLoginAndLoadPage = (req, res) => {
+    if (req.session.user && req.session.user.id) {
+        // 사용자가 로그인한 경우, 기존의 loadingMainPage 함수 로직을 실행
+        this.loadingMainPage(req, res);
+    } else {
+        // 사용자가 로그인하지 않은 경우
+        res.render('login/login-required');
     }
 };
