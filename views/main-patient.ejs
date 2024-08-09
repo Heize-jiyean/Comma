@@ -1,0 +1,39 @@
+<head>
+<style>
+    body { margin: 0; background: #F4F5F8; }
+    .container { display: flex; flex-direction: column; margin: auto; max-width: 1080px; padding: 30px; }
+
+    .line-chart { background-color: #FFFFFF; border-radius: 20px; border: 1px solid #D6D7DA; 
+        padding: 30px; display: flex; flex-direction: column; justify-content: center; margin-top: 20px; }
+    .line-chart-header { width: 100%; text-align: left; }
+    .line-chart-body { display: flex; justify-content: center; align-items: center; width: 100%; }
+
+    .diaris-container { margin-top: 20px; }
+
+    .link { text-decoration: none; color: black; }
+    .link:hover { color: #4B8673; }
+</style>
+</head>
+
+<body>
+<div class="container">
+     <!--꺾은선차트 감정분석차트페이지로 바로가기-->
+    <a href="/profile/patient/<%= patientUser.id %>/emotion-chart" class="link">
+    <div class="line-chart">
+        <div class="line-chart-header">
+            <p style="margin-left: 20px">나의 최근 감정 변화를 살펴 보세요.</p>
+        </div>
+        <div class="line-chart-body">
+            <%- include('./chart/line-chart') %>
+        </div>
+    </div>
+    <a>
+
+    <hr style="margin-top: 40px; margin-bottom: 40px">
+
+    <a href="/profile/patient/<%= patientUser.id %>/diaries" class="link">
+        <%- include('./diary/diaries') %>
+    <a>
+
+</div>
+</body>

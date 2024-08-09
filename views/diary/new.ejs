@@ -21,7 +21,15 @@
     display: flex; justify-content: center; align-items: center; color: #ccc; font-size: 16px; }
     .placeholder { text-align: center; background-color: #F4F5F8; color: #979797 }
     .small-button { padding: 7px 13px; font-size: 0.8rem; position: absolute; left: 0; bottom: -35px; width: auto;}
-    
+    .charCountContainer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    #charCount {
+        font-size: 0.9rem;
+    }
+
     #removeButton { background-color: #4B8673; display: none; }
     #submitButton { background-color: #5FD068; }
 </style>
@@ -39,6 +47,10 @@
   <div class="panel">
     <input type="text" id="titleInput" class="input" placeholder="제목을 입력하세요">
     <textarea id="contentInput" class="textarea" placeholder="내용을 입력하세요"></textarea>
+    <div class="charCountContainer">
+        <div id="charCount">0 / 500</div>
+    </div>
+
     <div style="display: flex; align-items: center; margin-top: 10px;">
       <input type="checkbox" id="public" class="checkbox">
       <label for="public">상담사가 열람하도록 허용</label>
@@ -70,6 +82,15 @@ const contentInput = document.getElementById('contentInput');
 const submitButton = document.getElementById('submitButton');
 const removeButton = document.getElementById('removeButton');
 
+
+function updateCharacterCount() {
+    const currentLength = contentInput.value.length;
+    const charCountDiv = document.getElementById('charCount');
+    charCountDiv.textContent = `${currentLength} / 500`;
+}
+contentInput.addEventListener('input', updateCharacterCount);
+
+
 fileInput.addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (file) {
@@ -99,8 +120,16 @@ submitButton.addEventListener('click', async () => {
     const title = titleInput.value;
     const content = contentInput.value;
     const is_visible = document.getElementById('public').checked;
-    let image_url = null;
+    const contentLength = contentInput.value.length;
 
+    // 글자수 검사
+    if (contentLength > 500) {
+        alert('글자 수는 500자를 초과할 수 없습니다.');
+        event.preventDefault();
+        return;
+    }
+
+    let image_url = null;
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         image_url = await uploadImage(file);
@@ -122,7 +151,7 @@ async function uploadImage(file) {
     const patient_id = document.querySelector('input[name="patientId"]').value;
     const dateString = new Date().toISOString().split('T')[0];
     const filename = `${file.name}_${patient_id}_${dateString}`;
-    const storageRef = ref(storage, 'images/' + filename);
+    const storageRef = ref(storage, 'diaries/' + filename);
 
     try {
         const snapshot = await uploadBytes(storageRef, file);
@@ -143,7 +172,6 @@ function sendDataToServer(data) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Success:', data);
         if (data.success && data.redirect) {
             window.location.href = data.redirect;
         }

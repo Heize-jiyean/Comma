@@ -33,7 +33,7 @@
     .emotion-chart { width: 100%; max-height: 550px; background: #FFFFFF; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .emotion-text { margin-bottom: 20px; font-size: 18px; font-weight: bold; }
     canvas { width: 80%; max-height: 380px; }
-    .button { padding: 10px 15px; background-color: #4B8673; color: white; text-align: center; cursor: pointer; border-radius: 5px; position: absolute; bottom: 10px; right: 10px; }
+    .button { padding: 7px 15px; background-color: #4B8673; color: white; text-align: center; cursor: pointer; border-radius: 5px; position: absolute; bottom: 10px; right: 10px; }
     .privacy-label {display: inline-block; position: absolute; bottom: 10px; text-align: center; }
 </style>
 </head>
@@ -68,11 +68,21 @@
     <div class="panel emotion-chart">
         <div class="emotion-text">AI 감정 분석</div>
         <canvas id="emotionChart"></canvas>
+        <p style="margin-top: 20px; font-size: 0.9rem; color: #333; ">감정분석에는 10~20초 정도 시간이 걸릴 수 있습니다</p>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    const emotions = { 
+        joy: <%= diary.joy %>, 
+        surprise: <%= diary.surprise %>, 
+        anger: <%= diary.anger %>, 
+        anxiety: <%= diary.anxiety %>, 
+        hurt: <%= diary.hurt %>, 
+        sadness: <%= diary.sadness %>
+    };
+
     function togglePrivacy(diaryId) {
         const isPublic = document.getElementById('publicCheckbox').checked;
         fetch(`/diary/visibility/${diaryId}`, {
@@ -105,24 +115,17 @@
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' }
         })
-        .then(response => {
-            if (response.ok) { window.location.href = '/'; }
-            else { alert('삭제 실패. 다시 시도해주세요.'); }
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.redirect) {
+                window.location.href = data.redirect;
+            }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('삭제 중 오류 발생.');
         });
     }
-
-    const emotions = { 
-        joy: <%= diary.joy %>, 
-        surprise: <%= diary.surprise %>, 
-        anger: <%= diary.anger %>, 
-        anxiety: <%= diary.anxiety %>, 
-        hurt: <%= diary.hurt %>, 
-        sadness: <%= diary.sadness %>
-    };
     const ctx = document.getElementById('emotionChart').getContext('2d');
     const emotionChart = new Chart(ctx, {
         type: 'pie',
@@ -131,9 +134,23 @@
             datasets: [{
                 label: '감정 분석',
                 data: Object.values(emotions),
-                backgroundColor: [ '#FFAFCC', '#FFF84F','#FF4A4A', '#FF9B52','#62CC79','#8588D5'],
-                borderColor: ['#FFAFCC', '#FFF84F','#FF4A4A', '#FF9B52','#62CC79','#8588D5'],
-                borderWidth: 1
+                backgroundColor: [
+                    'rgba(255, 181, 199, 0.8)',
+                    'rgba(255, 248, 149, 0.8)',
+                    'rgba(255, 122, 122, 0.8)',
+                    'rgba(255, 165, 114, 0.8)',
+                    'rgba(132, 210, 158, 0.8)',
+                    'rgba(160, 164, 215, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(255, 181, 199, 1)',
+                    'rgba(255, 248, 149, 1)',
+                    'rgba(255, 122, 122, 1)',
+                    'rgba(255, 165, 114, 1)',
+                    'rgba(132, 210, 158, 1)',
+                    'rgba(160, 164, 215, 1)'
+                ],
+                borderWidth: 1.5
             }]
         },
         options: {
@@ -141,9 +158,42 @@
             maintainAspectRatio: false,
             plugins: {
                 legend: { position: 'bottom' }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuad'
             }
         }
     });
+
+    
+    const diaryId = <%= diary.diary_id %>;
+    function checkAnalysisStatus(diaryId) {
+        fetch(`/diary/checkStatus/${diaryId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.analyzed) {
+                    window.location.href = `/diary/${data.diaryId}`;
+                } else {
+                    setTimeout(() => checkAnalysisStatus(diaryId), 5000); // 5초 후에 다시 확인
+                }
+            })
+            .catch(error => {
+                console.error('Error checking analysis status:', error);
+            });
+    }
+    // 감정 분석 상태가 완료되지 않았을 때만 확인
+    if (
+        parseFloat(emotions.joy) === 0.00 && 
+        parseFloat(emotions.surprise) === 0.00 && 
+        parseFloat(emotions.anger) === 0.00 && 
+        parseFloat(emotions.anxiety) === 0.00 && 
+        parseFloat(emotions.hurt) === 0.00 && 
+        parseFloat(emotions.sadness) === 0.00
+        ) {
+        checkAnalysisStatus(diaryId);
+    }
+
 </script>
 </body>
 </html>

@@ -1,9 +1,20 @@
 <style>
-    .photo-container {
-        margin-bottom: 20px;
+    .title {
+        font-size: 20px;
+        font-weight: 700;
+        border-bottom: 1px solid #D6D7DA;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
     }
-
-    #photo-preview {
+    .photo-container {
+        margin-bottom: 40px;
+    }
+    .photo-preview-section {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .photo-preview {
         width: 100px;
         height: 100px;
         border: 1px solid #ccc;
@@ -14,18 +25,29 @@
         background-size: cover;
         background-position: center;
     }
-
+    .delete-button, .photo-container input[type="file"]::file-selector-button {
+        color: #5FD068;
+        border: 1px solid #5FD068;
+        background-color: white;
+        padding: 4px 8px;
+        font-size: 16px;
+        border-radius: 12px;
+        cursor: pointer;
+    }
+    .delete-button:disabled {
+        color: #A1A4AC;
+        border: 1px solid #A1A4AC;
+        cursor: not-allowed;
+    }
     .form-group {
         display: flex;
-        flex-direction: row;
-        align-items: center;
-        margin-bottom: 15px;
+        flex-direction: column;
+        margin-bottom: 16px;
     }
     label {
-        width: 160px;
-        margin-right: 10px;
         font-size: 14px;
         color: black;
+        margin-bottom: 8px;
     }
     input[type="text"], input[type="email"], select {
         width: 100%;
@@ -34,11 +56,23 @@
         border-radius: 12px;
         font-size: 16px;
     }
+    input[readonly] {
+        color: #A1A4AC;
+    }
     .btn-container {
         display: flex;
         justify-content: flex-end;
     }
-    .btn-save {
+    .btn-disabled {
+        background-color: #E4E5EA;
+        color: #A1A4AC;
+        border: none;
+        padding: 4px 8px;
+        font-size: 16px;
+        cursor: not-allowed;
+        border-radius: 5px;
+    }
+    .save-button {
         background-color: #5FD068;
         color: white;
         border: none;
@@ -47,54 +81,309 @@
         cursor: pointer;
         border-radius: 5px;
     }
-    .btn-save:hover {
+    .save-button:hover {
         background-color: #45a049;
+    }
+    .save-button:disabled {
+        background-color: #E4E5EA;
+        color: #A1A4AC;
+        cursor: not-allowed;
     }
 </style>
 
 <!-- TODO: 프로필 사진 설정 추가 필요 -->
 <div class="photo-container">
-    <div id="photo-preview"></div>
-    <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*" onchange="previewProfilePhoto()">
+    <div class="title">프로필 이미지</div>
+    <div class="photo-preview-section">
+        <div class="photo-preview" style="background-image: url('<%= loginUser.profile_picture %>');"></div>
+        <div class="photo-buttons">
+            <input type="file" id="photoInput" accept="image/*">
+            <button type="button" id="deleteButton" class="delete-button" disabled>삭제</button>
+        </div>
+    </div>
+    <div class="btn-container">
+        <button type="button" class="save-button" id="photoSaveButton" disabled>이미지 저장</button>
+    </div>
 </div>
-<div class="form-group">
-    <label for="user-id">아이디</label>
-    <input type="text" id="user-id" name="user-id" required>
-</div>
-<div class="form-group">
-    <label for="nickname">닉네임</label>
-    <input type="text" id="nickname" name="nickname" required>
-</div>
-<div class="form-group">
-    <label for="email">이메일</label>
-    <input type="email" id="email" name="email" required>
-</div>
-<div class="form-group">
-    <label for="gender">성별</label>
-    <select id="gender" name="gender">
-        <option value="male">남</option>
-        <option value="female">여</option>
-    </select>
-</div>
-<div class="form-group">
-    <label for="birthYear">출생연도</label>
-    <select id="birthYear" name="birthYear" /></select>
-</div>
-<div class="form-group">
-    <label for="bio">소개</label>
-    <input type="text" id="bio" name="bio" required>
-</div>
-<div class="btn-container">
-    <button type="button" class="btn-save">수정 완료</button>
+<div class="info-container">
+    <div class="title">프로필 정보</div>
+    <div class="form-group">
+        <label for="user-id">아이디</label>
+        <input type="text" id="user-id" name="user-id" value="<%= loginUser.id %>" readonly>
+    </div>
+    <div class="form-group">
+        <label for="nickname">닉네임</label>
+        <input type="text" id="nickname" name="nickname" value="<%= loginUser.nickname %>" data-initial-value="<%= loginUser.nickname %>">
+    </div>
+    <div class="form-group">
+        <label for="email">이메일</label>
+        <input type="email" id="email" name="email" value="<%= loginUser.email %>" readonly>
+    </div>
+    <div class="form-group">
+        <label for="gender">성별</label>
+        <select id="gender" name="gender" data-initial-value="<%= loginUser.gender %>"">
+            <option value="male" <%= loginUser.gender === 'male' ? 'selected' : '' %>>남</option>
+            <option value="female" <%= loginUser.gender === 'female' ? 'selected' : '' %>>여</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="birthYear">출생연도</label>
+        <select id="birthYear" name="birthYear" value="<%= loginUser.age %>" data-initial-value="<%= loginUser.age %>"></select>
+    </div>
+    <div class="form-group">
+        <label for="bio">소개</label>
+        <input type="text" id="bio" name="bio" value="<%= loginUser.bio %>" data-initial-value="<%= loginUser.bio %>">
+    </div>
+    <% if (loginRole === 'patient') { %>
+        <div class="form-group">
+            <label for="job">직업</label>
+            <input type="text" id="job" name="job" value="<%= loginUser.job %>" data-initial-value="<%= loginUser.job %>">
+        </div>
+    <% } else { %>
+        <div class="form-group">
+            <label for="specialty">전문의</label>
+            <input type="text" id="specialty" name="specialty" value="<%= loginUser.specialty %>" data-initial-value="<%= loginUser.specialty %>">
+        </div>
+        <div class="form-group">
+            <label for="experience">경력</label>
+            <input type="text" id="experience" name="experience" value="<%= loginUser.experience %>"" data-initial-value="<%= loginUser.experience %>">
+        </div>
+    <% } %>
+    
+    <div class="btn-container">
+        <button type="button" class="save-button" id="infoSaveButton" disabled>정보 저장</button>
+    </div>
 </div>
 
-<script>
-    const currentYear = new Date().getFullYear();
-    const birthYearSelect = document.getElementById('birthYear');
-    for (let year = currentYear; year >= 1950; year--) {
-        let option = document.createElement('option');
-        option.value = year;
-        option.text = year;
-        birthYearSelect.appendChild(option);
+
+<script type="module">
+    // 파이어베이스 관련
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAoZC_XqFl5HIJ1v3NYGWrCc5CH3FEvva0",
+        authDomain: "comma-5a85c.firebaseapp.com",
+        projectId: "comma-5a85c",
+        storageBucket: "comma-5a85c.appspot.com",
+        messagingSenderId: "193588412726",
+        appId: "1:193588412726:web:2c6994dbe833fff855f397"
+    };
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    // 페이지 변수
+    const loginRole = "<%= loginRole %>";
+    let loginId;
+    if (loginRole === 'patient') {
+        loginId = "<%= loginUser.patient_id %>"
+    } else if (loginRole === 'counselor') {
+        loginId =  "<%= loginUser.counselor_id %>"
     }
+    const hasProfileImage = "<%= hasProfileImage %>";
+    const photoSaveButton = document.getElementById('photoSaveButton');
+    const infoSaveButton = document.getElementById('infoSaveButton');
+    const deleteButton = document.getElementById('deleteButton');
+
+    const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
+
+    document.addEventListener("DOMContentLoaded", function() {
+        initializeDeleteButton();
+        setBirthdayYearSelect();
+        monitorProfilePhotoChange();
+        monitorProfileInfoChange();
+    });
+
+    // 사진 삭제버튼 초기화
+    function initializeDeleteButton() {
+        if (hasProfileImage === "false") {
+            deleteButton.disabled = true;
+        } else {
+            deleteButton.disabled = false;
+        }
+    }
+    // 생년월일 폼 설정
+    function setBirthdayYearSelect() {
+        const birthYearSelect = document.getElementById('birthYear');
+        const currentYear = new Date().getFullYear();
+        const initialBirthYear = birthYearSelect.getAttribute('data-initial-value');
+
+        // 1950부터 현재 연도까지
+        for (let year = currentYear; year >= 1950; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.text = year;
+            if (year.toString() === initialBirthYear) {
+                option.selected = true;
+            }
+            birthYearSelect.appendChild(option);
+        }
+    }
+    
+    // 이미지 수정을 감지하는 함수
+    function monitorProfilePhotoChange() {
+        const photoPreview = document.querySelector('.photo-preview');
+        const photoInput = document.getElementById('photoInput');
+
+        // 파일 입력 필드의 값이 변경될 때 실행됨
+        photoInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                // 파일이 선택되었을 때
+                photoSaveButton.disabled = false;
+                deleteButton.disabled = false;
+
+                // 선택된 이미지를 미리보기로 표시
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    photoPreview.style.backgroundImage = `url(${e.target.result})`; // 미리보기 업데이트
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                // 파일이 선택되지 않았을 경우 버튼 비활성화
+                photoSaveButton.disabled = true;
+            }
+        });
+
+        // 삭제 버튼 눌렀을 때 실행됨
+        deleteButton.addEventListener('click', function() {
+            console.log('삭제버튼 클릭!');
+            photoPreview.style.backgroundImage = `url(${DEFAULT_PROFILE_IMAGE})`;
+            photoInput.value = '';
+            photoSaveButton.disabled = false;
+            deleteButton.disabled = true;
+        });
+    }
+
+    // 정보 수정을 감지하는 함수
+    function monitorProfileInfoChange() {
+        const profileInfoInputs = document.querySelectorAll('.info-container input:not([readonly]), .info-container select');
+        
+        let changeCount = 0;
+        let fieldChanged = new Map();  // 각 필드의 변경 상태를 추적하기 위한 Map
+
+        profileInfoInputs.forEach(input => {
+            const initialValue = input.getAttribute('data-initial-value');
+            fieldChanged.set(input, false);  // 초기 상태는 모든 필드가 변경되지 않음으로 설정
+
+            input.addEventListener('input', function() {
+                if (this.value !== initialValue && (fieldChanged.get(this) === false)) {
+                    this.style.borderColor = '#5FD068';
+                    fieldChanged.set(this, true);
+                    changeCount++;
+                } else if (this.value === initialValue && (fieldChanged.get(this) === true )) {
+                    this.style.borderColor = '#D6D7DA';
+                    fieldChanged.set(this, false);
+                    changeCount--;
+                }
+                infoSaveButton.disabled = (changeCount === 0);  // 변경된 필드가 없으면 버튼 비활성화
+            });
+        });
+    }
+
+    // 이미지 저장 버튼 눌렀을 때 실행됨
+    photoSaveButton.addEventListener('click', async () => {
+        let image_url = null;
+
+        if (photoInput.files.length > 0) {
+            const file = photoInput.files[0];
+            image_url = await uploadImage(file);
+        }
+
+        const profilePhotoData = {
+            profile_picture: image_url
+        }
+
+        sendPhotoDataToServer(profilePhotoData);
+    })
+
+    // 파이어베이스에 이미지를 올리기 위한 함수
+    async function uploadImage(file) {
+        const dateString = new Date().toISOString().split('T')[0];
+        const filename = `${file.name}_${loginRole}_${loginId}_${dateString}`;
+        const storageRef = ref(storage, 'profile/' + filename);
+
+        try {
+            const snapshot = await uploadBytes(storageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            return null;
+        }
+    }
+
+    // 서버로 프로필 이미지 PUT하는 함수
+    function sendPhotoDataToServer(data) {
+        fetch('/profile/settings/profilePhotoEdit', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ profilePhotoData: data })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('프로필 이미지 편집 완료');
+                window.location.reload();
+            } else {
+                alert(data.message);
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // 정보 저장 버튼 눌렀을 때 실행됨
+    infoSaveButton.addEventListener('click', function() {
+        const nickname = document.getElementById('nickname').value;
+        const birthYear = document.getElementById('birthYear').value;
+        const gender = document.getElementById('gender').value;
+        const bio = document.getElementById('bio').value;
+
+        let profileInfoData = {
+            nickname: nickname,
+            age: birthYear,
+            gender: gender,
+            bio: bio
+        }
+
+        if (loginRole === 'patient') {
+            profileInfoData.job = document.getElementById('job').value;
+        } else if (loginRole === 'counselor') {
+            profileInfoData.specialty = document.getElementById('specialty').value;
+            profileInfoData.experience = document.getElementById('experience').value;
+        }
+
+        console.log(profileInfoData);
+
+        // 변경사항을 서버로 전송
+        sendInfoDataToServer(profileInfoData);
+    })
+
+    // 서버로 프로필 정보 데이터 PUT하는 함수
+    function sendInfoDataToServer(data) {
+        fetch('/profile/settings/profileInfoEdit', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ profileInfoData: data })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('프로필 정보 편집 완료');
+                window.location.reload();
+            } else {
+                alert(data.message);
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
 </script>

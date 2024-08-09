@@ -63,6 +63,21 @@
         font-size: 16px;
     }
 
+    .setting-button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: white;
+        color: black;
+        border: 1px solid #D6D7DA;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 40px;
+    }
+
     .interest-button {
         display: block;
         width: 100%;
@@ -128,13 +143,25 @@
             <% } %>
         </p>
     </div>
-    <!-- 관심 등록 버튼 -->
-    <button class="interest-button">
-        <% if (type === 'patient') { %>
-            관심 환자로 등록하기
-        <% } else { %>
-            관심 상담사로 등록하기
+
+    <% if (type === 'patient') { %>
+        <% if ((user.role === 'patient') && (user.custom_id === patientUser.id)) { %>
+            <button class="setting-button" id="settingButton">프로필 수정하기</button>
+        <% } else if (user.role === 'counselor') { %>
+            <button class="interest-button">관심 환자로 등록하기</button>
         <% } %>
-    </button>
-    <!-- TODO: 세션에 저장된 사용자 타입에 따라 다르게 뜨드록 처리해야 함 -->
+    <% } else if (type === 'counselor') { %>
+        <% if ((user.role === 'counselor') && (user.custom_id === counselorUser.id)) { %>
+            <button class ="setting-button" id="settingButton">프로필 수정하기</button>
+        <% } else if (user.role === 'patient') { %>
+            <button class="interest-button">관심 상담사로 등록하기</button>
+        <% } %>
+    <% } %>
+
 </div>
+
+<script>
+    document.getElementById('settingButton')?.addEventListener('click', function() {
+        window.location.href = `/profile/settings/profileEdit`;
+    })
+</script>

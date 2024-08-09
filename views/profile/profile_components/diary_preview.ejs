@@ -70,8 +70,9 @@
     <!-- 일기 헤더 -->
     <div class="diary-container-header">
         <h2>일기 목록</h2>
-        <button class="write-diary-button" id="writeDiaryButton">일기 작성</button>
-        <!-- TODO: 세션에 저장된 사용자 정보에 따라 다르게 뜨도록 처리하기 -->
+        <% if (loginRole === 'patient') { %>
+            <button class="write-diary-button" id="writeDiaryButton">일기 작성</button>
+        <% } %>
     </div>
     <!-- 일기 목록 -->
     <div class="diary-list">
@@ -97,7 +98,7 @@
 </div>
 
 <script>
-    document.getElementById('writeDiaryButton').addEventListener('click', function() {
+    document.getElementById('writeDiaryButton')?.addEventListener('click', function() {
         window.location.href = `/diary/new`;
     });
     document.getElementById('viewAllDiariesButton').addEventListener('click', function() {

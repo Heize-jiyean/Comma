@@ -1,27 +1,27 @@
 const DiaryModel = require('../models/Diary')
-
+const spawn = require('child_process').spawn;
 
 
 // 여러날자의 일기의 감정을 분류
 exports.calculateEmotionPercentages = (Data) => {
     const total = { joy: 0, surprise: 0, anger: 0, anxiety: 0, hurt: 0, sadness: 0 };
     Data.forEach(entry => {
-        total.joy += entry.joy;
-        total.surprise += entry.surprise;
-        total.anger += entry.anger;
-        total.anxiety += entry.anxiety;
-        total.hurt += entry.hurt;
-        total.sadness += entry.sadness;
+        total.joy += parseFloat(entry.joy);
+        total.surprise += parseFloat(entry.surprise);
+        total.anger += parseFloat(entry.anger);
+        total.anxiety += parseFloat(entry.anxiety);
+        total.hurt += parseFloat(entry.hurt);
+        total.sadness += parseFloat(entry.sadness);
     });
 
     const totalSum = total.joy + total.surprise + total.anger + total.anxiety + total.hurt + total.sadness;
     const totalPercentages = {
-        joy: (total.joy / totalSum) * 100,
-        surprise: (total.surprise / totalSum) * 100,
-        anger: (total.anger / totalSum) * 100,
-        anxiety: (total.anxiety / totalSum) * 100,
-        hurt: (total.hurt / totalSum) * 100,
-        sadness: (total.sadness / totalSum) * 100
+        joy: totalSum > 0 ? (total.joy / totalSum) * 100 : 0,
+        surprise: totalSum > 0 ? (total.surprise / totalSum) * 100 : 0,
+        anger: totalSum > 0 ? (total.anger / totalSum) * 100 : 0,
+        anxiety: totalSum > 0 ? (total.anxiety / totalSum) * 100 : 0,
+        hurt: totalSum > 0 ? (total.hurt / totalSum) * 100 : 0,
+        sadness: totalSum > 0 ? (total.sadness / totalSum) * 100 : 0
     };
     return totalPercentages;
 }
@@ -64,7 +64,7 @@ exports.generateEmotionSummary = (percentageData) => {
 exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
     const allPercentages = {};
     //const startDate = new Date(patientUser.registration_time); 
-    const startDate = new Date(new Date().getFullYear(), 3, 1); // 임시데이터
+    const startDate = new Date(new Date().getFullYear(), new Date().getMonth() -3, 1); // 4개월 전부터
     const endDate = new Date();
 
     let currentDate = new Date(startDate);
@@ -80,4 +80,25 @@ exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
     }
 
     return allPercentages;
+}
+
+
+exports.analyzeAndNotify = async (content, title, diaryId) => {
+    try {
+        // 감정분석
+        content = content + title;
+        const result = await spawn('python', ['./python/main.py', content]);
+        result.stdout.on('data', (data) => {
+            const rs = data.toString();
+            try {
+                const emotionResult = JSON.parse(rs);
+                DiaryModel.registerEmotion(diaryId, emotionResult);
+                
+            } catch (e) {
+                console.error("감정분석 오류");
+            }
+        });
+    } catch (error) {
+        console.error("감정분석 실행 오류", error);
+    }
 }

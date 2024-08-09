@@ -1,5 +1,3 @@
-const { options } = require('../email');
-
 exports.register = async (diary) => {
     try {
         const db = await require('../main').connection(); 
@@ -13,16 +11,37 @@ exports.register = async (diary) => {
             diary.content,
             diary.image_url,
             diary.is_visible,
-            // diary.joy,
-            // diary.surprise,
-            // diary.anger,
-            // diary.anxiety,
-            // diary.hurt,
-            // diary.sadness
         ]);
 
         if (db && db.end) db.end();
         return result.insertId;
+
+    } catch (error) {
+        console.error("Diary.resgister() 쿼리 실행 중 오류:", error);
+    }
+};
+
+exports.registerEmotion = async (diaryID, emotions) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            UPDATE diary
+            SET joy = ?, surprise = ?, anger = ?, anxiety = ?, hurt = ?, sadness = ?
+            WHERE diary_id = ?;
+            `;
+        const [result] = await db.query(sql, [
+            emotions.기쁨,
+            emotions.당황,
+            emotions.분노,
+            emotions.불안,
+            emotions.상처,
+            emotions.슬픔,
+            diaryID
+        ]);
+
+        if (db && db.end) db.end();
+        return;
 
     } catch (error) {
         console.error("Diary.resgister() 쿼리 실행 중 오류:", error);
@@ -46,18 +65,22 @@ exports.delete = async (diaryId) => {
     }
 };
 
-exports.findImageUrlById = async (diaryId) => {
+exports.findBypatientIdAndDate = async (patientId, year, month, day) => {
     try {
         const db = await require('../main').connection(); 
 
         let sql = `
-            SELECT image_url 
+            SELECT *
             FROM diary
-            WHERE diary_id = ?`; 
-        const [rows, fields] = await db.query(sql, [diaryId]);
+            WHERE patient_id = ?
+                AND YEAR(created_at) = ?
+                AND MONTH(created_at) = ?
+                AND DAY(created_at) = ?
+            `; 
+        const [rows, fields] = await db.query(sql, [patientId, parseInt(year), parseInt(month), parseInt(day)]);
         
         if (db && db.end) db.end();
-        return rows.length > 0 ? rows[0].image_url : null;
+        return rows.length > 0 ? rows[0] : null;
 
     } catch (error) {
         console.error("Diary.findImageUrlById() 쿼리 실행 중 오류:", error);
@@ -206,11 +229,10 @@ exports.countOfFindAll = async (option, counselorId) => {
 
 
 // 환자 프로필 용
-exports.PreviewfindByPatientId = async (page, patientId, role) => {
+exports.PreviewfindByPatientId = async (page, patientId, role, pageSize) => {
     try {
         const db = await require('../main').connection(); 
 
-        const pageSize = 9;
         let offset = pageSize * (page - 1);
         let sql;
 
@@ -292,9 +314,6 @@ exports.countOfFindByPatientId = async (patientId, role) => {
     }
 };
 
-
-
-
 exports.findAllByPatientId = async(patientId) => {
     try {
         const db = await require('../main').connection();
@@ -311,7 +330,7 @@ exports.findAllByPatientId = async(patientId) => {
         return rows;
 
     } catch (error) {
-        console.log("Diary.findAllByPatientId() 쿼리 실행 중 오류: ", error)
+        console.error("Diary.findAllByPatientId() 쿼리 실행 중 오류: ", error)
     }
 }
 
@@ -334,7 +353,7 @@ exports.findLatestFourByPatientId = async (patientId) => {
         return rows;
 
     } catch (error) {
-        console.log("Diary.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
+        console.error("Diary.findLatestByPatientId() 쿼리 실행 중 오류: ", error);
     }
 }
 

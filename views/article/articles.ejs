@@ -1,0 +1,86 @@
+<head>
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #F4F5F8; }
+    .articles { display: flex; flex-direction: column; justify-content: space-between; align-items: center; margin: auto; 
+        max-width: 1080px; margin-bottom: 16px; padding: 30px;}
+    .card { border-radius: 30px; overflow: hidden; min-width: 240px; }
+
+    .card-img-container { height: 260px; overflow: hidden; }
+    .card-link { text-decoration: none; color: black; }
+    .card-link:hover { color: #4B8673; }
+    .card-body { margin: 10px; height: 160px;}
+    .text-muted { padding-right: 12px; }
+
+    .sort-combobox { margin-left: 20px; margin: 10px; display: flex; justify-content: flex-start; width: 100%;}
+    .button-container { display: flex; justify-content: flex-end; width: 100%; margin-bottom: 20px; }
+    .button-link { background-color: #5FD068; padding: 7px 13px; border-radius: 10px;
+        border: 1px solid #ccc; color: white; text-decoration: none; display: inline-block; text-align: center; }
+    .button-link:hover { background-color: #4caf50; color: white; }
+</style>
+</head>
+
+<div class="articles">
+    <% if (user && user.role === 'counselor') { %>
+    <div class="button-container">
+        <a href="/article/new" class="button-link">아티클 작성</a>
+    </div>
+    <% } %>
+    <div class="sort-combobox">
+        <label for="theme_id">정렬 선택: </label>
+        <select id="sortSelect" onchange="searchPosts()" style="margin-left: 10px;">
+            <option value="latest">최신순</option>
+            <option value="views">조회순</option>
+            <option value="likes">좋아요순</option>
+            <option value="bookmarks">북마크순</option>
+        </select>
+    </div>
+
+    <% if (!Previews || Previews.length === 0) { %>
+        <p>No posts found.</p>
+    <% } else { %>
+        <div class="row">
+            <% Previews.forEach(Preview => { %>
+                <div class="col-md-4 mb-3">
+                <a href="/article/<%= Preview.article_id %>" class="card-link">
+                <div class="card">
+                    <div class="card-img-container">
+                        <img src="<%= Preview.thumbnail_url %>" class="card-img-top" alt="Post Image">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" style="font-weight: bold" ><%= Preview.title %></h5>
+                        <p style="font-size: 14px" class="card-text"><%= Preview.nickname %></p>
+                        <p style="font-size: 14px" class="card-text"><%= new Date(Preview.created_at).toLocaleDateString('ko-KR') %></p>
+                        <p style="font-size: 14px" class="card-text font-size: 0.9rem; color: #333;">조회 <%= Preview.views %>회</p>
+                    </div>
+                </div>
+                </a>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
+<nav aria-label="Article pagination">
+    <%- include('../components/pagination') %>
+</nav>
+
+<script>
+    function searchPosts(page) {
+        const sortValue = document.getElementById("sortSelect").value;
+        window.location.href = `/article?sort=${sortValue}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        setSortByFromQuery();
+    });
+    function setSortByFromQuery() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortBy = urlParams.get('sort');
+        const sortSelect = document.getElementById('sortSelect');
+
+        if (sortBy) {
+            sortSelect.value = sortBy;
+        }
+    }
+
+</script>
