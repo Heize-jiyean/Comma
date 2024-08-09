@@ -475,3 +475,32 @@ exports.charts = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
+
+// 관심 환자, 관심 상담사 등록
+exports.addScrap = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    const targetId = req.params.targetId;
+
+    console.log("addScrap까지는 옴")
+
+    try {
+        if (loginRole === 'patient') {
+            targetUser = await UserModel.getCounselorByUserId(targetId);
+            result = await UserModel.addScrapCounselor(loginId, targetUser.counselor_id);
+        } else if (loginRole === 'counselor') {
+            targetUser = await UserModel.getPatientByUserId(targetId);
+            result = await UserModel.addScrapPatient(targetUser.patient_id, loginId);
+        }
+
+        if (result) {
+            res.status(200).json({ success: true, message: "성공적으로 등록되었습니다." });
+        } else {
+            res.status(400).json({ success: false, message: "등록에 실패했습니다." });
+        }
+
+    } catch (error) {
+        console.error("addScrap 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}

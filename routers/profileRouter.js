@@ -39,7 +39,10 @@ router.get('/settings/accountRemoval', profileController.accountRemovalPage);
 router.post('/settings/accountRemoval', profileController.accountRemoval);
 
 // [GET] 환자 감정 차트 페이지 
-router.get('/patient/:patientId/emotion-chart', profileController.charts)
+router.get('/patient/:patientId/emotion-chart', profileController.charts);
+
+// [POST] 관심 환자, 관심 상담사 등록
+router.post('/scrap/:targetId', profileController.addScrap);
 
 
 module.exports = router;

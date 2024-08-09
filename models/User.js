@@ -602,3 +602,43 @@ exports.getCounselorByNickname = async (nickname) => {
         throw error;
     }
 };
+
+// 관심 상담사로 등록 (환자 -> 상담사)
+exports.addScrapCounselor = async(patientId, counselorId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            INSERT INTO scrap (patient_id, counselor_id, type) 
+            VALUES (?, ?, 'patient_to_counselor')`;
+
+        const [result] = await db.query(sql, [patientId, counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result.affectedRows === 1;
+    } catch (error) {
+        console.error("UserModel.addScrapCounselor 오류: ", error);
+        throw error;
+    }
+}
+
+// 관심 환자로 등록 (상담사 -> 환자)
+exports.addScrapPatient = async(patientId, counselorId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            INSERT INTO scrap (patient_id, counselor_id, type) 
+            VALUES (?, ?, 'counselor_to_patient')`;
+
+        const [result] = await db.query(sql, [patientId, counselorId]);
+        
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result.affectedRows === 1;
+    } catch (error) {
+        console.error("UserModel.addScrapPatient 오류: ", error);
+        throw error;
+    }
+}
