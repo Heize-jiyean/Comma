@@ -92,9 +92,7 @@
     <!-- 방명록 헤더 -->
     <div class="guestbook-container-header">
         <h2>방명록</h2>
-        <% if (loginRole === 'counselor') { %>
-            <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
-        <% } %>
+        
     </div>
     <!-- 방명록 목록 -->
     <div class="guestbook-list">
@@ -133,11 +131,16 @@
 
 <script>
     document.getElementById('writeGuestbookButton')?.addEventListener('click', function() {
-        const patientId = '<%= patientUser.id %>';
-        window.location.href = `/guestbook/new/${patientId}`;
+        const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
+        window.location.href = `/guestbook/new/${userId}`;
     });
+
     document.getElementById('viewAllGuestbooksButton').addEventListener('click', function() {
-        const patientId = '<%= patientUser.id %>';
-        window.location.href = `/profile/patient/${patientId}/guestbooks`;
+        const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
+        const profilePath = '<%= typeof patientUser !== "undefined" ? "patient" : "counselor" %>';
+        window.location.href = `/profile/${profilePath}/${userId}/guestbooks`;
     });
 </script>
+
+
+

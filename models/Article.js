@@ -99,3 +99,25 @@ exports.countOfFindAll = async () => {
         console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
     }
 }
+
+//프로필에 사용
+exports.findLatestFourByCounselorId = async (counselorId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            SELECT * 
+            FROM article
+            WHERE counselor_id = ?
+            ORDER BY created_at DESC
+            LIMIT 4`; // 최신 4개의 아티클만 가져옵니다.
+        
+        const [rows] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) db.end();
+        return rows;
+
+    } catch (error) {
+        console.error("Article.findLatestFourByCounselorId() 쿼리 실행 중 오류:", error);
+    }
+};
