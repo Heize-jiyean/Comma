@@ -50,13 +50,20 @@ exports.patientProfilePage = async (req, res) => {
                 guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
             }
 
+            // 관심 환자인지 여부 확인
+            let isCounselorScrapPatient;
+            if (loginRole === 'counselor') {
+                isCounselorScrapPatient = await UserModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
+            }
+
             // 렌더링
             res.render("profile/patient.ejs", { 
                 patientUser: patientUser, 
                 type: 'patient', 
                 diaries: diaries, 
                 guestbooks: guestbooks,
-                loginRole: loginRole
+                loginRole: loginRole,
+                isCounselorScrapPatient: isCounselorScrapPatient
             });
         } else {
             res.status(403).send("접근 권한이 없습니다.");
@@ -106,13 +113,24 @@ exports.counselorProfilePage = async (req, res) => {
             guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
         }
 
+        const totalPages = Math.ceil(totalGuestbooks / limit);
+
+        // 관심 상담사인지 여부 확인
+        let isPatientScrapCounselor;
+        if (loginRole === 'patient') {
+            isPatientScrapCounselor = await UserModel.checkPatientScrapCounselor(loginId, counselorUser.counselor_id);
+        }
+
         // 렌더링
         res.render("profile/counselor.ejs", { 
             counselorUser: counselorUser, 
             type: 'counselor',
             articles: articles,
             guestbooks: guestbooks,
-            loginRole: loginRole
+            currentPage: currentPage,
+            totalPages: totalPages,
+            loginRole: loginRole,
+            isPatientScrapCounselor: isPatientScrapCounselor
         });
 
     } catch (error) {
@@ -480,6 +498,34 @@ exports.charts = async (req, res) => {
     }
 }
 
+// 관심 환자, 관심 상담사 등록
+exports.addScrap = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    const targetId = req.params.targetId;
+
+    console.log("addScrap까지는 옴")
+
+    try {
+        if (loginRole === 'patient') {
+            targetUser = await UserModel.getCounselorByUserId(targetId);
+            result = await UserModel.addScrapCounselor(loginId, targetUser.counselor_id);
+        } else if (loginRole === 'counselor') {
+            targetUser = await UserModel.getPatientByUserId(targetId);
+            result = await UserModel.addScrapPatient(targetUser.patient_id, loginId);
+        }
+
+        if (result) {
+            res.status(200).json({ success: true, message: "성공적으로 등록되었습니다." });
+        } else {
+            res.status(400).json({ success: false, message: "등록에 실패했습니다." });
+        }
+
+    } catch (error) {
+        console.error("addScrap 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
 // 상담사 방명록 모아보기 페이지 반환
 exports.listAllGuestbooksByCounselor = async (req, res) => {
     // 로그인하지 않은 사용자가 접근할 경우
