@@ -1,5 +1,5 @@
 const UserModel = require('../models/User');
-const DiaryModel = require('../models/Diary')
+const DiaryModel = require('../models/Diary');
 const GuestbookModel = require('../models/Guestbook');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
@@ -127,7 +127,7 @@ exports.listAllDiaries = async (req, res) => {
         const patientId = req.params.patientId;
         const patientUser = await UserModel.getPatientByUserId(patientId);
         if (!patientUser) {
-            res.render("/");    // TODO: 없는 환자인 경우 띄울 페이지
+            res.render("main");    // TODO: 없는 환자인 경우 띄울 페이지
             return;
         }
 
@@ -143,7 +143,7 @@ exports.listAllDiaries = async (req, res) => {
 
             const totalPages = Math.ceil( await DiaryModel.countOfFindByPatientId(patientUser.patient_id, role) / 9);
             let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-            let Previews = await DiaryModel.PreviewfindByPatientId(currentPage, patientUser.patient_id, role);
+            let Previews = await DiaryModel.PreviewfindByPatientId(currentPage, patientUser.patient_id, role, 9);
 
             if (Previews) {
                 Previews.forEach(preview => {
@@ -441,32 +441,39 @@ exports.charts = async (req, res) => {
         // 환자 정보 가져오기
         const patientId = req.params.patientId;
         const patientUser = await UserModel.getPatientByUserId(patientId);
-    
-        let Data = [];
-        // 데이터 불러오기 
-        if (req.query.year && req.query.month) {
-            Data = await DiaryModel.getEmotionDataByMonth(patientUser.patient_id, req.query.year, req.query.month);
+
+        if (req.session.user) {
+            if (req.session.user.role == 'patient') {
+                if (patientUser.patient_id != req.session.user.id) {
+                    const referer = req.get('Referer') || '/';
+                    return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+                }
+            } 
+        
+            let Data = [];
+            // 데이터 불러오기 
+            if (req.query.year && req.query.month) {
+                Data = await DiaryModel.getEmotionDataByMonth(patientUser.patient_id, req.query.year, req.query.month);
+            }
+            else {
+                Data = await DiaryModel.getEmotionData(patientUser.patient_id);
+            }
+
+            const Percentages = await EmotionData.calculateEmotionPercentages(Data);
+            const descriptionEmotions = await  EmotionData.generateEmotionSummary(Percentages);
+            const monthlyPercentages = await EmotionData.calculateMonthlyEmotionPercentages(patientUser);
+
+
+            res.render('profile/emotion-chart', 
+                {patientUser, type: 'patient',
+                lineChartEmotionData: Data, //꺾은선차트
+                doughnutChartEmotionData: Percentages, // 도넛차트
+                barChartData: monthlyPercentages, // 막대차트
+                descriptionEmotions
+            });
         }
-        else {
-            Data = await DiaryModel.getEmotionData(patientUser.patient_id);
-        }
+        else return res.render("login/login");
 
-        const Percentages = await EmotionData.calculateEmotionPercentages(Data);
-        const descriptionEmotions = await  EmotionData.generateEmotionSummary(Percentages);
-        const monthlyPercentages = await EmotionData.calculateMonthlyEmotionPercentages(patientUser);
-
-        // console.log(Percentages);
-        // console.log(monthlyPercentages);
-
-
-
-        res.render('profile/emotion-chart', 
-            {patientUser, type: 'patient',
-            lineChartEmotionData: Data, 
-            doughnutChartEmotionData: Percentages,
-            barChartData: monthlyPercentages,
-            descriptionEmotions
-        });
     } catch (error) {
         console.error("newDiary 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -524,3 +531,21 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 };
+
+// 부분 뷰를 렌더링하는 새로운 엔드포인트
+// exports.getLineChartPartial = async (req, res) => {
+//     try {
+//         const patientId = req.params.patientId;
+//         const { year, month } = req.query;
+//         console.log(patientId, year, month);
+
+//         // 특정 연도와 월에 대한 데이터 가져오기
+//         const Data = await DiaryModel.getEmotionDataByMonth(patientId, year, month);
+
+//         console.log(Data);
+//         res.render('chart/line-chart', { lineChartEmotionData: Data });
+//     } catch (error) {
+//         console.error("getEmotionChartPartial 오류:", error);
+//         res.status(500).send("서버 오류가 발생했습니다.");
+//     }
+// }

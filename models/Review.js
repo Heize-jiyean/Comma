@@ -102,3 +102,24 @@ exports.createReview = async (reviewData) => {
         throw new Error('Error creating review: ' + err.message);
     }
 };
+
+// 리뷰 삭제 함수
+exports.deleteReview = async (reviewId) => {
+    try {
+        const db = await require('../main').connection();
+        await db.query(`
+            DELETE FROM review 
+            WHERE review_id = ?
+        `, [reviewId]);
+
+        if (db && db.end) {
+            db.end().catch(err => {
+                console.error('DB 연결 종료 중 오류:', err);
+            });
+        }
+
+        return reviewId;
+    } catch (err) {
+        throw new Error('Error deleting review: ' + err.message);
+    }
+}

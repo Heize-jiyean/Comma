@@ -12,8 +12,7 @@ router.post('/register', articleController.register);
 
 router.get('/', articleController.list);
 router.get('/:articleId', articleController.view);
-
-// router.delete('/:articleId', articleController.delete);
+router.delete('/:articleId', articleController.delete);
 
 // 좋아요 등록
 router.post("/like", articleController.toggleLike);

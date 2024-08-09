@@ -17,10 +17,18 @@ exports.checkCounselorRole = (sessionRole) => {
     return sessionRole === "counselor";
 }
 
-// 회원본인만 접근
+// 회원 본인만 접근
 exports.checkPatientId = (sessionRole, sessionUserId, targetID) => {
     if (!exports.isUserAuthenticated(sessionUserId)) return false;
     if (!exports.checkPatientRole(sessionRole)) return false;
+
+    return sessionUserId === targetID;
+}
+
+// 상담사 본인만 접근
+exports.checkCounselorId = (sessionRole, sessionUserId, targetID) => {
+    if (!exports.isUserAuthenticated(sessionUserId)) return false;
+    if (!exports.checkCounselorRole(sessionRole)) return false;
 
     return sessionUserId === targetID;
 }
