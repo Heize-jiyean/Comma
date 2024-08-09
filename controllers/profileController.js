@@ -48,13 +48,20 @@ exports.patientProfilePage = async (req, res) => {
                 guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
             }
 
+            // 관심 환자인지 여부 확인
+            let isCounselorScrapPatient;
+            if (loginRole === 'counselor') {
+                isCounselorScrapPatient = await UserModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
+            }
+
             // 렌더링
             res.render("profile/patient.ejs", { 
                 patientUser: patientUser, 
                 type: 'patient', 
                 diaries: diaries, 
                 guestbooks: guestbooks,
-                loginRole: loginRole
+                loginRole: loginRole,
+                isCounselorScrapPatient: isCounselorScrapPatient
             });
         } else {
             res.status(403).send("접근 권한이 없습니다.");
@@ -107,6 +114,11 @@ exports.counselorProfilePage = async (req, res) => {
 
         const totalPages = Math.ceil(totalGuestbooks / limit);
 
+        // 관심 상담사인지 여부 확인
+        let isPatientScrapCounselor;
+        if (loginRole === 'patient') {
+            isPatientScrapCounselor = await UserModel.checkPatientScrapCounselor(loginId, counselorUser.counselor_id);
+        }
 
         // 렌더링
         res.render("profile/counselor.ejs", { 
@@ -115,7 +127,8 @@ exports.counselorProfilePage = async (req, res) => {
             guestbooks: guestbooks,
             currentPage: currentPage,
             totalPages: totalPages,
-            loginRole: loginRole
+            loginRole: loginRole,
+            isPatientScrapCounselor: isPatientScrapCounselor
         });
     } catch (error) {
         console.log("상담사 프로필 반환 오류", error);

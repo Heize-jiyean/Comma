@@ -148,13 +148,21 @@
         <% if ((user.role === 'patient') && (user.custom_id === patientUser.id)) { %>
             <button class="setting-button" id="settingButton">프로필 수정하기</button>
         <% } else if (user.role === 'counselor') { %>
-            <button class="interest-button" id="scrapPatientButton">관심 환자로 등록하기</button>
+            <% if (isCounselorScrapPatient) { %>
+                <button class="interest-button" disabled>이미 관심 환자로 등록됨</button>
+            <% } else { %>
+                <button class="interest-button" id="scrapPatientButton">관심 환자로 등록하기</button>
+            <% } %>
         <% } %>
     <% } else if (type === 'counselor') { %>
         <% if ((user.role === 'counselor') && (user.custom_id === counselorUser.id)) { %>
             <button class ="setting-button" id="settingButton">프로필 수정하기</button>
         <% } else if (user.role === 'patient') { %>
-            <button class="interest-button" id="scrapCounselorButton">관심 상담사로 등록하기</button>
+            <% if (isPatientScrapCounselor) { %>
+                <button class="interest-button" disabled>이미 관심 상담사로 등록됨</button>
+            <% } else { %>
+                <button class="interest-button" id="scrapCounselorButton">관심 상담사로 등록하기</button>
+            <% } %>
         <% } %>
     <% } %>
 

@@ -642,3 +642,46 @@ exports.addScrapPatient = async(patientId, counselorId) => {
         throw error;
     }
 }
+
+// 관심 상담사인지 확인 (환자 -> 상담사)
+exports.checkPatientScrapCounselor = async(patientId, counselorId) => {
+    try {
+        const db = await require('../main').connection();
+
+        const sql = `
+            SELECT COUNT(*) AS count
+            FROM scrap
+            WHERE patient_id = ? AND counselor_id = ? AND type = 'patient_to_counselor'`;
+
+        const [result] = await db.query(sql, [patientId, counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result[0].count > 0;
+    } catch (error) {
+        console.error("UserModel.checkPatientScrapCounselor 오류: ", error);
+        throw error;
+    }
+}
+
+
+// 관심 환자인지 확인 (상담사 -> 환자)
+exports.checkCounselorScrapPatient = async(patientId, counselorId) => {
+    try {
+        const db = await require('../main').connection();
+
+        const sql = `
+            SELECT COUNT(*) AS count
+            FROM scrap
+            WHERE patient_id = ? AND counselor_id = ? AND type = 'counselor_to_patient'`;
+
+        const [result] = await db.query(sql, [patientId, counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return result[0].count > 0;
+    } catch (error) {
+        console.error("UserModel.checkCounselorScrapPatient 오류: ", error);
+        throw error;
+    }
+}
