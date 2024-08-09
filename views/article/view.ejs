@@ -62,7 +62,7 @@
           <%- htmlContent %>
       </div>
 
-      <% if (user.role === 'patient') { %>
+      <% if (!user || user.role === 'patient') { %>
       <div class="interaction">
           <button id="likeButton" title="좋아요">
               <i id="likeIcon" class="<%= interaction.liked ? 'fas' : 'far' %> fa-heart" style="color: red;"></i> 좋아요
@@ -74,7 +74,7 @@
       <% } %>
   </div>
 
-  <% if (user.role === 'counselor' && user.id === article.counselor_id) { %>
+  <% if (user && user.role === 'counselor' && user.id === article.counselor_id) { %>
   <div class="button-container">
     <div class="button" onclick="confirmDelete('<%= article.article_id %>')">삭제</div>
   </div>
