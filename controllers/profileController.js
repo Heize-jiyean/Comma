@@ -634,6 +634,7 @@ exports.listMyScraps = async(req, res) => {
             for (counselor of scrappedCounselors) {
                 const counselorUser = await UserModel.getCounselorByCounselorId(counselor.counselor_id);
                 if (counselorUser) {
+                    counselorUser.role = 'counselor';
                     scrapUserList.push(counselorUser)
                 }
             }
@@ -642,6 +643,7 @@ exports.listMyScraps = async(req, res) => {
             for (patient of scrappedPatients) {
                 const patientUser = await UserModel.getPatientByPatientId(patient.patient_id);
                 if (patientUser) {
+                    patientUser.role = 'patient';
                     scrapUserList.push(patientUser)
                 }
             }

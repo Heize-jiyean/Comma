@@ -81,16 +81,18 @@
         </div>
         <div class="content-container">
             <% scrapUserList.forEach(function(scrapUser) { %>
-                <div class="profile-entry">
-                    <img src="<%= scrapUser.profile_picture %>" alt="Profile Image" class="profile-picture">
-                    <div class="profile-info">
-                        <%= scrapUser.nickname %> <br>
-                        <%= scrapUser.id %>
+                <a href="/profile/<%= scrapUser.role %>/<%= scrapUser.id %>" style="text-decoration: none; color: inherit;">
+                    <div class="profile-entry">
+                        <img src="<%= scrapUser.profile_picture %>" alt="Profile Image" class="profile-picture">
+                        <div class="profile-info">
+                            <%= scrapUser.nickname %> <br>
+                            <%= scrapUser.id %>
+                        </div>
+                        <div class="profile-action">
+                            <button class="unscrap-button" data-user-id="<%= scrapUser.id %>" onclick="toggleScrap(this)">스크랩 해제</button>
+                        </div>
                     </div>
-                    <div class="profile-action">
-                        <button class="unscrap-button" data-user-id="<%= scrapUser.id %>" onclick="toggleScrap(this)">스크랩 해제</button>
-                    </div>
-                </div>
+                </a>
             <% }); %>
         </div>
         
