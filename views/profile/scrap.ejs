@@ -29,8 +29,14 @@
         .tab {
             flex: 1;
             text-align: center;
-            padding: 10px 20px;
+            padding: 20px 20px;
             cursor: pointer;
+            font-size: 18px;
+        }
+        .tab.active {
+            color: #4B8673;
+            font-weight: 800;
+            border-bottom: 2px solid #4B8673;
         }
         .content-container {
             padding: 20px;
@@ -51,14 +57,13 @@
         }
         button {
             padding: 5px 10px;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
+            border: 1px solid #D6D7DA;
+            border-radius: 8px;
             cursor: pointer;
-            border: none;
+            background-color: white;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #D6D7DA;
         }
         .profile-picture {
             width: 50px;
@@ -71,8 +76,8 @@
 <body>
     <div class="scrap-container">
         <div class="tab-container">
-            <div class="tab active" onclick="location.href='/profile/scrap/myScraps'">내가 스크랩</div>
-            <div class="tab" onclick="location.href='/profile/scrap/scrapsOnMe'">나를 스크랩</div>
+            <div class="tab" id="myScrapsTab" onclick="location.href='/profile/scrap/myScraps'">내가 스크랩</div>
+            <div class="tab" id="scrapsOnMeTab" onclick="location.href='/profile/scrap/scrapsOnMe'">나를 스크랩</div>
         </div>
         <div class="content-container">
             <% scrapUserList.forEach(function(scrapUser) { %>
@@ -92,3 +97,16 @@
     </div>
 </body>
 </html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const path = window.location.pathname;
+        const myScrapsTab = document.getElementById('myScrapsTab');
+        const scrapsOnMeTab = document.getElementById('scrapsOnMeTab');
+        if (path.includes('myScraps')) {
+            myScrapsTab.classList.add('active');
+        } else if (path.includes('scrapsOnMe')) {
+            scrapsOnMeTab.classList.add('active');
+        }
+    });
+</script>
