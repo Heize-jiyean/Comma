@@ -48,5 +48,11 @@ router.post('/scrap/:targetId', profileController.addScrap);
 // [DELETE] 관심 환자, 관심 상담사 해제
 router.delete('/scrap/:targetId', profileController.removeScrap);
 
+// [GET] 내가 스크랩한 관심 환자, 관심 상담사
+router.get('/scrap/myScraps', profileController.listMyScraps);
+
+// [GET] 나를 스크랩한 관심 환자, 관심 상담사
+router.get('/scrap/scrapsOnMe', profileController.listScrapsOnMe);
+
 
 module.exports = router;

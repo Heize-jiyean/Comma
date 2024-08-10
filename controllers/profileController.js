@@ -4,6 +4,7 @@ const GuestbookModel = require('../models/Guestbook');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
 const ArticleModel = require('../models/Article'); 
+const ScrapModel = require('../models/Scrap');
 
 const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
 
@@ -53,7 +54,7 @@ exports.patientProfilePage = async (req, res) => {
             // 관심 환자인지 여부 확인
             let isCounselorScrapPatient;
             if (loginRole === 'counselor') {
-                isCounselorScrapPatient = await UserModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
+                isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
             }
 
             // 렌더링
@@ -117,7 +118,7 @@ exports.counselorProfilePage = async (req, res) => {
         // 관심 상담사인지 여부 확인
         let isPatientScrapCounselor;
         if (loginRole === 'patient') {
-            isPatientScrapCounselor = await UserModel.checkPatientScrapCounselor(loginId, counselorUser.counselor_id);
+            isPatientScrapCounselor = await ScrapModel.checkPatientScrapCounselor(loginId, counselorUser.counselor_id);
         }
 
         // 렌더링
@@ -504,10 +505,10 @@ exports.addScrap = async(req, res) => {
     try {
         if (loginRole === 'patient') {
             targetUser = await UserModel.getCounselorByUserId(targetId);
-            result = await UserModel.addScrapCounselor(loginId, targetUser.counselor_id);
+            result = await ScrapModel.addScrapCounselor(loginId, targetUser.counselor_id);
         } else if (loginRole === 'counselor') {
             targetUser = await UserModel.getPatientByUserId(targetId);
-            result = await UserModel.addScrapPatient(targetUser.patient_id, loginId);
+            result = await ScrapModel.addScrapPatient(targetUser.patient_id, loginId);
         }
 
         if (result) {
@@ -531,10 +532,10 @@ exports.removeScrap = async(req, res) => {
     try {
         if (loginRole === 'patient') {
             targetUser = await UserModel.getCounselorByUserId(targetId);
-            result = await UserModel.removeScrapCounselor(loginId, targetUser.counselor_id);
+            result = await ScrapModel.removeScrapCounselor(loginId, targetUser.counselor_id);
         } else if (loginRole === 'counselor') {
             targetUser = await UserModel.getPatientByUserId(targetId);
-            result = await UserModel.removeScrapPatient(targetUser.patient_id, loginId);
+            result = await ScrapModel.removeScrapPatient(targetUser.patient_id, loginId);
         }
 
         if (result) {
@@ -619,3 +620,68 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
 //         res.status(500).send("서버 오류가 발생했습니다.");
 //     }
 // }
+
+
+// 내가 스크랩한 관심 환자 or 관심 상담사
+exports.listMyScraps = async(req, res) => {
+    try {
+        const loginId = req.session.user.id;
+        const loginRole = req.session.user.role;
+        const scrapUserList = [];
+
+        if (loginRole === 'patient') {
+            const scrappedCounselors = await ScrapModel.getScrappedCounselorsByPatientId(loginId);
+            for (counselor of scrappedCounselors) {
+                const counselorUser = await UserModel.getCounselorByCounselorId(counselor.counselor_id);
+                if (counselorUser) {
+                    scrapUserList.push(counselorUser)
+                }
+            }
+        } else if (loginRole === 'counselor') {
+            const scrappedPatients = await ScrapModel.getScrappedCounselorsByPatientId(loginId);
+            for (patient of scrappedPatients) {
+                const patientUser = await UserModel.getPatientByPatientId(patient.patient_id);
+                if (patientUser) {
+                    scrapUserList.push(patientUser)
+                }
+            }
+        }
+
+        res.render("profile/scrap.ejs", { scrapUserList: scrapUserList });
+    } catch (error) {
+        console.log("listMyScraps 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+// 나를 스크랩한 관심 환자 or 관심 상담사
+exports.listScrapsOnMe = async(req, res) => {
+    try {
+        const loginId = req.session.user.id;
+        const loginRole = req.session.user.role;
+        const scrapUserList = [];
+
+        if (loginRole === 'patient') {
+            const scrappingCounselors = await ScrapModel.getScrappingCounselorsByPatientId(loginId);
+            for (const counselor of scrappingCounselors) {
+                const counselorUser = await UserModel.getCounselorByCounselorId(counselor.counselor_id);
+                if (counselorUser) {
+                    scrapUserList.push(counselorUser);
+                }
+            }
+        } else if (loginRole === 'counselor') {
+            const scrappingPatients = await ScrapModel.getScrappingPatientsByCounselorId(loginId);
+            for (const patient of scrappingPatients) {
+                const patientUser = await UserModel.getPatientByPatientId(patient.patient_id);
+                if (patientUser) {
+                    scrapUserList.push(patientUser);
+                }
+            }
+        }
+
+        res.render("profile/scrap.ejs", { scrapUserList: scrapUserList })
+    } catch (error) {
+        console.log("listScrapsOnMe 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}

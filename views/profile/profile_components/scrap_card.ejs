@@ -1,0 +1,27 @@
+<style>
+    .scrap-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #D6D7DA;
+        padding: 20px;
+    }
+    .scrap-more-button {
+        width: 100%;
+        background: none;
+        border: none;
+    }
+
+</style>
+<div class="scrap-card">
+    <% if (type === 'counselor') { %>
+        <button class ="scrap-more-button" id="scrapMoreButton">관심 상담사 스크랩 내역</button>
+    <% } else if (type === 'patient') { %>
+        <button class ="scrap-more-button" id="scrapMoreButton">관심 환자 스크랩 내역</button>
+    <% } %>
+</div>
+
+<script>
+    document.getElementById('scrapMoreButton')?.addEventListener('click', function() {
+        window.location.href = `/profile/scrap/myScraps`;
+    })
+</script>
