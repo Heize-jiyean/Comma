@@ -88,7 +88,7 @@
                         <%= scrapUser.id %>
                     </div>
                     <div class="profile-action">
-                        <button>스크랩 해제</button>
+                        <button class="unscrap-button" data-user-id="<%= scrapUser.id %>" onclick="toggleScrap(this)">스크랩 해제</button>
                     </div>
                 </div>
             <% }); %>
@@ -109,4 +109,27 @@
             scrapsOnMeTab.classList.add('active');
         }
     });
+
+    function toggleScrap(buttonElement) {
+        const userId = buttonElement.dataset.userId;
+        const isScrapped = buttonElement.textContent.includes('해제');
+
+        fetch(`/profile/scrap/${userId}`, {
+            method: isScrapped ? 'DELETE' : 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                buttonElement.textContent = isScrapped ? '스크랩' : '스크랩 해제';
+                alert(isScrapped ? '스크랩이 해제되었습니다.' : '스크랩이 등록되었습니다.');
+            } else {
+                alert('작업 실패');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
 </script>
