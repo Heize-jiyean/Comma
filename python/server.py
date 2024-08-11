@@ -112,23 +112,28 @@ def similarity_like():
                 vectors.append(jdata[i]['vector'])
 
             selected_array = np.array(selected)
-            mean_vector = np.mean(selected_array, axis=0)
+            
+            if selected_array.size > 0:
+                mean_vector = np.mean(selected_array, axis=0, keepdims=True)
         
-            vectors_array = np.array(vectors)
-            vectors_array = np.append(vectors_array, [mean_vector], axis=0)
+                vectors_array = np.array(vectors)
+                vectors_array = np.concatenate((vectors_array, mean_vector), axis=0)
         
-            cosine_sim_matrix = cosine_similarity(vectors_array)
-            sim = cosine_sim_matrix[-1]
+                cosine_sim_matrix = cosine_similarity(vectors_array)
+                sim = cosine_sim_matrix[-1]
         
-            delete_sim_like(connection, pid)
+                delete_sim_like(connection, pid)
         
-            for index, similarity in enumerate(sim[:-1]):
-                if jdata[index]['id'] not in likeId:
-                    insert_sim_like(connection, pid, jdata[index]['id'], similarity)
+                for index, similarity in enumerate(sim[:-1]):
+                    if jdata[index]['id'] not in likeId:
+                        insert_sim_like(connection, pid, jdata[index]['id'], similarity)
         
-            mean_vector = mean_vector.tolist()
-        
-        return jsonify(mean_vector)
+                mean_vector = mean_vector.tolist()
+                return jsonify(mean_vector)
+            else:
+                delete_sim_like(connection, pid)   
+                zero_list = [0] * 768   
+                return jsonify(zero_list)
     else:
         return jsonify({'error': 'No input received'}), 400 
 

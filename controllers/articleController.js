@@ -128,7 +128,7 @@ exports.delete = async (req, res) => {
             await ArticleModel.delete(articleId);
 
             // Json 삭제
-            await JsonUtils.deleteJson(articleId);
+            await JsonUtils.deleteJson(0, articleId);
     
             // redirect
             return res.json({ success: true, redirect: `/article` });
@@ -157,7 +157,7 @@ exports.list = async (req, res) => {
 
         let RecommendPreviews = null;
         if (req.session.user && req.session.user.role == 'patient') {
-            RecommendPreviews = await ArticleModel.RecommendTop3(req.session.user.id);
+            RecommendPreviews = await ArticleModel.RecommendTop3_like(req.session.user.id);
 
             if (RecommendPreviews) {
                 RecommendPreviews.forEach(preview => {
@@ -190,10 +190,10 @@ exports.toggleLike = async (req, res) => {
     
             let liked = true;
             if (await ArticleInteractionModel.findLikeByPatientAndArticle(articleId, patientId) == null) { // 좋아요 추가
-                ArticleInteractionModel.createLike(articleId, patientId);
+                await ArticleInteractionModel.createLike(articleId, patientId);
             }
             else { // 좋아요 삭제
-                ArticleInteractionModel.deleteLike(articleId, patientId);
+                await ArticleInteractionModel.deleteLike(articleId, patientId);
                 liked = false;
             }
 

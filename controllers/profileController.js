@@ -4,6 +4,7 @@ const GuestbookModel = require('../models/Guestbook');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
 const ArticleModel = require('../models/Article'); 
+const JsonUtils = require('../utils/jsonUtils');
 
 const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
 
@@ -434,6 +435,7 @@ exports.accountRemoval = async(req, res) => {
         // 비밀번호가 일치하면 탈퇴 처리
         if (loginRole === 'patient') {
             await UserModel.removePatient(loginId);
+            await JsonUtils.deleteJson(1, loginId);
         } else if (loginRole === 'counselor') {
             await UserModel.removeCounselor(loginId);
         }

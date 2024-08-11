@@ -44,11 +44,11 @@ exports.addJson = async (idx, id, vectorResult) => {
 exports.getJson = async (idx, id) => {
     try {
         const data = await readJson(idx);
-        const article = data.find(item => item.id === id);
+        const article = await data.find(item => item.id == id);
         if (article) {
             res.json(article);
         } else {
-            res.status(404).send('데이터를 찾을 수 없습니다.');
+            rconsole.log('데이터를 찾을 수 없습니다.');
         }
     } catch (error) {
         console.error('파일 가져오기 오류:', error);
@@ -59,12 +59,12 @@ exports.getJson = async (idx, id) => {
 exports.updateJson = async (idx, id, vectorResult) => {
     try {
         const data = await readJson(idx);
-        const index = data.findIndex(item => item.id === id);
+        const index = await data.findIndex(item => item.id == id);
         if (index !== -1) {
             data[index] = { id: id, vector: vectorResult };
             await writeJson(idx, data);
         } else {
-            res.status(404).send('데이터를 찾을 수 없습니다.');
+            console.log('데이터를 찾을 수 없습니다.');
         }
     } catch (error) {
         console.error('파일 업데이트 오류:', error);
@@ -75,9 +75,9 @@ exports.updateJson = async (idx, id, vectorResult) => {
 exports.deleteJson = async (idx, id) => {
     try {
         const data = await readJson(idx);
-        const newData = data.filter(item => item.id !== id);
+        const newData = await data.filter(item => item.id != id);
         if (data.length === newData.length) {
-            res.status(404).send('데이터를 찾을 수 없습니다.');
+            console.log('데이터를 찾을 수 없습니다.');
         } else {
             await writeJson(idx, newData);
         }

@@ -31,7 +31,7 @@ exports.main_patient = async (req, res) => {
         // 추천아티클 
         let RecommendPreviews = null;
         if (req.session.user && req.session.user.role == 'patient') {
-            RecommendPreviews = await ArticleModel.RecommendTop3(req.session.user.id);
+            RecommendPreviews = await ArticleModel.RecommendTop3_like(req.session.user.id);
 
             if (RecommendPreviews) {
                 RecommendPreviews.forEach(preview => {
