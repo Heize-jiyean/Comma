@@ -164,13 +164,32 @@ exports.listAllDiaries = async (req, res) => {
             });
         }
 
+        //임의로 손댄부분
+        // `isCounselorScrapPatient` 변수 추가
+        let isCounselorScrapPatient;
+        if (role === 'counselor') {
+            isCounselorScrapPatient = await UserModel.checkCounselorScrapPatient(patientId, loginId);
+        }
+
+        // 렌더링 부분에서 변수 전달
         res.render('profile/diary', { 
             patientUser, 
             type: 'patient', 
             Previews, 
             currentPage, 
-            totalPages 
+            totalPages,
+            loginRole: role,
+            isCounselorScrapPatient: isCounselorScrapPatient // 추가
         });
+
+
+        // res.render('profile/diary', { 
+        //     patientUser, 
+        //     type: 'patient', 
+        //     Previews, 
+        //     currentPage, 
+        //     totalPages 
+        // });
 
     } catch (error) {
         console.error("listAllDiaries 오류:", error);
@@ -219,14 +238,33 @@ exports.listAllGuestbooks = async (req, res) => {
                 guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
             }
 
+            // `isCounselorScrapPatient` 변수 추가
+            let isCounselorScrapPatient;
+            if (loginRole === 'counselor') {
+                isCounselorScrapPatient = await UserModel.checkCounselorScrapPatient(patientId, loginId);
+            }
+
+            //임의로 손댄부분
+            // 렌더링 부분에서 변수 전달
             res.render("profile/guestbook.ejs", { 
                 patientUser: patientUser, 
                 type: 'patient', 
                 guestbooks: guestbooks,
                 currentPage: currentPage,
                 totalPages: totalPages,
-                loginRole: loginRole 
+                loginRole: loginRole,
+                isCounselorScrapPatient: isCounselorScrapPatient // 추가
             });
+
+
+            // res.render("profile/guestbook.ejs", { 
+            //     patientUser: patientUser, 
+            //     type: 'patient', 
+            //     guestbooks: guestbooks,
+            //     currentPage: currentPage,
+            //     totalPages: totalPages,
+            //     loginRole: loginRole 
+            // });
 
         } else {
             res.status(403).send("접근 권한이 없습니다.");

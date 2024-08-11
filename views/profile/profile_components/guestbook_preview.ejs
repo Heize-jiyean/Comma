@@ -92,7 +92,7 @@
     <!-- 방명록 헤더 -->
     <div class="guestbook-container-header">
         <h2>방명록</h2>
-        <% if (loginRole === 'counselor') { %>
+        <% if (loginRole === 'counselor' && type === 'patient') { %>
             <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
         <% } %>
     </div>
