@@ -245,7 +245,7 @@ exports.listAllGuestbooks = async (req, res) => {
                 isCounselorScrapPatient = await UserModel.checkCounselorScrapPatient(patientId, loginId);
             }
 
-            //임의로 손댄부분
+            //임의로 손댄부분(원본주석,아래코드임의작성)
             // 렌더링 부분에서 변수 전달
             res.render("profile/guestbook.ejs", { 
                 patientUser: patientUser, 
@@ -308,6 +308,9 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
                 guestbook.patientId = patient ? patient.id : "Unknown";
                 guestbook.patientNickname = patient ? patient.nickname : "Unknown";
                 guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
+
+                // 추가: 방명록을 작성한 상담사의 프로필 사진이 제대로 설정되어 있는지 확인
+                guestbook.counselorProfilePicture = counselorUser.profile_picture ? counselorUser.profile_picture : DEFAULT_PROFILE_IMAGE;
             }
 
             res.render("profile/guestbook.ejs", { 
@@ -328,6 +331,7 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 };
+
 
 // 프로필 설정 - 프로필 편집 페이지 반환
 exports.profileEditPage = async(req, res) => {
