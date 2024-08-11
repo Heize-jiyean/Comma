@@ -1,16 +1,25 @@
 //방명록 등록
+// models/Guestbook.js
+
 exports.register = async (guestbook) => {
     try {
-        const db = await require('../main').connection(); 
+        const db = await require('../main').connection();
+
+        // KST 시간 생성
+        const now = new Date();
+        const offset = 9 * 60 * 60 * 1000; // 9시간 (한국 시간대)
+        const kstTime = new Date(now.getTime() + offset);
+        const createdAtKST = kstTime.toISOString().slice(0, 19).replace('T', ' ');
 
         let sql = `
-            INSERT INTO guestbook (patient_id, counselor_id, title, content) 
-            VALUES (?, ?, ?, ?)`;
+            INSERT INTO guestbook (patient_id, counselor_id, title, content, created_at) 
+            VALUES (?, ?, ?, ?, ?)`;
         const [result] = await db.query(sql, [
             guestbook.patient_id,
             guestbook.counselor_id,
             guestbook.title,
             guestbook.content,
+            createdAtKST
         ]);
 
         if (db && db.end) db.end();
@@ -19,7 +28,9 @@ exports.register = async (guestbook) => {
     } catch (error) {
         console.error("Guestbook.register() 쿼리 실행 중 오류:", error);
     }
-}
+};
+
+
 
 //방명록 상세조회
 exports.findById = async (guestbookId) => {

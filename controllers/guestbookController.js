@@ -51,11 +51,14 @@ exports.register = async (req, res) => {
 
         const counselorId = loginId;
 
+        const createdAtKST = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+
         newGuestbookData = {
             patient_id: patientUser.patient_id,
             counselor_id: counselorId,
-            ...guestbookData
-        }
+            ...guestbookData,
+            created_at: createdAtKST
+        };
 
         const savedGuestbookId = await GuestbookModel.register(newGuestbookData);
         return res.json({ success: true, redirect: `/guestbook/${savedGuestbookId}` });
@@ -63,7 +66,7 @@ exports.register = async (req, res) => {
         console.error("registerGuestbook 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
-}
+};
 
 
 // 방명록 상세조회
