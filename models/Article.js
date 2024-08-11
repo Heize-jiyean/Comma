@@ -152,6 +152,76 @@ exports.findLatestFourByCounselorId = async (counselorId) => {
     }
 };
 
+//프로필에사용-특정상담사가 작성한 아티클찾기
+exports.countByCounselorId = async (counselorId) => {
+    try {
+        const db = await require('../main').connection();
+
+        let sql = `
+            SELECT COUNT(*) AS total
+            FROM article
+            WHERE counselor_id = ?`;
+
+        const [rows, fields] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows[0].total;
+    } catch (error) {
+        console.log("Article.countByCounselorId() 쿼리 실행 중 오류: ", error);
+        throw error;
+    }
+};
+
+exports.PreviewFindAllByCounselorId = async (counselorId, page, sortBy) => {
+    try {
+        const db = await require('../main').connection();        
+
+        const pageSize = 9;
+        let offset = pageSize * (page - 1);
+
+        let sql = `
+            SELECT 
+                a.*,
+                c.nickname,
+                c.profile_picture,
+                (SELECT COUNT(*) FROM article_like WHERE article_like.article_id = a.article_id) AS like_count,
+                (SELECT COUNT(*) FROM article_bookmark WHERE article_bookmark.article_id = a.article_id) AS bookmark_count
+            FROM 
+                article a 
+            JOIN 
+                counselor c ON a.counselor_id = c.counselor_id 
+            WHERE 
+                a.counselor_id = ? `;
+
+        switch (sortBy) {
+            case 'views':
+                sql += `ORDER BY a.views DESC`;
+                break;
+            case 'likes':
+                sql += `ORDER BY like_count DESC`;
+                break;
+            case 'bookmarks':
+                sql += `ORDER BY bookmark_count DESC`;
+                break;
+            default:
+                sql += `ORDER BY a.created_at DESC`;
+                break;
+        }
+
+        sql += ` LIMIT ? OFFSET ?`;
+        const [rows] = await db.query(sql, [counselorId, pageSize, offset]);
+
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows : null;
+
+    } catch (error) {
+        console.error("ArticleModel.PreviewFindAllByCounselorId() 쿼리 실행 중 오류:", error);
+        throw error;
+    }
+};
+
+
 exports.delete = async (articleId) => {
     try {
         const db = await require('../main').connection(); 

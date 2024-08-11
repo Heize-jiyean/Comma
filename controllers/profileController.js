@@ -113,7 +113,6 @@ exports.counselorProfilePage = async (req, res) => {
             guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
         }
 
-
         // 관심 상담사인지 여부 확인
         let isPatientScrapCounselor;
         if (loginRole === 'patient') {
@@ -135,6 +134,7 @@ exports.counselorProfilePage = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.")
     }
 };
+
 
 // 환자 일기 모아보기 페이지 반환
 exports.listAllDiaries = async (req, res) => {

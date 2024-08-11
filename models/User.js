@@ -131,20 +131,20 @@ exports.getPatientByUserId = async (id) => {
 };
 
 // 의사 정보 로그인아이디로 가져오기
-exports.getCounselorByUserId = async (id) => {
+exports.getCounselorByUserId = async (userId) => {
     try {
         const db = await require('../main').connection();
+
         let sql = `
-            SELECT *
-            FROM counselor
-            WHERE id = ?`;
-        const [result] = await db.query(sql, [id]);
+            SELECT * FROM counselor WHERE id = ?`;
+        
+        const [rows] = await db.query(sql, [userId]);
 
         if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
 
-        return result.length > 0 ? result[0] : null;
+        return rows.length > 0 ? rows[0] : null;
     } catch (error) {
-        console.error('UserModel.getCounselorByUserId 오류:', error);
+        console.log("UserModel.getCounselorByUserId() 쿼리 실행 중 오류: ", error);
         throw error;
     }
 };
