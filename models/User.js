@@ -152,22 +152,18 @@ exports.getCounselorByUserId = async (userId) => {
 // 의사 정보 의사아이디로 가져오기
 exports.getCounselorByCounselorId = async (counselorId) => {
     try {
-        const db = await require('../main').connection();
-        let sql = `
-            SELECT *
-            FROM counselor
-            WHERE counselor_id = ?`;
+        const db = await require('../main').connection(); 
+        let sql = `SELECT id, nickname, profile_picture FROM counselor WHERE counselor_id = ?`;
+        const [rows] = await db.query(sql, [counselorId]);
 
-        const [result] = await db.query(sql, [counselorId]);
-
-        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
-
-        return result.length > 0 ? result[0] : null;
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows[0] : null;
     } catch (error) {
-        console.error('UserModel.getCounselorByCounselorId 오류:', error);
-        throw error;
+        console.error("UserModel.getCounselorByCounselorId 오류:", error);
+        return null;
     }
 };
+
 
 // 비밀번호 검증
 exports.verifyPassword = async (plainPassword, hashedPassword) => {

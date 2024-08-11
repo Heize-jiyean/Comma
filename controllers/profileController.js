@@ -47,7 +47,8 @@ exports.patientProfilePage = async (req, res) => {
                 const counselor = await UserModel.getCounselorByCounselorId(guestbook.counselor_id);
                 guestbook.counselorId = counselor ? counselor.id : "Unknown";
                 guestbook.counselorNickname = counselor ? counselor.nickname : "Unknown";
-                guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
+                // 프로필 사진이 null일 경우 기본 이미지로 설정
+                guestbook.counselorProfilePicture = counselor && counselor.profile_picture ? counselor.profile_picture : DEFAULT_PROFILE_IMAGE;
             }
 
             // 관심 환자인지 여부 확인
@@ -235,7 +236,7 @@ exports.listAllGuestbooks = async (req, res) => {
                 const counselor = await UserModel.getCounselorByCounselorId(guestbook.counselor_id);
                 guestbook.counselorId = counselor ? counselor.id : "Unknown";
                 guestbook.counselorNickname = counselor ? counselor.nickname : "Unknown";
-                guestbook.counselorProfilePicture = counselor ? counselor.profile_picture : null;
+                guestbook.counselorProfilePicture = counselor && counselor.profile_picture ? counselor.profile_picture : DEFAULT_PROFILE_IMAGE;
             }
 
             // `isCounselorScrapPatient` 변수 추가

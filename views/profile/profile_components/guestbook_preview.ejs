@@ -115,13 +115,13 @@
                 <% if (showCounselorInfo) { %>
                     <div class="counselor-info">
                         <a href="/profile/counselor/<%= guestbook.counselorId %>" class="clickable" style="text-decoration: none; color: inherit;">
-                            <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
+                            <img src="<%= guestbook.counselorProfilePicture %>" alt="Counselor Profile Picture">
                             <div class="counselor-nickname"><%= guestbook.counselorNickname %> 상담사</div>
                         </a>
                     </div>
                 <% } %>
                 </a>
-            </div>
+            </div>            
         <% }) %>
     <% } else { %>
         <p>방명록이 없습니다.</p>
