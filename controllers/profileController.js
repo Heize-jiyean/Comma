@@ -117,7 +117,6 @@ exports.counselorProfilePage = async (req, res) => {
             guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
         }
 
-        const totalPages = Math.ceil(totalGuestbooks / limit);
 
         // 관심 상담사인지 여부 확인
         let isPatientScrapCounselor;
@@ -131,8 +130,6 @@ exports.counselorProfilePage = async (req, res) => {
             type: 'counselor',
             articles: articles,
             guestbooks: guestbooks,
-            currentPage: currentPage,
-            totalPages: totalPages,
             loginRole: loginRole,
             isPatientScrapCounselor: isPatientScrapCounselor
         });
@@ -530,6 +527,13 @@ exports.addScrap = async(req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
+
+// 관심 환자, 관심 상담사 해제
+// exports.removeScrap = async(req, res) => {
+
+// }
+
+
 // 상담사 방명록 모아보기 페이지 반환
 exports.listAllGuestbooksByCounselor = async (req, res) => {
     // 로그인하지 않은 사용자가 접근할 경우
