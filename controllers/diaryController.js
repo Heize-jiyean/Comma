@@ -2,6 +2,7 @@ const DiaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
+const JsonUtils = require('../utils/jsonUtils');
 const ArticleModel = require('../models/Article');
 
 function setDefaultImage(image_url) {
@@ -46,6 +47,12 @@ exports.register = async (req, res) => {
     
             const savedDiaryId = await DiaryModel.register(diaryData);
             res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
+
+            //추천 시스템 관련
+            const response = await axios.post('http://localhost:5000/embedding', { sentence: diaryData.title+diaryData.content });
+            const vectorResult = response.data;
+            JsonUtils.addJson(2, savedDiaryId, vectorResult)
+            await axios.post('http://localhost:5000/similarity_diary', { did: savedDiaryId, vector: vectorResult});
 
             // 감정분석 후 WebSocket을 통해 메시지 전송
             EmotionData.analyzeAndNotify(diaryData.content, diaryData.title, savedDiaryId);
@@ -160,6 +167,9 @@ exports.delete = async (req, res) => {
             
             // DB diary 삭제
             await DiaryModel.delete(diaryId);
+
+            // Json 삭제
+            await JsonUtils.deleteJson(diaryId);
     
             // redirect
             return res.json({ success: true, redirect: `/profile/patient/${patient.id}/diaries` });

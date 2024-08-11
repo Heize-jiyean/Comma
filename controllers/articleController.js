@@ -126,6 +126,9 @@ exports.delete = async (req, res) => {
             
             // DB diary 삭제
             await ArticleModel.delete(articleId);
+
+            // Json 삭제
+            await JsonUtils.deleteJson(articleId);
     
             // redirect
             return res.json({ success: true, redirect: `/article` });

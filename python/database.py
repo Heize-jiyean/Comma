@@ -15,7 +15,7 @@ def create_connection(host_name, user_name, user_password, db_name):
         print(f"Error: '{e}'")
     return connection
 
-def insert_data(connection, pid, aid, sim):
+def insert_sim_like(connection, pid, aid, sim):
     insert_query = """
     INSERT INTO similarity_like (patient_id, article_id, similarity) VALUES (%s, %s, %s)
     """
@@ -26,11 +26,22 @@ def insert_data(connection, pid, aid, sim):
     except Error as e:
         print(f"Error: '{e}'")
         
-def delete_data(connection, pid):
+def delete_sim_like(connection, pid):
     delete_query = "DELETE FROM similarity_like WHERE patient_id = %s"
     try:
         cursor = connection.cursor()
         cursor.execute(delete_query, (pid, ))
+        connection.commit()
+    except Error as e:
+        print(f"Error: '{e}'")
+        
+def insert_sim_diary(connection, did, aid, sim):
+    insert_query = """
+    INSERT INTO similarity_diary (diary_id, article_id, similarity) VALUES (%s, %s, %s)
+    """
+    try:
+        cursor = connection.cursor()
+        cursor.execute(insert_query, (did, aid, sim))
         connection.commit()
     except Error as e:
         print(f"Error: '{e}'")

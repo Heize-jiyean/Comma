@@ -3,7 +3,8 @@ const path = require('path');
 
 const paths = [
     path.join(__dirname, 'data', '../../python/vector/articleVectors.json'),
-    path.join(__dirname, 'data', '../../python/vector/patientVectors.json')
+    path.join(__dirname, 'data', '../../python/vector/patientVectors.json'),
+    path.join(__dirname, 'data', '../../python/vector/diaryVectors.json')
   ];
 
 const readJson = async (idx) => {

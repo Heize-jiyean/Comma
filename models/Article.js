@@ -169,7 +169,7 @@ exports.delete = async (articleId) => {
     }
 };
 
-exports.RecommendTop3 = async (pid) => {
+exports.RecommendTop3_like = async (pid) => {
     try {
         const db = await require('../main').connection();        
 
@@ -187,6 +187,45 @@ exports.RecommendTop3 = async (pid) => {
                 similarity_like sl ON a.article_id = sl.article_id AND sl.patient_id = ?
             ;`;
         const [rows] = await db.query(sql, [pid]);
+
+        if (db && db.end) db.end();
+
+        if (rows.length > 0) {
+            rows.forEach(row => {
+                let noise = Math.random() * 0.1;
+                row.similarity = row.similarity ? row.similarity + noise : noise;
+            });
+
+            rows.sort((a, b) => b.similarity - a.similarity);
+
+            return rows.slice(0, 3);
+        } else {
+            return null;
+        }
+        
+    } catch (error) {
+        console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
+    }
+}
+
+exports.RecommendTop3_diary = async (did) => {
+    try {
+        const db = await require('../main').connection();        
+
+        let sql = `
+            SELECT 
+                a.*,
+                c.nickname,
+                c.profile_picture,
+                sl.similarity
+            FROM 
+                article a 
+            JOIN 
+                counselor c ON a.counselor_id = c.counselor_id
+            LEFT JOIN
+                similarity_diary sl ON a.article_id = sl.article_id AND sl.diary_id = ?
+            ;`;
+        const [rows] = await db.query(sql, [did]);
 
         if (db && db.end) db.end();
 

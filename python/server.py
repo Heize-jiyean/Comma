@@ -9,21 +9,16 @@ import numpy as np
 import json
 import os
 from dotenv import load_dotenv
-from database import create_connection, insert_data, delete_data
+from database import create_connection, insert_sim_like, delete_sim_like, insert_sim_diary
+#import chromadb
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
 
-# GPU 설정
-
-device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
-device = torch.device(device_type)
-
-
-
 # 파라미터 정의
 
+device = torch.device('cpu')
 max_len = 500
 batch_size = 32
 
@@ -38,7 +33,7 @@ tok = nlp.data.BERTSPTokenizer(tokenizer_classification, vocab, lower = False)
 
 model_classification = BERTClassifier(bertmodel, dr_rate = 0.5).to(device)
 
-checkpoint = torch.load("./python/model.pt", map_location=torch.device('cpu'))
+checkpoint = torch.load("./python/model.pt", map_location = device)
 model_classification.load_state_dict(checkpoint)
 
 
@@ -59,6 +54,13 @@ USER_PASSWORD=os.getenv('DB_PW')
 DB_NAME=os.getenv('DB_NAME')
 
 connection = create_connection(HOST_NAME, USER_NAME, USER_PASSWORD, DB_NAME)
+
+
+
+# vector DB
+
+#client = chromadb.Client()
+#vector_collection = client.create_collection(name="comma")
 
 
 
@@ -94,36 +96,38 @@ def similarity_like():
     data = request.get_json()
     
     if ('pid' in data) & ('likeId' in data):
-        pid = data['pid']
-        likeId = data['likeId']
-        selected = []
-        vectors = []
+        if os.path.exists('python/vector/articleVectors.json'):
+            pid = data['pid']
+            likeId = data['likeId']
+            selected = []
+            vectors = []
 
-        with open('python/vector/articleVectors.json', 'r') as file:
-            data = json.load(file)
+            with open('python/vector/articleVectors.json', 'r') as file:
+                jdata = json.load(file)
         
-        for i in range(len(data)):
-            if data[i]['id'] in likeId:
-                selected.append(data[i]['vector'])
+            for i in range(len(jdata)):
+                if jdata[i]['id'] in likeId:
+                    selected.append(jdata[i]['vector'])
             
-            vectors.append(data[i]['vector'])
+                vectors.append(jdata[i]['vector'])
 
-        selected_array = np.array(selected)
-        mean_vector = np.mean(selected_array, axis=0)
+            selected_array = np.array(selected)
+            mean_vector = np.mean(selected_array, axis=0)
         
-        vectors_array = np.array(vectors)
-        vectors_array = np.append(vectors_array, [mean_vector], axis=0)
+            vectors_array = np.array(vectors)
+            vectors_array = np.append(vectors_array, [mean_vector], axis=0)
         
-        cosine_sim_matrix = cosine_similarity(vectors_array)
-        sim = cosine_sim_matrix[-1]
+            cosine_sim_matrix = cosine_similarity(vectors_array)
+            sim = cosine_sim_matrix[-1]
         
-        delete_data(connection, pid)
+            delete_sim_like(connection, pid)
         
-        for index, similarity in enumerate(sim[:-1]):
-            if data[index]['id'] not in likeId:
-                insert_data(connection, pid, data[index]['id'], similarity)
+            for index, similarity in enumerate(sim[:-1]):
+                if jdata[index]['id'] not in likeId:
+                    insert_sim_like(connection, pid, jdata[index]['id'], similarity)
         
-        mean_vector = mean_vector.tolist()
+            mean_vector = mean_vector.tolist()
+        
         return jsonify(mean_vector)
     else:
         return jsonify({'error': 'No input received'}), 400 
@@ -135,58 +139,75 @@ def similarity_article():
     if ('aid' in data) & ('vector' in data):
         aid = data['aid']
         vector = data['vector']
-        vectors = []
         
-        if not os.path.exists('python/vector/patientVectors.json'):
-            print(f"파일이 존재하지 않습니다: python/vector/patientVectors.json")
-            return jsonify({'message': 'No file'}), 200 
+        if os.path.exists('python/vector/patientVectors.json'):
+            vectors = []
         
-        with open('python/vector/patientVectors.json', 'r') as file:
-            data = json.load(file)
+            with open('python/vector/patientVectors.json', 'r') as file:
+                jdata = json.load(file)
         
-        for i in range(len(data)):
-            vectors.append(data[i]['vector'])
+            for i in range(len(jdata)):
+                vectors.append(jdata[i]['vector'])
         
-        vectors_array = np.array(vectors)
-        vectors_array = np.append(vectors_array, [vector], axis=0)
+            vectors_array = np.array(vectors)
+            vectors_array = np.append(vectors_array, [vector], axis=0)
         
-        cosine_sim_matrix = cosine_similarity(vectors_array)
-        sim = cosine_sim_matrix[-1]
+            cosine_sim_matrix = cosine_similarity(vectors_array)
+            sim = cosine_sim_matrix[-1]
         
-        for index, similarity in enumerate(sim[:-1]):
-            insert_data(connection, data[index]['id'], aid, similarity)
+            for index, similarity in enumerate(sim[:-1]):
+                insert_sim_like(connection, jdata[index]['id'], aid, similarity)
         
+        if os.path.exists('python/vector/diaryVectors.json'):
+            vectors = []    
+            
+            with open('python/vector/diaryVectors.json', 'r') as file:
+                jdata = json.load(file)
+            
+            for i in range(len(jdata)):
+                vectors.append(jdata[i]['vector'])
+                
+            vectors_array = np.array(vectors)
+            vectors_array = np.append(vectors_array, [vector], axis=0)
+            
+            cosine_sim_matrix = cosine_similarity(vectors_array)
+            sim = cosine_sim_matrix[-1]
+            
+            for index, similarity in enumerate(sim[:-1]):
+                insert_sim_diary(connection, jdata[index]['id'], aid, similarity)
+            
         return jsonify({'message': 'Operation successful'}), 200
     else:
         return jsonify({'error': 'No input received'}), 400 
 
-#@app.route('/similarity_diary', methods=['POST'])
-#def similarity_article():
-#    data = request.get_json()
-#    
-#    if ('aid' in data) & ('vector' in data):
-#        aid = data['did']
-#        vector = data['vector']
-#        vectors = []
-#
-#        with open('python/vector/articleVectors.json', 'r') as file:
-#            data = json.load(file)
-#        
-#        for i in range(len(data)):
-#            vectors.append(data[i]['vector'])
-#        
-#        vectors_array = np.array(vectors)
-#        vectors_array = np.append(vectors_array, [vector], axis=0)
-#        
-#        cosine_sim_matrix = cosine_similarity(vectors_array)
-#        sim = cosine_sim_matrix[-1]
-#        
-#        for index, similarity in enumerate(sim[:-1]):
-#            insert_data(connection, data[index]['id'], aid, similarity)
-#        
-#        return jsonify({'message': 'Operation successful'}), 200
-#    else:
-#        return jsonify({'error': 'No input received'}), 400 
+@app.route('/similarity_diary', methods=['POST'])
+def similarity_diary():
+    data = request.get_json()
+    
+    if ('did' in data) & ('vector' in data):
+        if os.path.exists('python/vector/articleVectors.json'):
+            did = data['did']
+            vector = data['vector']
+            vectors = []
+
+            with open('python/vector/articleVectors.json', 'r') as file:
+                jdata = json.load(file)
+        
+            for i in range(len(jdata)):
+                vectors.append(jdata[i]['vector'])
+        
+            vectors_array = np.array(vectors)
+            vectors_array = np.append(vectors_array, [vector], axis=0)
+        
+            cosine_sim_matrix = cosine_similarity(vectors_array)
+            sim = cosine_sim_matrix[-1]
+        
+            for index, similarity in enumerate(sim[:-1]):
+                insert_sim_diary(connection, did, jdata[index]['id'], similarity)
+
+        return jsonify({'message': 'Operation successful'}), 200
+    else:
+        return jsonify({'error': 'No input received'}), 400 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
