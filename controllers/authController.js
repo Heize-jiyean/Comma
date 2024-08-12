@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const UserModel = require('../models/User');
 const smtpTransport = require('../email');
+const { checkPassword } = require('../public/js/passwordValidation');
 
 // 랜덤 인증번호 생성 코드
 const generateRandomNumber = (min, max) => {
@@ -231,14 +232,22 @@ module.exports = {
     resetPassword: async (req, res) => {
         const { token, password } = req.body;
         try {
+            console.log('Received password reset request for token:', token);
+            
+            const passwordError = checkPassword(password);
+            if (passwordError) {
+                console.log('Password validation failed:', passwordError);
+                return res.status(400).json({ success: false, message: passwordError });
+            }
+    
             const user = await UserModel.getUserByResetToken(token);
             if (!user || Date.now() > user.resetTokenExpires) {
+                console.log('Invalid or expired token');
                 return res.status(400).json({ success: false, message: '유효하지 않거나 만료된 토큰입니다.' });
             }
     
-            console.log('User found for password reset:', user);
+            console.log('User found for password reset:', user.id);
     
-            // 비밀번호 해싱 및 업데이트
             const hashedPassword = await bcrypt.hash(password, 10);
             const updateResult = await UserModel.updatePassword(user.id, hashedPassword);
             
@@ -249,7 +258,6 @@ module.exports = {
     
             console.log('Password updated successfully for user:', user.id);
     
-            // 토큰 제거
             const clearResult = await UserModel.clearResetToken(user.id);
             
             if (!clearResult) {
