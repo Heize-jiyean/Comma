@@ -56,6 +56,9 @@ exports.patientProfilePage = async (req, res) => {
                 isCounselorScrapPatient = await UserModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
             }
 
+            // 감정차트 데이터 불러오기
+            const Data = await DiaryModel.getEmotionData(patientUser.patient_id);
+
             // 렌더링
             res.render("profile/patient.ejs", { 
                 patientUser: patientUser, 
@@ -63,7 +66,8 @@ exports.patientProfilePage = async (req, res) => {
                 diaries: diaries, 
                 guestbooks: guestbooks,
                 loginRole: loginRole,
-                isCounselorScrapPatient: isCounselorScrapPatient
+                isCounselorScrapPatient: isCounselorScrapPatient,
+                lineChartEmotionData: Data
             });
         } else {
             res.status(403).send("접근 권한이 없습니다.");
