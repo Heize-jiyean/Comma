@@ -162,10 +162,10 @@ exports.list = async (req, res) => {
 // 특정 상담사가 작성한 아티클 리스트
 exports.listByCounselor = async (req, res) => {
     try {
-        const counselorUsername = req.params.counselorId; // URL에서 상담사의 사용자 이름을 가져옵니다.
+        const counselorUsername = req.params.counselorId; // URL에서 상담사의 사용자 이름가져오기
         const currentPage = req.query.page ? parseInt(req.query.page) : 1;
 
-        // 사용자 이름을 기반으로 상담사의 정보를 조회합니다.
+        // 사용자 이름 기반 상담사 정보 조회
         const counselor = await UserModel.getCounselorByUserId(counselorUsername);
         if (!counselor) {
             // 상담사를 찾지 못한 경우

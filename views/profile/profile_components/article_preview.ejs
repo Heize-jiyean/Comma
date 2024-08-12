@@ -77,7 +77,36 @@
     <!-- 아티클 목록 -->
     <div class="article-list">
     <% if (articles && articles.length > 0) { %>
-        <% articles.forEach(article => { %>
+        <% articles.forEach(async article => { %>
+            <% 
+            // 콘텐츠가 Firebase URL인지 체크하고, 실제 콘텐츠를 가져오는 로직 추가
+            let contentPreview = article.content;
+        
+            if (article.content && article.content.startsWith('https://')) {
+                const fetch = require('node-fetch');
+                try {
+                    const response = await fetch(article.content);
+                    if (response.ok) {
+                        contentPreview = await response.text();
+                    } else {
+                        contentPreview = "콘텐츠를 불러올 수 없습니다.";
+                    }
+                } catch (error) {
+                    console.error("콘텐츠를 가져오는 중 오류:", error);
+                    contentPreview = "콘텐츠를 불러올 수 없습니다.";
+                }
+            } else {
+                contentPreview = article.content ? article.content : "내용이 없습니다.";
+            }
+        
+            // HTML 태그 제거
+            contentPreview = contentPreview.replace(/<\/?[^>]+(>|$)/g, "");
+        
+            // 미리보기용으로 콘텐츠 길이를 제한
+            contentPreview = contentPreview.length > 60 ? contentPreview.substring(0, 60) + '...' : contentPreview;
+        %>
+        
+
         <div class="article-item">
             <a href="/article/<%= article.article_id %>" style="text-decoration: none; color: inherit;">
                 <div class="article-title">
@@ -86,7 +115,7 @@
                     </h3>
                     <span><%= new Date(article.created_at).toLocaleDateString() %></span>
                 </div>
-                <p><%= article.content.length > 60 ? article.content.substring(0, 60) + '...' : article.content %></p>
+                <p><%= contentPreview %></p>
             </a>
         </div>
         <% }) %>
