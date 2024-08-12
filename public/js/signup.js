@@ -278,6 +278,7 @@ function checkPassword() {
     const hasMinLength = password.length >= 8 && password.length <= 16;
     const hasNumber = /\d/.test(password);
     const hasLetter = /[a-zA-Z]/.test(password);
+    const isAlphanumeric = /^[a-zA-Z0-9]+$/.test(password); // 숫자와 문자 이외의 것이 포함되지 않았는지 확인
 
     // 비밀번호 입력 확인
     if (!password) {
@@ -286,8 +287,8 @@ function checkPassword() {
         return false;
     }
     // 비밀번호 형식 확인
-    else if (!(hasMinLength && hasNumber && hasLetter)) {
-        passwordError.textContent = '8~16자의 영문 대/소문자, 숫자, 특수문자를 사용해 주세요.'
+    else if (!(hasMinLength && hasNumber && hasLetter && isAlphanumeric)) {
+        passwordError.textContent = '8~16자의 영문 대/소문자, 숫자를 사용해 주세요.'
         passwordError.style.display = 'inline';
         return false;
     }
