@@ -224,6 +224,7 @@ module.exports = {
     resetPasswordLoad: async (req, res) => {
         const { token } = req.params;
         console.log('Received token:', token);
+        console.log('resetPasswordLoad function called', { params: req.params });
         try {
             const user = await UserModel.getUserByResetToken(token);
             console.log('User found:', user);
@@ -284,6 +285,7 @@ module.exports = {
             console.log('Reset token cleared');
 
             res.json({ success: true, message: '비밀번호가 성공적으로 재설정되었습니다.' });
+            res.render('/auth/login'); // 로그인 페이지로 리다이렉트
         } catch (error) {
             console.error("Reset password error:", error);
             res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
