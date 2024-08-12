@@ -2,6 +2,7 @@ const DiaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
+const ArticleModel = require('../models/Article');
 
 function setDefaultImage(image_url) {
     if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
@@ -18,11 +19,11 @@ exports.new = async (req, res) => {
 
             const patientId = req.session.user.id;
             const date = new Date();
-            // const todayDiary = await DiaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
-            // if (todayDiary) {
-            //     const redirect = `/diary/${todayDiary.diary_id}`;
-            //     return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
-            // }
+            const todayDiary = await DiaryModel.findBypatientIdAndDate(patientId, date.getFullYear(), date.getMonth()+1, date.getDate());
+            if (todayDiary) {
+                const redirect = `/diary/${todayDiary.diary_id}`;
+                return res.status(403).send(`<script>alert("이미 오늘의 일기가 있습니다."); window.location.href = "${redirect}";</script>`);
+            }
 
             res.render('diary/new', {patientId});
         }
@@ -83,7 +84,19 @@ exports.view = async (req, res) => {
             // 기본이미지 설정
             diary.image_url = setDefaultImage(diary.image_url);
 
-            res.render('diary/view', {diary, patient, role});
+            // 추천아티클 
+            let RecommendPreviews = null;
+            if (req.session.user && req.session.user.role == 'patient') {
+                RecommendPreviews = await ArticleModel.RecommendTop3(req.session.user.id);
+    
+                if (RecommendPreviews) {
+                    RecommendPreviews.forEach(preview => {
+                        preview.thumbnail_url = setDefaultImage(preview.thumbnail_url);
+                    });
+                }
+            }
+
+            res.render('diary/view', {diary, patient, role, RecommendPreviews});
         }
         else return res.render("login/login");
     } catch (error) {

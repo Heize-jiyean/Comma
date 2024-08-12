@@ -19,6 +19,10 @@
         .content-column {
             flex: 1;
         }
+        .line-chart { background-color: #FFFFFF; border-radius: 20px; border: 1px solid #D6D7DA; 
+        padding: 30px; display: flex; flex-direction: column; justify-content: center; margin-top: 20px; }
+        .line-chart-header { width: 100%; text-align: left; }
+        .line-chart-body { display: flex; justify-content: center; align-items: center; width: 100%; }
     </style>
 </head>
 <body>
@@ -26,6 +30,7 @@
         <div class="profile-container">
             <%- include('./profile_components/profile_card') %>
         </div>
+
         <div class="content-container">
             <div class="content-column">
                 <%- include('./profile_components/diary_preview', { diaries: diaries, loginRole: loginRole }) %>

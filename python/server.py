@@ -136,7 +136,11 @@ def similarity_article():
         aid = data['aid']
         vector = data['vector']
         vectors = []
-
+        
+        if not os.path.exists('python/vector/patientVectors.json'):
+            print(f"파일이 존재하지 않습니다: python/vector/patientVectors.json")
+            return jsonify({'message': 'No file'}), 200 
+        
         with open('python/vector/patientVectors.json', 'r') as file:
             data = json.load(file)
         
