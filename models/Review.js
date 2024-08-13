@@ -34,7 +34,7 @@ exports.getReviewsByHospital = async (hospitalId) => {
         const [rows] = await db.query(`
             SELECT r.review_id, r.content, r.created_at, 
                    h.name AS hospital_name, h.address AS hospital_address, 
-                   p.nickname AS patient_nickname
+                   p.nickname AS patient_nickname, p.patient_id
             FROM review r
             JOIN hospital h ON r.hospital_id = h.hospital_id
             JOIN patient p ON r.patient_id = p.patient_id

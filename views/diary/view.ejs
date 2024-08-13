@@ -68,8 +68,15 @@
     <div class="panel emotion-chart">
         <div class="emotion-text">AI 감정 분석</div>
         <canvas id="emotionChart"></canvas>
-        <p style="margin-top: 20px; font-size: 0.9rem; color: #333; ">감정분석에는 10~20초 정도 시간이 걸릴 수 있습니다</p>
+        <p style="margin-top: 20px; font-size: 0.9rem; color: #333; ">감정분석에는 5초 정도 시간이 걸릴 수 있습니다</p>
     </div>
+
+    <% if (user && user.role === 'patient') { %>
+        <div class="info-container"> 
+            <p style="margin-top: 40px;">이 일기를 기반으로 한 추천 아티클</p> 
+        </div>
+        <%- include('../article/recommend-list-component') %>
+    <% } %>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

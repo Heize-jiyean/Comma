@@ -1,0 +1,54 @@
+
+<head>
+<link rel="stylesheet" href="/css/profile/dashboard.css">
+<style>
+    body { margin: 0; background: #F4F5F8; }
+    .container { display: flex; flex-direction: column; margin: auto; max-width: 1080px; padding: 10px; }
+    .menu { display: flex; margin-top: 20px; margin-left: 30px;}
+    .menu-item { cursor: pointer; padding: 10px 20px; color: #333; font-weight: bold; font-size: 16px; }
+    .menu-item.active { border-bottom: 2px solid #4B8673; color: #4B8673; }
+</style>
+</head>
+
+<body>
+<div class="main-container">
+    <div class="profile-container">
+        <%- include('./profile_components/profile_card') %>
+    </div>
+    <div class="container">
+        <div class="menu">
+            <div class="menu-item active" id="like">좋아요 한 아티클</div>
+            <div class="menu-item" id="bookmark">북마크 한 아티클</div>
+        </div>
+        <div class="content-container">
+            <%- include('../article/list-component') %>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    // URL에서 쿼리 파라미터 값을 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const option = urlParams.get('option') || 'like'; // option 값이 없으면 기본값 'all' 설정
+
+    // 초기 활성화 상태 설정
+    menuItems.forEach(item => {
+        if (item.id === option) { item.classList.add('active'); } 
+        else { item.classList.remove('active'); }
+    });
+
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const option = this.id;
+            const patientId = '<%= patientUser.id %>';
+
+            window.location.href = `/profile/patient/${patientId}/article/?option=${option}`; // 새 페이지로 이동
+        });
+    });
+});
+
+</script>

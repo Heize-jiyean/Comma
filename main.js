@@ -13,6 +13,12 @@ const bodyParser = require('body-parser');
 const layouts = require("express-ejs-layouts");
 const cors = require('cors');
 
+// 로깅 미들웨어 추가
+app.use((req, res, next) => {
+  console.log('Incoming request:', req.method, req.url);
+  next();
+});
+
 // 지도 API 미들웨어
 app.use((req, res, next) => {
   res.locals.naverMapClientId = process.env.NAVER_MAP_CLIENT_ID;
@@ -33,6 +39,7 @@ exports.connection = async () => {
           connectionLimit: 30,
           queueLimit: 10
       });
+      console.log('Database connected successfully');
       return db; // 연결된 데이터베이스 객체 반환
   } catch (error) {
       console.error("데이터베이스 연결 오류:", error);
@@ -93,12 +100,6 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// 로깅 미들웨어 추가
-app.use((req, res, next) => {
-  console.log(`Received request: ${req.method} ${req.originalUrl}`);
-  next();
-});
-
 // user 변수 설정을 위한 미들웨어 (통합)
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -124,8 +125,6 @@ app.use(methodOverride("_method"));
 //layouts 사용
 app.use(layouts);
 
-// 페이지 라우팅
-
 // 메인페이지 설정
 const mainController = require('./controllers/mainController');
 app.get('/', (req, res) => {
@@ -138,7 +137,10 @@ app.get('/', (req, res) => {
 
 // 라우트 설정
 const authRouter = require('./routers/authRouters');
-app.use("/auth", authRouter);
+app.use("/auth", (req, res, next) => {
+  console.log("Auth route accessed:", req.method, req.url);
+  next();
+}, authRouter);
 
 const profileRouter = require('./routers/profileRouter');
 app.use('/profile', profileRouter);
@@ -155,16 +157,25 @@ app.use("/hospital", hospitalRouter);
 const articleRouter = require('./routers/articleRouters');
 app.use("/article", articleRouter);
 
-
 // 404 에러 핸들러
 app.use((req, res, next) => {
+  console.log('404 Not Found:', req.method, req.url);
   res.status(404).json({ error: 'Not Found', message: 'The requested resource was not found.' });
 });
 
 // 오류 처리 미들웨어
+//app.use((err, req, res, next) => {
+ // console.error('Error:', err);
+  //res.status(500).json({ error: 'Internal Server Error', message: err.message });
+//});
+
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Internal Server Error', message: err.message });
+  console.error('Error:', err);
+  res.status(err.status || 500).json({ 
+    error: err.name || 'Internal Server Error', 
+    message: err.message || 'An unexpected error occurred',
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
 });
 
 app.listen(port, () => {
@@ -174,4 +185,3 @@ app.listen(port, () => {
 
 // 클라이언트 측 JavaScript를 위한 코드 (로그아웃 기능)
 app.use(express.static('public'));
-
