@@ -113,5 +113,86 @@ exports.deleteBookmark = async (articleId, patientId) => {
     }
 }
 
-// 특정 멤버의 북마크 전체 조회
+// 특정 멤버의 좋아요/북마크 전체 조회
+exports.PreviewFindInteraction = async (patient_id, page, option) => {
+    try {
+        const db = await require('../main').connection();        
 
+        const pageSize = 9;
+        let offset = pageSize * (page - 1);
+
+        let sql = `
+            SELECT 
+                a.*,
+                c.nickname,
+                c.profile_picture
+            FROM 
+                article a 
+            JOIN 
+                counselor c ON a.counselor_id = c.counselor_id `;      
+
+        switch (option) {
+            case 'like':
+                sql += `
+                JOIN 
+                    article_like al ON a.article_id = al.article_id
+                WHERE 
+                    al.patient_id = ?`;
+                break;
+            case 'bookmark':
+                sql += `
+                JOIN 
+                    article_bookmark ab ON a.article_id = ab.article_id
+                WHERE 
+                    ab.patient_id = ?`;
+                break;
+        }    
+        sql += ` ORDER BY a.created_at DESC LIMIT ? OFFSET ?`;
+        const [rows] = await db.query(sql, [parseInt(patient_id), pageSize, offset]);
+
+        console.log(rows);
+
+        if (db && db.end) db.end();
+        return rows.length > 0 ? rows : null;
+
+    } catch (error) {
+        console.error("ArticleInteraction.PreviewFindInteraction() 쿼리 실행 중 오류:", error);
+    }
+}
+exports.countOfFindInteraction = async (patient_id, option) => {
+    try {
+        const db = await require('../main').connection();        
+
+        let sql = `
+            SELECT 
+                COUNT(*) AS total
+            FROM 
+                article a 
+            `;      
+        switch (option) {
+            case 'like':
+                sql += `
+                JOIN 
+                    article_like al ON a.article_id = al.article_id
+                WHERE 
+                    al.patient_id = ?`;
+                break;
+            case 'bookmark':
+                sql += `
+                JOIN 
+                    article_bookmark ab ON a.article_id = ab.article_id
+                WHERE 
+                    ab.patient_id = ?`;
+                break;
+        }    
+        const [rows] = await db.query(sql, [parseInt(patient_id)]);
+
+        console.log(rows[0].total);
+
+        if (db && db.end) db.end();
+        return rows[0].total;
+
+    } catch (error) {
+        console.error("ArticleInteraction.countOfFindInteraction() 쿼리 실행 중 오류:", error);
+    }
+}

@@ -43,6 +43,9 @@ router.post('/settings/accountRemoval', profileController.accountRemoval);
 // [GET] 환자 감정 차트 페이지 
 router.get('/patient/:patientId/emotion-chart', profileController.charts);
 
+// [GET] 환자 아티클 좋아요, 북마크 페이지 
+router.get('/patient/:patientId/article', profileController.article);
+
 // [POST] 관심 환자, 관심 상담사 등록
 router.post('/scrap/:targetId', profileController.addScrap);
 
