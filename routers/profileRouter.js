@@ -37,6 +37,12 @@ router.get('/settings/passwordChange', profileController.passwordChangePage);
 // [PUT] 프로필 설정 - 비밀번호 변경 처리
 router.put('/settings/passwordChange', profileController.passwordChange);
 
+// [POST] 프로필 설정 - 이메일 인증번호 전송
+router.post('/settings/sendEmail', profileController.sendCode);
+
+// [PUT] 프로필 설정 - 비밀번호 잊은 경우, 비밀번호 변경 처리
+router.put('/settings/modalPasswordChange', profileController.modalPasswordChange);
+
 // [GET] 프로필 설정 - 회원 탈퇴 페이지
 router.get('/settings/accountRemoval', profileController.accountRemovalPage);
 
@@ -46,8 +52,20 @@ router.post('/settings/accountRemoval', profileController.accountRemoval);
 // [GET] 환자 감정 차트 페이지 
 router.get('/patient/:patientId/emotion-chart', profileController.charts);
 
+// [GET] 환자 아티클 좋아요, 북마크 페이지 
+router.get('/patient/:patientId/article', profileController.article);
+
 // [POST] 관심 환자, 관심 상담사 등록
 router.post('/scrap/:targetId', profileController.addScrap);
+
+// [DELETE] 관심 환자, 관심 상담사 해제
+router.delete('/scrap/:targetId', profileController.removeScrap);
+
+// [GET] 내가 스크랩한 관심 환자, 관심 상담사
+router.get('/scrap/myScraps', profileController.listMyScraps);
+
+// [GET] 나를 스크랩한 관심 환자, 관심 상담사
+router.get('/scrap/scrapsOnMe', profileController.listScrapsOnMe);
 
 
 module.exports = router;

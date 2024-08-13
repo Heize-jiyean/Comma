@@ -148,21 +148,33 @@
         <% if ((user.role === 'patient') && (user.custom_id === patientUser.id)) { %>
             <button class="setting-button" id="settingButton">프로필 수정하기</button>
         <% } else if (user.role === 'counselor') { %>
-            <% if (isCounselorScrapPatient) { %>
-                <button class="interest-button" disabled>이미 관심 환자로 등록됨</button>
-            <% } else { %>
-                <button class="interest-button" id="scrapPatientButton">관심 환자로 등록하기</button>
-            <% } %>
+            <button 
+                class="interest-button" 
+                id="scrapPatientButton"
+                data-scrapped="<%= isCounselorScrapPatient ? 'true' : 'false' %>"
+            >
+                <% if (isCounselorScrapPatient) { %>
+                    관심 환자 해제
+                <% } else { %>
+                    관심 환자 등록
+                <% } %>
+            </button>
         <% } %>
     <% } else if (type === 'counselor') { %>
         <% if ((user.role === 'counselor') && (user.custom_id === counselorUser.id)) { %>
             <button class ="setting-button" id="settingButton">프로필 수정하기</button>
         <% } else if (user.role === 'patient') { %>
-            <% if (isPatientScrapCounselor) { %>
-                <button class="interest-button" disabled>이미 관심 상담사로 등록됨</button>
-            <% } else { %>
-                <button class="interest-button" id="scrapCounselorButton">관심 상담사로 등록하기</button>
-            <% } %>
+            <button 
+                class="interest-button"
+                id="scrapCounselorButton"
+                data-scrapped="<%= isPatientScrapCounselor ? 'true' : 'false' %>"
+            >
+                <% if (isPatientScrapCounselor) { %>
+                    관심 상담사 해제
+                <% } else { %>
+                    관심 상담사 등록
+                <% } %>
+            </button>
         <% } %>
     <% } %>
 
@@ -178,8 +190,11 @@
     <script>
         document.getElementById('scrapPatientButton')?.addEventListener('click', function() {
             const patientUserId = '<%= patientUser.id %>';
+            const button = this;
+            const isScrapped = button.getAttribute('data-scrapped') === 'true';
+
             fetch(`/profile/scrap/${patientUserId}`, {
-                method: 'POST',
+                method: isScrapped ? 'DELETE' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -187,9 +202,11 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('등록 성공');
+                    button.textContent = isScrapped ? '관심 환자 등록' : '관심 환자 해제';
+                    button.setAttribute('data-scrapped', !isScrapped);
+                    alert(isScrapped ? '관심 환자에서 해제되었습니다.' : '관심 환자로 등록되었습니다.');
                 } else {
-                    alert('등록 실패');
+                    alert('실패');
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -197,12 +214,15 @@
     </script>
     <% } %>
     
-    <% if (type === 'counselor' && counselorUser) { %>
+<% if (type === 'counselor' && counselorUser) { %>
     <script>
         document.getElementById('scrapCounselorButton')?.addEventListener('click', function() {
             const counselorUserId = '<%= counselorUser.id %>';
+            const button = this;
+            const isScrapped = button.getAttribute('data-scrapped') === 'true';
+
             fetch(`/profile/scrap/${counselorUserId}`, {
-                method: 'POST',
+                method: isScrapped ? 'DELETE' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -210,13 +230,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('성공적으로 등록되었습니다.');
+                    button.textContent = isScrapped ? '관심 상담사 등록' : '관심 상담사 해제';
+                    button.setAttribute('data-scrapped', !isScrapped);
+                    alert(isScrapped ? '관심 상담사에서 해제되었습니다.' : '관심 상담사로 등록되었습니다.');
                 } else {
-                    alert('등록에 실패했습니다.');
+                    alert('실패');
                 }
             })
             .catch(error => console.error('Error:', error));
         });
     </script>
-    <% } %>
+<% } %>
     

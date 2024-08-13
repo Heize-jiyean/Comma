@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>스크랩 목록 페이지</title>
+    <style>
+        body {
+            font-family: 'Pretendard-Regular', sans-serif;
+            background-color: #F4F5F8;
+            margin: 0;
+            padding: 0;
+        }
+        .scrap-container {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #D6D7DA;
+            margin: 20px auto;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            margin: 20px auto;
+        }
+        .tab-container {
+            width: 100%; 
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid #D6D7DA;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 20px 20px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .tab.active {
+            color: #4B8673;
+            font-weight: 800;
+            border-bottom: 2px solid #4B8673;
+        }
+        .content-container {
+            padding: 20px;
+        }
+        .profile-entry {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #D6D7DA;
+            padding-bottom: 10px;
+        }
+        .profile-info {
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+        .profile-action {
+            text-align: right;
+        }
+        button {
+            padding: 5px 10px;
+            border: 1px solid #D6D7DA;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: white;
+        }
+        button:hover {
+            background-color: #D6D7DA;
+        }
+        .profile-picture {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="scrap-container">
+        <div class="tab-container">
+            <div class="tab" id="myScrapsTab" onclick="location.href='/profile/scrap/myScraps'">내가 스크랩</div>
+            <div class="tab" id="scrapsOnMeTab" onclick="location.href='/profile/scrap/scrapsOnMe'">나를 스크랩</div>
+        </div>
+        <div class="content-container">
+            <% scrapUserList.forEach(function(scrapUser) { %>
+                <a href="/profile/<%= scrapUser.role %>/<%= scrapUser.id %>" style="text-decoration: none; color: inherit;">
+                    <div class="profile-entry">
+                        <img src="<%= scrapUser.profile_picture %>" alt="Profile Image" class="profile-picture">
+                        <div class="profile-info">
+                            <%= scrapUser.nickname %> <br>
+                            <%= scrapUser.id %>
+                        </div>
+                        <div class="profile-action">
+                            <button class="unscrap-button" data-user-id="<%= scrapUser.id %>" onclick="toggleScrap(this)">스크랩 해제</button>
+                        </div>
+                    </div>
+                </a>
+            <% }); %>
+        </div>
+        
+    </div>
+</body>
+</html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const path = window.location.pathname;
+        const myScrapsTab = document.getElementById('myScrapsTab');
+        const scrapsOnMeTab = document.getElementById('scrapsOnMeTab');
+        if (path.includes('myScraps')) {
+            myScrapsTab.classList.add('active');
+        } else if (path.includes('scrapsOnMe')) {
+            scrapsOnMeTab.classList.add('active');
+        }
+    });
+
+    function toggleScrap(buttonElement) {
+        const userId = buttonElement.dataset.userId;
+        const isScrapped = buttonElement.textContent.includes('해제');
+
+        fetch(`/profile/scrap/${userId}`, {
+            method: isScrapped ? 'DELETE' : 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                buttonElement.textContent = isScrapped ? '스크랩' : '스크랩 해제';
+                alert(isScrapped ? '스크랩이 해제되었습니다.' : '스크랩이 등록되었습니다.');
+            } else {
+                alert('작업 실패');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+</script>

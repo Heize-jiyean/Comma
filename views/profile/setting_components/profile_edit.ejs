@@ -159,7 +159,7 @@
 <script type="module">
     // 파이어베이스 관련
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js';
 
     const firebaseConfig = {
         apiKey: "AIzaSyAoZC_XqFl5HIJ1v3NYGWrCc5CH3FEvva0",
@@ -185,7 +185,8 @@
     const infoSaveButton = document.getElementById('infoSaveButton');
     const deleteButton = document.getElementById('deleteButton');
 
-    const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
+    const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e"
+
 
     document.addEventListener("DOMContentLoaded", function() {
         initializeDeleteButton();
@@ -202,6 +203,7 @@
             deleteButton.disabled = false;
         }
     }
+    
     // 생년월일 폼 설정
     function setBirthdayYearSelect() {
         const birthYearSelect = document.getElementById('birthYear');
@@ -246,11 +248,101 @@
 
         // 삭제 버튼 눌렀을 때 실행됨
         deleteButton.addEventListener('click', function() {
-            console.log('삭제버튼 클릭!');
-            photoPreview.style.backgroundImage = `url(${DEFAULT_PROFILE_IMAGE})`;
+            photoPreview.style.backgroundImage = `url(${DEFAULT_PROFILE_IMAGE})`; // 기본 이미지로 변경
             photoInput.value = '';
             photoSaveButton.disabled = false;
             deleteButton.disabled = true;
+        });
+    }
+
+    // 이미지 저장 버튼 눌렀을 때 실행됨
+    photoSaveButton.addEventListener('click', async () => {
+        let image_url = null;
+
+        const photoPreview = document.querySelector('.photo-preview');
+
+        // 기존 프로필 사진 URL
+        const existingImageUrl = "<%= loginUser.profile_picture %>";
+
+        if (photoInput.files.length > 0) {
+            const file = photoInput.files[0];
+            await deleteExistingImage(existingImageUrl);
+            image_url = await uploadImage(file);
+        } else if (photoPreview.style.backgroundImage.includes(DEFAULT_PROFILE_IMAGE)) {
+            // 삭제 버튼을 눌러 기본 이미지로 변경한 경우
+            image_url = DEFAULT_PROFILE_IMAGE;
+            await deleteExistingImage(existingImageUrl);
+        }
+
+        const profilePhotoData = {
+            profile_picture: image_url
+        }
+
+        sendPhotoDataToServer(profilePhotoData);
+    })
+
+    // 파이어베이스에 이미지를 올리기 위한 함수
+    async function uploadImage(file) {
+        const dateString = new Date().toISOString().split('T')[0];
+        const filename = `${loginRole}_${loginId}_${dateString}`;
+        const storageRef = ref(storage, 'profile/' + filename);
+
+        try {
+            const snapshot = await uploadBytes(storageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            return null;
+        }
+    }
+
+    // 파이어베이스에 있는 기존 프로필 사진 삭제 함수
+    async function deleteExistingImage(imageUrl) {
+        if (imageUrl && shouldDeleteImage(imageUrl)) {
+            const imageRef = ref(storage, getImagePathFromUrl(imageUrl));
+            try {
+                await deleteObject(imageRef);
+                console.log('기존 이미지 삭제 완료');
+            } catch (error) {
+                console.error('Error deleting image:', error);
+            }
+        }
+    }
+
+    // 기존 이미지 삭제 여부 판단 함수
+    function shouldDeleteImage(imageUrl) {
+        const baseFilename = `${loginRole}_${loginId}_`;
+        const imagePath = getImagePathFromUrl(imageUrl);
+        return imagePath.startsWith(`profile/${baseFilename}`);
+    }
+
+    // 이미지 URL에서 파일 경로 추출 함수
+    function getImagePathFromUrl(url) {
+        const baseUrl = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/";
+        return decodeURIComponent(url.replace(baseUrl, "").split("?")[0]);
+    }
+
+    // 서버로 프로필 이미지 PUT하는 함수
+    function sendPhotoDataToServer(data) {
+        fetch('/profile/settings/profilePhotoEdit', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ profilePhotoData: data })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('프로필 이미지 편집 완료');
+                window.location.reload();
+            } else {
+                alert(data.message);
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     }
 
@@ -277,61 +369,6 @@
                 }
                 infoSaveButton.disabled = (changeCount === 0);  // 변경된 필드가 없으면 버튼 비활성화
             });
-        });
-    }
-
-    // 이미지 저장 버튼 눌렀을 때 실행됨
-    photoSaveButton.addEventListener('click', async () => {
-        let image_url = null;
-
-        if (photoInput.files.length > 0) {
-            const file = photoInput.files[0];
-            image_url = await uploadImage(file);
-        }
-
-        const profilePhotoData = {
-            profile_picture: image_url
-        }
-
-        sendPhotoDataToServer(profilePhotoData);
-    })
-
-    // 파이어베이스에 이미지를 올리기 위한 함수
-    async function uploadImage(file) {
-        const dateString = new Date().toISOString().split('T')[0];
-        const filename = `${file.name}_${loginRole}_${loginId}_${dateString}`;
-        const storageRef = ref(storage, 'profile/' + filename);
-
-        try {
-            const snapshot = await uploadBytes(storageRef, file);
-            return await getDownloadURL(snapshot.ref);
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            return null;
-        }
-    }
-
-    // 서버로 프로필 이미지 PUT하는 함수
-    function sendPhotoDataToServer(data) {
-        fetch('/profile/settings/profilePhotoEdit', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ profilePhotoData: data })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('프로필 이미지 편집 완료');
-                window.location.reload();
-            } else {
-                alert(data.message);
-                window.location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
         });
     }
 

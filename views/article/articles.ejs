@@ -20,13 +20,18 @@
         <a href="/article/new" class="button-link">아티클 작성</a>
     </div>
     <% } %>
+    <% if (user && user.role === 'patient') { %>
+    <div class="button-container">
+        <a href="/profile/patient/<%= user.custom_id %>/article" class="button-link">내가 저장한 아티클 보러가기</a>
+    </div>
+    <% } %>
 
     <% if (user && user.role === 'patient') { %>
         <div class="info-container"> 
             <p>회원님의 추천 아티클</p> 
         </div>
         <%- include('./recommend-list-component') %>
-        <hr style="margin-top: 20px; margin-bottom: 20px color: darkgray">
+        <hr style="margin-top: 20px; margin-bottom: 20px; color: darkgray">
     <% } %>
 
     <div class="sort-combobox">

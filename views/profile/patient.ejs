@@ -5,6 +5,11 @@
     <title>환자 프로필 페이지</title>
     <link rel="stylesheet" href="/css/profile/dashboard.css">
     <style>
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
         .chart-container, .diary-container, .guestbook-container {
             background: #fff;
             border-radius: 20px;
@@ -12,15 +17,29 @@
             padding: 20px;
             margin-bottom: 20px;
         }
-        .content-container {
+        .list-container {
             display: flex;
-            gap: 20px;
         }
         .content-column {
             flex: 1;
+            margin: 10px;
         }
+        .chart {
+            margin-bottom: 20px;
+            margin: 10px;
+        }
+
+        .link { text-decoration: none; color: black; }
+        .link:hover { color: #4B8673; }
+
+        .line-chart-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .button-container { display: flex; justify-content: flex-end; width: auto; margin-bottom: 20px; }
+        .button-link { background-color: #5FD068; padding: 7px 13px; border-radius: 10px;
+            border: 1px solid #ccc; color: white; text-decoration: none; display: inline-block; text-align: center; }
+        .button-link:hover { background-color: #4caf50; color: white; }
+
         .line-chart { background-color: #FFFFFF; border-radius: 20px; border: 1px solid #D6D7DA; 
-        padding: 30px; display: flex; flex-direction: column; justify-content: center; margin-top: 20px; }
+        padding: 30px; display: flex; flex-direction: column; justify-content: center; }
         .line-chart-header { width: 100%; text-align: left; }
         .line-chart-body { display: flex; justify-content: center; align-items: center; width: 100%; }
     </style>
@@ -29,14 +48,37 @@
     <div class="main-container">
         <div class="profile-container">
             <%- include('./profile_components/profile_card') %>
+            <% if (type === 'patient') { %>
+                <% if ((user.role === 'patient') && (user.custom_id === patientUser.id)) { %>
+                    <%- include('./profile_components/scrap_card') %>
+                <% } %>
+            <% } %>
         </div>
 
         <div class="content-container">
-            <div class="content-column">
-                <%- include('./profile_components/diary_preview', { diaries: diaries, loginRole: loginRole }) %>
+            <div class="chart">
+                <a href="/profile/patient/<%= patientUser.id %>/emotion-chart" class="link">
+                <div class="line-chart">
+                    <div class="line-chart-header">
+                        <p style="margin-left: 20px">나의 최근 감정 변화를 살펴 보세요.</p>
+                        <div class="button-container">
+                            <p class="button-link">전체 감정 차트 바로가기</p>
+                        </div>
+                    </div>
+                    <div class="line-chart-body">
+                        <%- include('../chart/line-chart') %>
+                    </div>
+                </div>
+                <a>
             </div>
-            <div class="content-column">
-                <%- include('./profile_components/guestbook_preview', { guestbooks: guestbooks, showCounselorInfo: true, loginRole: loginRole, patientUser: patientUser }) %>
+
+            <div class="list-container">
+                <div class="content-column">
+                    <%- include('./profile_components/diary_preview', { diaries: diaries, loginRole: loginRole }) %>
+                </div>
+                <div class="content-column">
+                    <%- include('./profile_components/guestbook_preview', { guestbooks: guestbooks, showCounselorInfo: true, loginRole: loginRole, patientUser: patientUser }) %>
+                </div>
             </div>
         </div>
     </div>
