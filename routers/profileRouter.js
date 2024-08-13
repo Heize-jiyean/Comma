@@ -34,7 +34,10 @@ router.get('/settings/passwordChange', profileController.passwordChangePage);
 router.put('/settings/passwordChange', profileController.passwordChange);
 
 // [POST] 프로필 설정 - 이메일 인증번호 전송
-router.post('/settings/sendEmail', profileController.sendEmail);
+router.post('/settings/sendEmail', profileController.sendCode);
+
+// [PUT] 프로필 설정 - 비밀번호 잊은 경우, 비밀번호 변경 처리
+router.put('/settings/modalPasswordChange', profileController.modalPasswordChange);
 
 // [GET] 프로필 설정 - 회원 탈퇴 페이지
 router.get('/settings/accountRemoval', profileController.accountRemovalPage);

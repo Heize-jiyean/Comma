@@ -411,7 +411,7 @@ const generateRandomNumber = (min, max) => {
 };
 
 // 프로필 설정 - 비밀번호 잊었을 경우, 메일 보내기
-exports.sendEmail = async(req, res) => {
+exports.sendCode = async(req, res) => {
     const number = generateRandomNumber(111111, 999999);
     const { email } = req.body;
 
@@ -432,6 +432,35 @@ exports.sendEmail = async(req, res) => {
         smtpTransport.close(); // 전송 종료
     });
 
+}
+
+// 비밀번호 잊은 경우, 비밀번호 변경 처리
+exports.modalPasswordChange = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    const modalNewPassword = req.body.modalNewPassword;
+
+
+    try {
+        // 새 비밀번호로 업데이트
+        if (loginRole === 'patient') {
+            await UserModel.updatePatientPassword(loginId, modalNewPassword);
+        } else if (loginRole === 'counselor') {
+            await UserModel.updateCounselorPassword(loginId, modalNewPassword);
+        }
+
+        // 성공 응답 메시지 보내기
+        res.status(200).json({
+            success: true,
+            message: '비밀번호가 성공적으로 변경되었습니다.'
+        })
+
+
+    } catch (error) {
+        console.log("프로필 설정 - 비밀번호 변경 처리 오류: ", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+    
 }
 
 // 프로필 설정 - 탈퇴 페이지 반환
