@@ -404,3 +404,24 @@ exports.getEmotionDataByMonth  = async (patientId, year, month) => {
         return [];
     }
 };
+
+exports.findByPatientId = async (patientId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            SELECT diary_id
+            FROM diary
+            WHERE patient_id = ?`;
+        
+        const [rows] = await db.query(sql, [patientId]);
+
+        if (db && db.end) db.end();
+
+        const diaryIds = rows.map(row => row.diary_id);
+        return diaryIds.length > 0 ? diaryIds : [];
+
+    } catch (error) {
+        console.error("Article.findByPatientId() 쿼리 실행 중 오류:", error);
+    }
+};

@@ -196,6 +196,27 @@ exports.RecommendTop3 = async (aid) => {
         return results.length > 0 ? results : null;
       
     } catch (error) {
-        console.error("Post.findByQueryAndSortBy() 쿼리 실행 중 오류:", error);
+        console.error("Article.RecommendTop3() 쿼리 실행 중 오류:", error);
     }
-}
+};
+
+exports.findByCounselorId = async (counselorId) => {
+    try {
+        const db = await require('../main').connection(); 
+
+        let sql = `
+            SELECT article_id
+            FROM article
+            WHERE counselor_id = ?`;
+        
+        const [rows] = await db.query(sql, [counselorId]);
+
+        if (db && db.end) db.end();
+
+        const articleIds = rows.map(row => row.article_id);
+        return articleIds.length > 0 ? articleIds : [];
+
+    } catch (error) {
+        console.error("Article.findByCounselorId() 쿼리 실행 중 오류:", error);
+    }
+};
