@@ -35,8 +35,10 @@ router.post('/forgot-password', authController.forgotPassword);
 // 비밀번호 재설정 페이지 렌더링
 router.get('/reset-password/:token', authController.resetPasswordLoad);
 
+router.post('/reset-password/:token', authController.resetPassword);
+
 // 새 비밀번호 설정
-router.post('/reset-password', authController.resetPassword);
+//router.post('/reset-password', authController.resetPassword);
 
 
 module.exports = router;

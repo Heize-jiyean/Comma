@@ -151,8 +151,19 @@ exports.list = async (req, res) => {
                 preview.thumbnail_url = setDefaultImage(preview.thumbnail_url);
             });
         }
+
+        let RecommendPreviews = null;
+        if (req.session.user && req.session.user.role == 'patient') {
+            RecommendPreviews = await ArticleModel.RecommendTop3(req.session.user.id);
+
+            if (RecommendPreviews) {
+                RecommendPreviews.forEach(preview => {
+                    preview.thumbnail_url = setDefaultImage(preview.thumbnail_url);
+                });
+            }
+        }
         
-        res.render('article/articles', {Previews, currentPage, totalPages});
+        res.render('article/articles', {Previews, currentPage, totalPages, RecommendPreviews});
     } catch (error) {
         console.error("listAllDiaries 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
