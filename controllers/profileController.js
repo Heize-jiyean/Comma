@@ -5,6 +5,7 @@ const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
 const ArticleModel = require('../models/Article'); 
 const ScrapModel = require('../models/Scrap');
+const smtpTransport = require('../email');
 
 const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
 
@@ -335,11 +336,25 @@ exports.passwordChangePage = async(req, res) => {
     if (!AccessCheck.isUserAuthenticated(req.session.user)) {
         const referer = req.get('Referer') || '/';
         return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
-    }
+    } 
+
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
 
     try {
+        let loginUser;
+
+        if (loginRole === 'patient') {
+            loginUser = await UserModel.getPatientByPatientId(loginId);
+        } else if (loginRole === 'counselor') {
+            loginUser = await UserModel.getCounselorByCounselorId(loginId);
+        }
+
         // 렌더링
-        res.render("profile/setting.ejs", { page: 'passwordChange' });
+        res.render("profile/setting.ejs", { 
+            page: 'passwordChange',
+            loginUser
+        });
     } catch (error) {
         console.log("프로필 설정 - 비밀번호 변경 페이지 반환 오류: ", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -388,6 +403,35 @@ exports.passwordChange = async(req, res) => {
         console.log("프로필 설정 - 비밀번호 변경 처리 오류: ", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
+}
+
+// 랜덤 인증번호 생성 코드
+const generateRandomNumber = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+// 프로필 설정 - 비밀번호 잊었을 경우, 메일 보내기
+exports.sendEmail = async(req, res) => {
+    const number = generateRandomNumber(111111, 999999);
+    const { email } = req.body;
+
+    const mailOptions = {
+        from: "team.ive.comma@gmail.com",
+        to: email,
+        subject: "Comma 인증 메일 입니다.",
+        html: '<h1>인증번호를 입력해주세요 \n\n\n\n\n\n</h1>' + number
+    }
+
+    smtpTransport.sendMail(mailOptions, (err, response) => {
+        if (err) {
+            res.status(500).json({ ok: false });
+        } else {
+            res.json({ ok: true , authNum: number });
+        }
+        res.set('Cache-Control', 'no-store');
+        smtpTransport.close(); // 전송 종료
+    });
+
 }
 
 // 프로필 설정 - 탈퇴 페이지 반환
