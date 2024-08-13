@@ -2,26 +2,23 @@ name: Node.js CI/CD with Docker and GCP
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
-    env:
-      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
-      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-      GCP_INSTANCE_NAME: ${{ secrets.GCP_INSTANCE_NAME }}
-      GCP_INSTANCE_ZONE: ${{ secrets.GCP_INSTANCE_ZONE }}
+
+    strategy:
+      matrix:
+        node-version: [20.x]
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Use Node.js
+    - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
-        node-version: '20.x'
+        node-version: ${{ matrix.node-version }}
 
     - name: Install dependencies
       run: npm ci
@@ -29,31 +26,29 @@ jobs:
     - name: Build application
       run: npm run build --if-present
 
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
       with:
-        project_id: ${{ env.GCP_PROJECT_ID }}
-        service_account_key: ${{ env.GCP_SA_KEY }}
-        export_default_credentials: true
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
 
     - name: Configure Docker for GCP
       run: gcloud auth configure-docker
 
-    - name: Prepare Docker image name
-      run: |
-        PROJECT_NAME_LOWER=$(echo "${{ env.PROJECT_NAME }}" | tr '[:upper:]' '[:lower:]')
-        echo "DOCKER_IMAGE_NAME=gcr.io/${{ env.GCP_PROJECT_ID }}/${PROJECT_NAME_LOWER}:${{ github.sha }}" >> $GITHUB_ENV
-
     - name: Build and push Docker image
       run: |
-        docker build -t ${{ env.DOCKER_IMAGE_NAME }} .
-        docker push ${{ env.DOCKER_IMAGE_NAME }}
+        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.PROJECT_NAME }}:${{ github.sha }} .
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.PROJECT_NAME }}:${{ github.sha }}
 
     - name: Deploy to GCP VM
       run: |
-        gcloud compute ssh --zone ${{ env.GCP_INSTANCE_ZONE }} ${{ env.GCP_INSTANCE_NAME }} --command="
-        docker pull ${{ env.DOCKER_IMAGE_NAME }} &&
-        docker stop ${PROJECT_NAME_LOWER} || true &&
-        docker rm ${PROJECT_NAME_LOWER} || true &&
-        docker run -d --name ${PROJECT_NAME_LOWER} -p 3000:3000 ${{ env.DOCKER_IMAGE_NAME }}
+        gcloud compute ssh --zone ${{ secrets.GCP_INSTANCE_ZONE }} ${{ secrets.GCP_INSTANCE_NAME }} --command="
+        docker pull gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.PROJECT_NAME }}:${{ github.sha }} &&
+        docker stop ${{ secrets.PROJECT_NAME }} || true &&
+        docker rm ${{ secrets.PROJECT_NAME }} || true &&
+        docker run -d --name ${{ secrets.PROJECT_NAME }} -p 3000:3000 gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.PROJECT_NAME }}:${{ github.sha }}
         " || exit 1
