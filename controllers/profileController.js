@@ -7,8 +7,7 @@ const ArticleModel = require('../models/Article');
 const ScrapModel = require('../models/Scrap');
 const smtpTransport = require('../email');
 
-const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
-
+const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e"
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -177,7 +176,7 @@ exports.listAllDiaries = async (req, res) => {
 }
 
 function setDefaultImage(image_url) {
-    if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
+    if (image_url == null) image_url = DEFAULT_PROFILE_IMAGE;
     return image_url;
 }
 
