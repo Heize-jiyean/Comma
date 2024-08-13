@@ -133,11 +133,11 @@
 
 <script>
     document.getElementById('writeGuestbookButton')?.addEventListener('click', function() {
-        const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
-        window.location.href = `/guestbook/new/${userId}`;
+    const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
+    window.location.href = `/guestbook/new/${userId}`;
     });
 
-    document.getElementById('viewAllGuestbooksButton').addEventListener('click', function() {
+    document.getElementById('viewAllGuestbooksButton')?.addEventListener('click', function() {
         const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
         const profilePath = '<%= typeof patientUser !== "undefined" ? "patient" : "counselor" %>';
         window.location.href = `/profile/${profilePath}/${userId}/guestbooks`;

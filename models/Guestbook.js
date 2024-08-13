@@ -207,28 +207,33 @@ exports.findAllByCounselorId = async (counselorId) => {
 }
 
 // 상담사 아이디로 상담사가 작성한 방명록 찾기 (페이지네이션)
-exports.findAllByCounselorIdWithPagination = async(counselorId, page, limit) => {
+exports.findAllByCounselorIdWithPagination = async (counselorId, page, limit) => {
     try {
         const db = await require('../main').connection();
 
         const offset = limit * (page - 1);
 
         let sql = `
-            SELECT *
-            FROM guestbook
-            WHERE counselor_id = ?
-            ORDER BY created_at DESC
-            LIMIT ? OFFSET ?`;  // LIMIT은 한 번에 가져올 최대 행, OFFSET은 몇 개의 행을 건너뛸지
+            SELECT g.*, c.id as counselorId
+            FROM guestbook g
+            JOIN counselor c ON g.counselor_id = c.counselor_id
+            WHERE g.counselor_id = ?
+            ORDER BY g.created_at DESC
+            LIMIT ? OFFSET ?`;
 
         const [rows, fields] = await db.query(sql, [counselorId, limit, offset]);
+
+        // 여기서 rows에는 counselor의 id가 포함됩니다.
+        console.log('findAllByCounselorIdWithPagination 반환 데이터:', rows);
 
         if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
 
         return rows;
     } catch (error) {
-        console.log("Guestbook.findAllByPatientIdWithPagination() 쿼리 실행 중 오류: ", error)
+        console.log("Guestbook.findAllByCounselorIdWithPagination() 쿼리 실행 중 오류: ", error);
     }
-}
+};
+
 
 // 상담사 아이디로 상담사가 작성한 방명록의 총 개수 구하기
 exports.countByCounselorId = async (counselorId) => {

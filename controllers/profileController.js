@@ -112,6 +112,9 @@ exports.counselorProfilePage = async (req, res) => {
         // 상담사가 작성한 최신 방명록 4개 가져오기
         const guestbooks = await GuestbookModel.findLatestFourByCounselorId(counselorUser.counselor_id);
 
+         // 추가된 코드: guestbooks 데이터를 콘솔에 출력
+         console.log('counselorProfilePage에서 받은 guestbooks:', guestbooks);
+
         // 각 방명록 항목에 대해 환자의 닉네임과 이미지 가져오기
         for (let guestbook of guestbooks) {
             const patient = await UserModel.getPatientByPatientId(guestbook.patient_id);
@@ -332,7 +335,8 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
             });
             
         } else {
-            res.status(403).send("접근 권한이 없습니다.");
+            //res.status(403).send("접근 권한이 없습니다.");
+            return res.status(403).render('profile/forbidden.ejs');
         }
 
     } catch (error) {
