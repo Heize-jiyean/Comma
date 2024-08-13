@@ -285,9 +285,9 @@ function updateReviewList(reviews, currentUserId) {
         reviews.forEach(review => {
             const comment = document.createElement('div');
             comment.className = 'comment card mb-3';
-
+            console.log(review, currentUserId)
             // 조건부로 삭제 버튼을 추가합니다.
-            const deleteButtonHtml = review.patient_id === currentUserId 
+            const deleteButtonHtml = review.patient_id == currentUserId 
                 ? `<p class="delete-review" onclick="deleteReview(${review.review_id})" style="cursor: pointer;">x</p>`
                 : '';
 

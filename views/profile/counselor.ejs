@@ -5,6 +5,11 @@
     <title>상담사 프로필 페이지</title>
     <link rel="stylesheet" href="/css/profile/dashboard.css">
     <style>
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
         .content-container {
             display: flex;
             gap: 20px;
@@ -18,6 +23,11 @@
     <div class="main-container">
         <div class="profile-container">
             <%- include('./profile_components/profile_card') %>
+            <% if (type === 'counselor') { %>
+                <% if ((user.role === 'counselor') && (user.custom_id === counselorUser.id)) { %>
+                    <%- include('./profile_components/scrap_card') %>
+                <% } %>
+            <% } %>
         </div>
         <div class="content-container">
             <div class="content-column">

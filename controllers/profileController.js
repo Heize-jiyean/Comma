@@ -4,10 +4,11 @@ const GuestbookModel = require('../models/Guestbook');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
 const ArticleModel = require('../models/Article'); 
-const JsonUtils = require('../utils/jsonUtils');
+const ScrapModel = require('../models/Scrap');
+const smtpTransport = require('../email');
+const ArticleInteractionModel = require('../models/ArticleInteraction');
 
-const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
-
+const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e"
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -54,7 +55,7 @@ exports.patientProfilePage = async (req, res) => {
             // 관심 환자인지 여부 확인
             let isCounselorScrapPatient;
             if (loginRole === 'counselor') {
-                isCounselorScrapPatient = await UserModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
+                isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
             }
 
             // 감정차트 데이터 불러오기
@@ -122,7 +123,7 @@ exports.counselorProfilePage = async (req, res) => {
         // 관심 상담사인지 여부 확인
         let isPatientScrapCounselor;
         if (loginRole === 'patient') {
-            isPatientScrapCounselor = await UserModel.checkPatientScrapCounselor(loginId, counselorUser.counselor_id);
+            isPatientScrapCounselor = await ScrapModel.checkPatientScrapCounselor(loginId, counselorUser.counselor_id);
         }
 
         // 렌더링
@@ -180,7 +181,7 @@ exports.listAllDiaries = async (req, res) => {
 }
 
 function setDefaultImage(image_url) {
-    if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
+    if (image_url == null) image_url = DEFAULT_PROFILE_IMAGE;
     return image_url;
 }
 
@@ -339,11 +340,25 @@ exports.passwordChangePage = async(req, res) => {
     if (!AccessCheck.isUserAuthenticated(req.session.user)) {
         const referer = req.get('Referer') || '/';
         return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
-    }
+    } 
+
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
 
     try {
+        let loginUser;
+
+        if (loginRole === 'patient') {
+            loginUser = await UserModel.getPatientByPatientId(loginId);
+        } else if (loginRole === 'counselor') {
+            loginUser = await UserModel.getCounselorByCounselorId(loginId);
+        }
+
         // 렌더링
-        res.render("profile/setting.ejs", { page: 'passwordChange' });
+        res.render("profile/setting.ejs", { 
+            page: 'passwordChange',
+            loginUser
+        });
     } catch (error) {
         console.log("프로필 설정 - 비밀번호 변경 페이지 반환 오류: ", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -392,6 +407,64 @@ exports.passwordChange = async(req, res) => {
         console.log("프로필 설정 - 비밀번호 변경 처리 오류: ", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
+}
+
+// 랜덤 인증번호 생성 코드
+const generateRandomNumber = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+// 프로필 설정 - 비밀번호 잊었을 경우, 메일 보내기
+exports.sendCode = async(req, res) => {
+    const number = generateRandomNumber(111111, 999999);
+    const { email } = req.body;
+
+    const mailOptions = {
+        from: "team.ive.comma@gmail.com",
+        to: email,
+        subject: "Comma 인증 메일 입니다.",
+        html: '<h1>인증번호를 입력해주세요 \n\n\n\n\n\n</h1>' + number
+    }
+
+    smtpTransport.sendMail(mailOptions, (err, response) => {
+        if (err) {
+            res.status(500).json({ ok: false });
+        } else {
+            res.json({ ok: true , authNum: number });
+        }
+        res.set('Cache-Control', 'no-store');
+        smtpTransport.close(); // 전송 종료
+    });
+
+}
+
+// 비밀번호 잊은 경우, 비밀번호 변경 처리
+exports.modalPasswordChange = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    const modalNewPassword = req.body.modalNewPassword;
+
+
+    try {
+        // 새 비밀번호로 업데이트
+        if (loginRole === 'patient') {
+            await UserModel.updatePatientPassword(loginId, modalNewPassword);
+        } else if (loginRole === 'counselor') {
+            await UserModel.updateCounselorPassword(loginId, modalNewPassword);
+        }
+
+        // 성공 응답 메시지 보내기
+        res.status(200).json({
+            success: true,
+            message: '비밀번호가 성공적으로 변경되었습니다.'
+        })
+
+
+    } catch (error) {
+        console.log("프로필 설정 - 비밀번호 변경 처리 오류: ", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+    
 }
 
 // 프로필 설정 - 탈퇴 페이지 반환
@@ -507,15 +580,13 @@ exports.addScrap = async(req, res) => {
     const loginRole = req.session.user.role;
     const targetId = req.params.targetId;
 
-    console.log("addScrap까지는 옴")
-
     try {
         if (loginRole === 'patient') {
             targetUser = await UserModel.getCounselorByUserId(targetId);
-            result = await UserModel.addScrapCounselor(loginId, targetUser.counselor_id);
+            result = await ScrapModel.addScrapCounselor(loginId, targetUser.counselor_id);
         } else if (loginRole === 'counselor') {
             targetUser = await UserModel.getPatientByUserId(targetId);
-            result = await UserModel.addScrapPatient(targetUser.patient_id, loginId);
+            result = await ScrapModel.addScrapPatient(targetUser.patient_id, loginId);
         }
 
         if (result) {
@@ -531,9 +602,31 @@ exports.addScrap = async(req, res) => {
 }
 
 // 관심 환자, 관심 상담사 해제
-// exports.removeScrap = async(req, res) => {
+exports.removeScrap = async(req, res) => {
+    const loginId = req.session.user.id;
+    const loginRole = req.session.user.role;
+    const targetId = req.params.targetId;
 
-// }
+    try {
+        if (loginRole === 'patient') {
+            targetUser = await UserModel.getCounselorByUserId(targetId);
+            result = await ScrapModel.removeScrapCounselor(loginId, targetUser.counselor_id);
+        } else if (loginRole === 'counselor') {
+            targetUser = await UserModel.getPatientByUserId(targetId);
+            result = await ScrapModel.removeScrapPatient(targetUser.patient_id, loginId);
+        }
+
+        if (result) {
+            res.status(200).json({ success: true, message: "성공적으로 등록되었습니다." });
+        } else {
+            res.status(400).json({ success: false, message: "등록에 실패했습니다." });
+        }
+
+    } catch (error) {
+        console.error("removeScrap 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
 
 
 // 상담사 방명록 모아보기 페이지 반환
@@ -588,20 +681,104 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
     }
 };
 
-// 부분 뷰를 렌더링하는 새로운 엔드포인트
-// exports.getLineChartPartial = async (req, res) => {
-//     try {
-//         const patientId = req.params.patientId;
-//         const { year, month } = req.query;
-//         console.log(patientId, year, month);
+// 저장한 아티클 리스트
+exports.article = async (req, res) => {
+    try {
+        if (req.session.user) {
+            if (!AccessCheck.checkPatientRole(req.session.user.role)) {
+                const referer = req.get('Referer') || '/';
+                return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+            }
+            const patientId = req.params.patientId;
+            const patientUser = await UserModel.getPatientByUserId(patientId);
+            const patient_id = patientUser.patient_id;
 
-//         // 특정 연도와 월에 대한 데이터 가져오기
-//         const Data = await DiaryModel.getEmotionDataByMonth(patientId, year, month);
 
-//         console.log(Data);
-//         res.render('chart/line-chart', { lineChartEmotionData: Data });
-//     } catch (error) {
-//         console.error("getEmotionChartPartial 오류:", error);
-//         res.status(500).send("서버 오류가 발생했습니다.");
-//     }
-// }
+            const option = req.query.option ? req.query.option : "like";
+            let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+
+            const totalPages = Math.ceil( await ArticleInteractionModel.countOfFindInteraction(patient_id, option) / 9);
+            let Previews = await ArticleInteractionModel.PreviewFindInteraction(patient_id, currentPage, option); 
+
+            if (Previews) {
+                Previews.forEach(preview => {
+                    preview.thumbnail_url = setDefaultImage(preview.thumbnail_url);
+                });
+            }
+            
+            res.render('profile/article', {patientUser, type: 'patient', Previews, currentPage, totalPages});
+        }
+        else return res.render("login/login");
+    } catch (error) {
+        console.error("listAllDiaries 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+
+
+// 내가 스크랩한 관심 환자 or 관심 상담사
+exports.listMyScraps = async(req, res) => {
+    try {
+        const loginId = req.session.user.id;
+        const loginRole = req.session.user.role;
+        const scrapUserList = [];
+
+        if (loginRole === 'patient') {
+            const scrappedCounselors = await ScrapModel.getScrappedCounselorsByPatientId(loginId);
+            for (counselor of scrappedCounselors) {
+                const counselorUser = await UserModel.getCounselorByCounselorId(counselor.counselor_id);
+                if (counselorUser) {
+                    counselorUser.role = 'counselor';
+                    scrapUserList.push(counselorUser)
+                }
+            }
+        } else if (loginRole === 'counselor') {
+            const scrappedPatients = await ScrapModel.getScrappedCounselorsByPatientId(loginId);
+            for (patient of scrappedPatients) {
+                const patientUser = await UserModel.getPatientByPatientId(patient.patient_id);
+                if (patientUser) {
+                    patientUser.role = 'patient';
+                    scrapUserList.push(patientUser)
+                }
+            }
+        }
+
+        res.render("profile/scrap.ejs", { scrapUserList: scrapUserList });
+    } catch (error) {
+        console.log("listMyScraps 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
+
+// 나를 스크랩한 관심 환자 or 관심 상담사
+exports.listScrapsOnMe = async(req, res) => {
+    try {
+        const loginId = req.session.user.id;
+        const loginRole = req.session.user.role;
+        const scrapUserList = [];
+
+        if (loginRole === 'patient') {
+            const scrappingCounselors = await ScrapModel.getScrappingCounselorsByPatientId(loginId);
+            for (const counselor of scrappingCounselors) {
+                const counselorUser = await UserModel.getCounselorByCounselorId(counselor.counselor_id);
+                if (counselorUser) {
+                    scrapUserList.push(counselorUser);
+                }
+            }
+        } else if (loginRole === 'counselor') {
+            const scrappingPatients = await ScrapModel.getScrappingPatientsByCounselorId(loginId);
+            for (const patient of scrappingPatients) {
+                const patientUser = await UserModel.getPatientByPatientId(patient.patient_id);
+                if (patientUser) {
+                    scrapUserList.push(patientUser);
+                }
+            }
+        }
+
+        res.render("profile/scrap.ejs", { scrapUserList: scrapUserList })
+    } catch (error) {
+        console.log("listScrapsOnMe 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}

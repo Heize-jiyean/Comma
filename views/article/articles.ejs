@@ -20,6 +20,11 @@
         <a href="/article/new" class="button-link">아티클 작성</a>
     </div>
     <% } %>
+    <% if (user && user.role === 'patient') { %>
+    <div class="button-container">
+        <a href="/profile/patient/<%= user.custom_id %>/article" class="button-link">내가 저장한 아티클 보러가기</a>
+    </div>
+    <% } %>
 
     <% if (user && user.role === 'patient') { %>
         <div class="info-container"> 
