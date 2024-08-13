@@ -140,11 +140,11 @@ exports.delete = async (req, res) => {
 // 아티클 리스트
 exports.list = async (req, res) => {
     try {
-        const sortBy = req.query.sort ? req.query.sort : "latest"; // 좋아순/최신순
+        const sortBy = req.query.sort ? req.query.sort : "latest";
         const currentPage = req.query.page ? parseInt(req.query.page) : 1;
 
-        const totalPages = Math.ceil( await ArticleModel.countOfFindAll(sortBy) / 9);
-        let Previews = await ArticleModel.PreviewFindAll(currentPage, sortBy); // 임시 상담사 설정
+        const totalPages = Math.ceil(await ArticleModel.countOfFindAll(sortBy) / 9);
+        let Previews = await ArticleModel.PreviewFindAll(currentPage, sortBy);
 
         if (Previews) {
             Previews.forEach(preview => {
@@ -163,9 +163,9 @@ exports.list = async (req, res) => {
             }
         }
         
-        res.render('article/articles', {Previews, currentPage, totalPages, RecommendPreviews});
+        res.render('article/articles', { Previews, currentPage, totalPages, RecommendPreviews, isCounselorProfile: false });
     } catch (error) {
-        console.error("listAllDiaries 오류:", error);
+        console.error("list 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
@@ -195,7 +195,7 @@ exports.listByCounselor = async (req, res) => {
             });
         }
 
-        res.render('article/articles', { Previews, currentPage, totalPages });
+        res.render('article/articles', { Previews, currentPage, totalPages, RecommendPreviews: null, isCounselorProfile: true });
     } catch (error) {
         console.error("listByCounselor 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");

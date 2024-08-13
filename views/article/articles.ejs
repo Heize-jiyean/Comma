@@ -26,13 +26,14 @@
     </div>
     <% } %>
 
-    <% if (user && user.role === 'patient') { %>
+    <% if (user && user.role === 'patient' && RecommendPreviews && RecommendPreviews.length > 0 && !isCounselorProfile) { %>
         <div class="info-container"> 
             <p>회원님의 추천 아티클</p> 
         </div>
-        <%- include('./recommend-list-component') %>
+        <%- include('./recommend-list-component', { RecommendPreviews }) %>
         <hr style="margin-top: 20px; margin-bottom: 20px; color: darkgray">
     <% } %>
+    
 
     <div class="sort-combobox">
         <label for="theme_id">정렬 선택: </label>

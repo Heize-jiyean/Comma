@@ -28,7 +28,7 @@
                         <img src="<%= Preview.thumbnail_url %>" class="card-img-top" alt="Post Image">
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title" style="font-weight: bold" ><%= Preview.title %></h5>
+                        <h5 class="card-title" style="font-weight: bold"><%= Preview.title %></h5>
                         <p style="font-size: 14px" class="card-text"><%= Preview.nickname %></p>
                         <p style="font-size: 14px" class="card-text"><%= new Date(Preview.created_at).toLocaleDateString('ko-KR') %></p>
                         <p style="font-size: 14px" class="card-text font-size: 0.9rem; color: #333;">조회 <%= Preview.views %>회</p>
@@ -39,4 +39,5 @@
             <% }) %>
         </div>
     <% } %>
+    
 </div>
