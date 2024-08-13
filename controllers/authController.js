@@ -243,52 +243,52 @@ module.exports = {
     // 비밀번호 재설정
     resetPassword: async (req, res) => {
         console.log('Reset password function called', { params: req.params, body: req.body });
-        const { token } = req.params;  // URL 파라미터에서 토큰을 가져옵니다.
+        const { token } = req.params;
         const { password } = req.body;
-
+    
         console.log('Reset password request received:', {
             method: req.method,
             url: req.url,
             params: req.params,
             body: req.body
         });
-
+    
         try {
             console.log('Attempting to reset password for token:', token);
-
+    
             const user = await UserModel.getUserByResetToken(token);
             if (!user || Date.now() > user.resetTokenExpires) {
                 console.log('Invalid or expired token');
-                return res.status(400).json({ success: false, message: '유효하지 않거나 만료된 토큰입니다.' });
+                return res.status(400).render('login/reset-password', { error: '유효하지 않거나 만료된 토큰입니다.', token });
             }
-
+    
             console.log('User found:', user.id);
-
+    
             // 서버 측 비밀번호 유효성 검사
             const passwordError = checkPassword(password);
             if (passwordError) {
                 console.log('Password validation failed');
-                return res.status(400).json({ success: false, message: passwordError });
+                return res.status(400).render('login/reset-password', { error: passwordError, token });
             }
-
+    
             const hashedPassword = await bcrypt.hash(password, 10);
             const updateResult = await UserModel.updatePassword(user.id, hashedPassword);
-
+    
             if (!updateResult) {
                 console.log('Failed to update password');
-                return res.status(500).json({ success: false, message: '비밀번호 업데이트 중 오류가 발생했습니다.' });
+                return res.status(500).render('login/reset-password', { error: '비밀번호 업데이트 중 오류가 발생했습니다.', token });
             }
-
+    
             console.log('Password updated successfully');
-
+    
             await UserModel.clearResetToken(user.id);
             console.log('Reset token cleared');
-
-            return res.status(200).render('login/login', { message: '로그인성공.' });
+    
+            return res.status(200).render('login/login', { message: '비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인하세요.' });
             
         } catch (error) {
             console.error("Reset password error:", error);
-            res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+            res.status(500).render('login/reset-password', { error: '서버 오류가 발생했습니다.', token });
         }
     }
 };
