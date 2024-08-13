@@ -6,13 +6,11 @@ from model import BERTClassifier, get_kobert_model, predict
 from kobert_tokenizer import KoBERTTokenizer
 
 import numpy as np
-import json
 import os
 from dotenv import load_dotenv
-from database import create_connection, insert_sim_like, delete_sim_like, insert_sim_diary
-#import chromadb
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import PointStruct
 from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 
 
 
@@ -44,23 +42,15 @@ model_embedding = SentenceTransformer("bespin-global/klue-sroberta-base-continue
 
 
 
-# DB 연결
+# vector DB
 
 load_dotenv()
 
-HOST_NAME=os.getenv('DB_HOST')
-USER_NAME=os.getenv('DB_USER')
-USER_PASSWORD=os.getenv('DB_PW')
-DB_NAME=os.getenv('DB_NAME')
+HOST_NAME=os.getenv('VDB_HOST')
+PORT_NUM=os.getenv('VDB_PORT')
 
-connection = create_connection(HOST_NAME, USER_NAME, USER_PASSWORD, DB_NAME)
-
-
-
-# vector DB
-
-#client = chromadb.Client()
-#vector_collection = client.create_collection(name="comma")
+qdrant = QdrantClient(host=HOST_NAME, port=PORT_NUM)
+collection_name = ['article', 'patient', 'diary'];
 
 
 
@@ -83,11 +73,20 @@ def classification():
 def embedding():
     data = request.get_json()
     
-    if 'sentence' in data:
+    if ('idx' in data) & ('id' in data) & ('sentence' in data):
+        idx = data['idx']
+        id = data['id']
         sentence = data['sentence']
         embedding = model_embedding.encode(sentence)
-        embedding_list = embedding.tolist()
-        return jsonify(embedding_list)
+        
+        point = PointStruct(id=id, vector=embedding)
+        
+        qdrant.upsert(
+            collection_name=collection_name[idx],
+            points=[point]
+        )
+        
+        return jsonify({'message': 'Success'}), 200
     else:
         return jsonify({'error': 'No input received'}), 400 
 
@@ -96,121 +95,97 @@ def similarity_like():
     data = request.get_json()
     
     if ('pid' in data) & ('likeId' in data):
-        if os.path.exists('python/vector/articleVectors.json'):
-            pid = data['pid']
-            likeId = data['likeId']
-            selected = []
-            vectors = []
-
-            with open('python/vector/articleVectors.json', 'r') as file:
-                jdata = json.load(file)
+        pid = int(data['pid'])
+        likeId = data['likeId']
         
-            for i in range(len(jdata)):
-                if jdata[i]['id'] in likeId:
-                    selected.append(jdata[i]['vector'])
-            
-                vectors.append(jdata[i]['vector'])
+        points = qdrant.retrieve(
+            collection_name=collection_name[0],
+            ids=likeId,
+            with_vectors=True
+        )
 
+        selected = [point.vector for point in points if point.vector is not None]
+        
+        if len(selected) > 0:
             selected_array = np.array(selected)
+            mean_vector = np.mean(selected_array, axis=0)
             
-            if selected_array.size > 0:
-                mean_vector = np.mean(selected_array, axis=0, keepdims=True)
-        
-                vectors_array = np.array(vectors)
-                vectors_array = np.concatenate((vectors_array, mean_vector), axis=0)
-        
-                cosine_sim_matrix = cosine_similarity(vectors_array)
-                sim = cosine_sim_matrix[-1]
-        
-                delete_sim_like(connection, pid)
-        
-                for index, similarity in enumerate(sim[:-1]):
-                    if jdata[index]['id'] not in likeId:
-                        insert_sim_like(connection, pid, jdata[index]['id'], similarity)
-        
-                mean_vector = mean_vector.tolist()
-                return jsonify(mean_vector)
-            else:
-                delete_sim_like(connection, pid)   
-                zero_list = [0] * 768   
-                return jsonify(zero_list)
+            qdrant.delete(
+                collection_name=collection_name[1],
+                points_selector=[pid],
+                wait=True
+            )
+            
+            point = PointStruct(id=pid, vector=mean_vector)
+
+            qdrant.upsert(
+                collection_name=collection_name[1],
+                points=[point]
+            )  
+
+        else:
+            qdrant.delete(
+                collection_name=collection_name[1],
+                points_selector=[pid],
+                wait=True
+            )
+
+        return jsonify({'message': 'Success'}), 200
     else:
         return jsonify({'error': 'No input received'}), 400 
 
-@app.route('/similarity_article', methods=['POST'])
-def similarity_article():
+@app.route('/recommend', methods=['POST'])
+def recommend():
     data = request.get_json()
     
-    if ('aid' in data) & ('vector' in data):
-        aid = data['aid']
-        vector = data['vector']
+    if ('likeId' in data) & ('idx' in data) & ('id' in data):
+        likeId = data['likeId']
+        idx = data['idx']
+        id = int(data['id'])
         
-        if os.path.exists('python/vector/patientVectors.json'):
-            vectors = []
+        points = qdrant.retrieve(
+            collection_name=collection_name[idx],
+            ids=[id],
+            with_vectors=True
+        )
+    
+        vector = [point.vector for point in points if point.vector is not None]
+        vector = np.array(vector).reshape(1, -1)
         
-            with open('python/vector/patientVectors.json', 'r') as file:
-                jdata = json.load(file)
+        noise = np.random.normal(scale=0.05, size=768)
         
-            for i in range(len(jdata)):
-                vectors.append(jdata[i]['vector'])
+        if vector.size > 0:
+            embedding = vector + noise     
+        else:
+            embedding = [noise]
         
-            vectors_array = np.array(vectors)
-            vectors_array = np.append(vectors_array, [vector], axis=0)
+        results = qdrant.recommend(
+            collection_name=collection_name[0],
+            positive=embedding
+        )
         
-            cosine_sim_matrix = cosine_similarity(vectors_array)
-            sim = cosine_sim_matrix[-1]
-        
-            for index, similarity in enumerate(sim[:-1]):
-                insert_sim_like(connection, jdata[index]['id'], aid, similarity)
-        
-        if os.path.exists('python/vector/diaryVectors.json'):
-            vectors = []    
+        filtered_results = [result for result in results if result.id not in likeId]
+        top_3_results = filtered_results[:3]
             
-            with open('python/vector/diaryVectors.json', 'r') as file:
-                jdata = json.load(file)
-            
-            for i in range(len(jdata)):
-                vectors.append(jdata[i]['vector'])
-                
-            vectors_array = np.array(vectors)
-            vectors_array = np.append(vectors_array, [vector], axis=0)
-            
-            cosine_sim_matrix = cosine_similarity(vectors_array)
-            sim = cosine_sim_matrix[-1]
-            
-            for index, similarity in enumerate(sim[:-1]):
-                insert_sim_diary(connection, jdata[index]['id'], aid, similarity)
-            
-        return jsonify({'message': 'Operation successful'}), 200
+        return jsonify([result.id for result in top_3_results]), 200
     else:
-        return jsonify({'error': 'No input received'}), 400 
+        return jsonify({'error': 'No input received'}), 400
 
-@app.route('/similarity_diary', methods=['POST'])
-def similarity_diary():
+@app.route('/delete_vector', methods=['POST'])
+def delete_vector():
     data = request.get_json()
     
-    if ('did' in data) & ('vector' in data):
-        if os.path.exists('python/vector/articleVectors.json'):
-            did = data['did']
-            vector = data['vector']
-            vectors = []
+    if ('idx' in data) & ('id' in data):
+        idx = data['idx']
+        id = int(data['id'])
+        
+        qdrant.delete(
+            collection_name=collection_name[idx],
+            points_selector=[id],
+            wait=True
+        )
 
-            with open('python/vector/articleVectors.json', 'r') as file:
-                jdata = json.load(file)
-        
-            for i in range(len(jdata)):
-                vectors.append(jdata[i]['vector'])
-        
-            vectors_array = np.array(vectors)
-            vectors_array = np.append(vectors_array, [vector], axis=0)
-        
-            cosine_sim_matrix = cosine_similarity(vectors_array)
-            sim = cosine_sim_matrix[-1]
-        
-            for index, similarity in enumerate(sim[:-1]):
-                insert_sim_diary(connection, did, jdata[index]['id'], similarity)
-
-        return jsonify({'message': 'Operation successful'}), 200
+        return jsonify({'message': 'Success'}), 200
     else:
         return jsonify({'error': 'No input received'}), 400 
 

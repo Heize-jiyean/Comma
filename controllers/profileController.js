@@ -435,7 +435,7 @@ exports.accountRemoval = async(req, res) => {
         // 비밀번호가 일치하면 탈퇴 처리
         if (loginRole === 'patient') {
             await UserModel.removePatient(loginId);
-            await JsonUtils.deleteJson(1, loginId);
+            await axios.post('http://localhost:5000/delete_vector', { idx: 1, id: loginId });
         } else if (loginRole === 'counselor') {
             await UserModel.removeCounselor(loginId);
         }

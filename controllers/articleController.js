@@ -2,7 +2,6 @@ const AccessCheck = require('../utils/authUtils');
 const ArticleModel = require('../models/Article');
 const ArticleInteractionModel = require('../models/ArticleInteraction');
 const UserModel = require('../models/User');
-const JsonUtils = require('../utils/jsonUtils');
 const fetch = require('node-fetch'); // node-fetch 모듈을 사용하여 fetch를 구현
 const axios = require('axios');
 
@@ -40,10 +39,7 @@ exports.register = async (req, res) => {
             const savedArticleId = await ArticleModel.register(articleData);
 
             //추천 시스템 관련
-            const response = await axios.post('http://localhost:5000/embedding', { sentence: articleData.title });
-            const vectorResult = response.data;
-            JsonUtils.addJson(0, savedArticleId, vectorResult)
-            await axios.post('http://localhost:5000/similarity_article', { aid: savedArticleId, vector: vectorResult});
+            await axios.post('http://localhost:5000/embedding', { idx: 0, id: savedArticleId, sentence: articleData.title });
 
             return res.json({ success: true, redirect: `/article/${savedArticleId}` });
         }
@@ -127,8 +123,8 @@ exports.delete = async (req, res) => {
             // DB diary 삭제
             await ArticleModel.delete(articleId);
 
-            // Json 삭제
-            await JsonUtils.deleteJson(0, articleId);
+            // vector 삭제
+            await axios.post('http://localhost:5000/delete_vector', { idx: 0, id: articleId });
     
             // redirect
             return res.json({ success: true, redirect: `/article` });
@@ -157,7 +153,10 @@ exports.list = async (req, res) => {
 
         let RecommendPreviews = null;
         if (req.session.user && req.session.user.role == 'patient') {
-            RecommendPreviews = await ArticleModel.RecommendTop3_like(req.session.user.id);
+            const likeData = await ArticleInteractionModel.findLikeByPatient(req.session.user.id);
+            let response = await axios.post('http://localhost:5000/recommend', { likeId: likeData, idx: 1, id: req.session.user.id });
+            let RecommendID = response.data;
+            RecommendPreviews = await ArticleModel.RecommendTop3(RecommendID);
 
             if (RecommendPreviews) {
                 RecommendPreviews.forEach(preview => {
@@ -200,9 +199,7 @@ exports.toggleLike = async (req, res) => {
             //추천 시스템 관련
             if (req.session.user.role=='patient') {
                 const likeData = await ArticleInteractionModel.findLikeByPatient(patientId);
-                const response = await axios.post('http://localhost:5000/similarity_like', { pid: patientId, likeId: likeData });
-                const vectorResult = response.data;
-                JsonUtils.addJson(1, patientId, vectorResult)
+                await axios.post('http://localhost:5000/similarity_like', { pid: patientId, likeId: likeData });
             }
 
             return res.json({ response: true, liked });

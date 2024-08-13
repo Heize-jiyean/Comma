@@ -2,8 +2,8 @@ const DiaryModel = require('../models/Diary');
 const UserModel = require('../models/User');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
-const JsonUtils = require('../utils/jsonUtils');
 const ArticleModel = require('../models/Article');
+const ArticleInteractionModel = require('../models/ArticleInteraction');
 const axios = require('axios');
 
 function setDefaultImage(image_url) {
@@ -47,13 +47,11 @@ exports.register = async (req, res) => {
             const { diaryData } = req.body;
     
             const savedDiaryId = await DiaryModel.register(diaryData);
-            res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
 
             //추천 시스템 관련
-            const response = await axios.post('http://localhost:5000/embedding', { sentence: diaryData.title+diaryData.content });
-            const vectorResult = response.data;
-            JsonUtils.addJson(2, savedDiaryId, vectorResult)
-            await axios.post('http://localhost:5000/similarity_diary', { did: savedDiaryId, vector: vectorResult});
+            await axios.post('http://localhost:5000/embedding', { idx: 2, id: savedDiaryId, sentence: diaryData.title+diaryData.content });
+
+            res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
 
             // 감정분석 후 WebSocket을 통해 메시지 전송
             EmotionData.analyzeAndNotify(diaryData.content, diaryData.title, savedDiaryId);
@@ -95,7 +93,10 @@ exports.view = async (req, res) => {
             // 추천아티클 
             let RecommendPreviews = null;
             if (req.session.user && req.session.user.role == 'patient') {
-                RecommendPreviews = await ArticleModel.RecommendTop3_diary(diaryId);
+                const likeData = await ArticleInteractionModel.findLikeByPatient(req.session.user.id);
+                let response = await axios.post('http://localhost:5000/recommend', { likeId: likeData, idx: 2, id: diaryId });
+                let RecommendID = response.data;
+                RecommendPreviews = await ArticleModel.RecommendTop3(RecommendID);
     
                 if (RecommendPreviews) {
                     RecommendPreviews.forEach(preview => {
@@ -169,8 +170,8 @@ exports.delete = async (req, res) => {
             // DB diary 삭제
             await DiaryModel.delete(diaryId);
 
-            // Json 삭제
-            await JsonUtils.deleteJson(2, diaryId);
+            // vector 삭제
+            await axios.post('http://localhost:5000/delete_vector', { idx: 2, id: diaryId });
     
             // redirect
             return res.json({ success: true, redirect: `/profile/patient/${patient.id}/diaries` });
