@@ -23,9 +23,6 @@ jobs:
       with:
         node-version: '20.x'
 
-    - name: Check Docker version
-      run: docker --version
-
     - name: Install dependencies
       run: npm ci
 
@@ -42,16 +39,21 @@ jobs:
     - name: Configure Docker for GCP
       run: gcloud auth configure-docker
 
+    - name: Prepare Docker image name
+      run: |
+        PROJECT_NAME_LOWER=$(echo "${{ env.PROJECT_NAME }}" | tr '[:upper:]' '[:lower:]')
+        echo "DOCKER_IMAGE_NAME=gcr.io/${{ env.GCP_PROJECT_ID }}/${PROJECT_NAME_LOWER}:${{ github.sha }}" >> $GITHUB_ENV
+
     - name: Build and push Docker image
       run: |
-        DOCKER_BUILDKIT=0 docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}:${{ github.sha }} .
-        docker push gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}:${{ github.sha }}
+        docker build -t ${{ env.DOCKER_IMAGE_NAME }} .
+        docker push ${{ env.DOCKER_IMAGE_NAME }}
 
     - name: Deploy to GCP VM
       run: |
         gcloud compute ssh --zone ${{ env.GCP_INSTANCE_ZONE }} ${{ env.GCP_INSTANCE_NAME }} --command="
-        docker pull gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}:${{ github.sha }} &&
-        docker stop ${{ env.PROJECT_NAME }} || true &&
-        docker rm ${{ env.PROJECT_NAME }} || true &&
-        docker run -d --name ${{ env.PROJECT_NAME }} -p 3000:3000 gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}:${{ github.sha }}
+        docker pull ${{ env.DOCKER_IMAGE_NAME }} &&
+        docker stop ${PROJECT_NAME_LOWER} || true &&
+        docker rm ${PROJECT_NAME_LOWER} || true &&
+        docker run -d --name ${PROJECT_NAME_LOWER} -p 3000:3000 ${{ env.DOCKER_IMAGE_NAME }}
         " || exit 1
