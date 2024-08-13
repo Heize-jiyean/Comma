@@ -4,6 +4,7 @@ const GuestbookModel = require('../models/Guestbook');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
 const ArticleModel = require('../models/Article'); 
+const ArticleInteractionModel = require('../models/ArticleInteraction');
 
 const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=f496c007-8b78-4f52-995e-a330af92e2bc";
 
@@ -586,20 +587,36 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
     }
 };
 
-// 부분 뷰를 렌더링하는 새로운 엔드포인트
-// exports.getLineChartPartial = async (req, res) => {
-//     try {
-//         const patientId = req.params.patientId;
-//         const { year, month } = req.query;
-//         console.log(patientId, year, month);
+// 저장한 아티클 리스트
+exports.article = async (req, res) => {
+    try {
+        if (req.session.user) {
+            if (!AccessCheck.checkPatientRole(req.session.user.role)) {
+                const referer = req.get('Referer') || '/';
+                return res.status(403).send(`<script>alert("권한이 없습니다."); window.location.href = "${referer}";</script>`);
+            }
+            const patientId = req.params.patientId;
+            const patientUser = await UserModel.getPatientByUserId(patientId);
+            const patient_id = patientUser.patient_id;
 
-//         // 특정 연도와 월에 대한 데이터 가져오기
-//         const Data = await DiaryModel.getEmotionDataByMonth(patientId, year, month);
 
-//         console.log(Data);
-//         res.render('chart/line-chart', { lineChartEmotionData: Data });
-//     } catch (error) {
-//         console.error("getEmotionChartPartial 오류:", error);
-//         res.status(500).send("서버 오류가 발생했습니다.");
-//     }
-// }
+            const option = req.query.option ? req.query.option : "like";
+            let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+
+            const totalPages = Math.ceil( await ArticleInteractionModel.countOfFindInteraction(patient_id, option) / 9);
+            let Previews = await ArticleInteractionModel.PreviewFindInteraction(patient_id, currentPage, option); 
+
+            if (Previews) {
+                Previews.forEach(preview => {
+                    preview.thumbnail_url = setDefaultImage(preview.thumbnail_url);
+                });
+            }
+            
+            res.render('profile/article', {patientUser, type: 'patient', Previews, currentPage, totalPages});
+        }
+        else return res.render("login/login");
+    } catch (error) {
+        console.error("listAllDiaries 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
