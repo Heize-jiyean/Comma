@@ -1,0 +1,57 @@
+name: Node.js CI/CD with Docker and GCP
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]  # Node.js 20.11.1 버전에 맞춤
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build --if-present
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Configure Docker for GCP
+      run: gcloud auth configure-docker
+
+    - name: Build and push Docker image
+      env:
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      run: |
+        docker build -t gcr.io/$GCP_PROJECT_ID/${{ secrets.PROJECT_NAME }}:${GITHUB_SHA::7} .
+        docker push gcr.io/$GCP_PROJECT_ID/${{ secrets.PROJECT_NAME }}:${GITHUB_SHA::7}
+
+    - name: Deploy to GCP VM
+      env:
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        GCP_INSTANCE_NAME: ${{ secrets.GCP_INSTANCE_NAME }}
+        GCP_INSTANCE_ZONE: ${{ secrets.GCP_INSTANCE_ZONE }}
+      run: |
+        gcloud compute ssh --zone $GCP_INSTANCE_ZONE $GCP_INSTANCE_NAME --command="
+        docker pull gcr.io/$GCP_PROJECT_ID/${{ secrets.PROJECT_NAME }}:${GITHUB_SHA::7} &&
+        docker stop ${{ secrets.PROJECT_NAME }} || true &&
+        docker rm ${{ secrets.PROJECT_NAME }} || true &&
+        docker run -d --name ${{ secrets.PROJECT_NAME }} -p 3000:3000 gcr.io/$GCP_PROJECT_ID/${{ secrets.PROJECT_NAME }}:${GITHUB_SHA::7}
+        " || exit 1
