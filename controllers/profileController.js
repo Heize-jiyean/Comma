@@ -117,6 +117,7 @@ exports.counselorProfilePage = async (req, res) => {
             guestbook.patientNickname = patient ? patient.nickname : "Unknown";
             guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
         }
+        
 
         // 관심 상담사인지 여부 확인
         let isPatientScrapCounselor;
