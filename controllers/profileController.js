@@ -114,24 +114,6 @@ exports.counselorProfilePage = async (req, res) => {
             guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
         }
 
-        //아티클내용 미리보기 url처리
-        for (let article of articles) {
-            if (article.content && article.content.startsWith('https://')) {
-                try {
-                    const response = await fetch(article.content);
-                    if (response.ok) {
-                        article.content = await response.text();
-                    } else {
-                        article.content = "콘텐츠를 불러올 수 없습니다.";
-                    }
-                } catch (error) {
-                    console.error("콘텐츠를 가져오는 중 오류:", error);
-                    article.content = "콘텐츠를 불러올 수 없습니다.";
-                }
-            }
-        }
-        
-
         // 관심 상담사인지 여부 확인
         let isPatientScrapCounselor;
         if (loginRole === 'patient') {

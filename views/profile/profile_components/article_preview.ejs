@@ -80,10 +80,10 @@
         <% articles.forEach(async article => { %>
             <% 
             // 콘텐츠가 Firebase URL인지 체크하고, 실제 콘텐츠를 가져오는 로직 추가
-            let contentPreview = article.content;
+            //let contentPreview = article.content;
         
             if (article.content && article.content.startsWith('https://')) {
-                const fetch = require('node-fetch');
+                //const fetch = require('node-fetch');
                 try {
                     const response = await fetch(article.content);
                     if (response.ok) {
