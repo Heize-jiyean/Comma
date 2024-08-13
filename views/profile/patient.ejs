@@ -5,6 +5,11 @@
     <title>환자 프로필 페이지</title>
     <link rel="stylesheet" href="/css/profile/dashboard.css">
     <style>
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
         .chart-container, .diary-container, .guestbook-container {
             background: #fff;
             border-radius: 20px;
@@ -43,6 +48,11 @@
     <div class="main-container">
         <div class="profile-container">
             <%- include('./profile_components/profile_card') %>
+            <% if (type === 'patient') { %>
+                <% if ((user.role === 'patient') && (user.custom_id === patientUser.id)) { %>
+                    <%- include('./profile_components/scrap_card') %>
+                <% } %>
+            <% } %>
         </div>
 
         <div class="content-container">
