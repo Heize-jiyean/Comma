@@ -8,6 +8,10 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
+    env:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+
     strategy:
       matrix:
         node-version: [20.x]  # Node.js 20.11.1 버전에 맞춤
@@ -37,21 +41,18 @@ jobs:
       run: gcloud auth configure-docker
 
     - name: Build and push Docker image
-      env:
-        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       run: |
-        docker build -t gcr.io/$GCP_PROJECT_ID/${{ secrets.PROJECT_NAME }}:${GITHUB_SHA::7} .
-        docker push gcr.io/$GCP_PROJECT_ID/${{ secrets.PROJECT_NAME }}:${GITHUB_SHA::7}
+        docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}:${{ github.sha }} .
+        docker push gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}:${{ github.sha }}
 
     - name: Deploy to GCP VM
       env:
-        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         GCP_INSTANCE_NAME: ${{ secrets.GCP_INSTANCE_NAME }}
         GCP_INSTANCE_ZONE: ${{ secrets.GCP_INSTANCE_ZONE }}
       run: |
         gcloud compute ssh --zone $GCP_INSTANCE_ZONE $GCP_INSTANCE_NAME --command="
-        docker pull gcr.io/$GCP_PROJECT_ID/${{ secrets.PROJECT_NAME }}:${GITHUB_SHA::7} &&
-        docker stop ${{ secrets.PROJECT_NAME }} || true &&
-        docker rm ${{ secrets.PROJECT_NAME }} || true &&
-        docker run -d --name ${{ secrets.PROJECT_NAME }} -p 3000:3000 gcr.io/$GCP_PROJECT_ID/${{ secrets.PROJECT_NAME }}:${GITHUB_SHA::7}
+        docker pull gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}:${{ github.sha }} &&
+        docker stop ${{ env.PROJECT_NAME }} || true &&
+        docker rm ${{ env.PROJECT_NAME }} || true &&
+        docker run -d --name ${{ env.PROJECT_NAME }} -p 3000:3000 gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.PROJECT_NAME }}:${{ github.sha }}
         " || exit 1
