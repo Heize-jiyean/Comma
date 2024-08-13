@@ -48,7 +48,7 @@ exports.getAutoComplete = async (req, res) => {
 exports.getCommentByHospital = async (req, res) => {
     try {
         const query = req.query.query;
-        const currentUserId = req.session.userId;
+        const currentUserId = req.session.user.id;
         const reviews = await ReviewModel.getReviewsByHospital(query);
         res.json({ reviews, currentUserId });
     } catch (error) {

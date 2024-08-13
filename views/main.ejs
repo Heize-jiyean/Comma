@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comma - 메인 페이지</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .main-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .main-image {
+            width: 75%;
+            max-width: 1200px;
+            height: auto;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        .full-width-image {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <img src="/images/CommaMain_01.svg" alt="Comma Main Image 1" class="full-width-image">
+    </div>
+    <div class="main-container">
+        <img src="/images/CommaMain_2.svg" alt="Comma Main Image 2" class="main-image">
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
