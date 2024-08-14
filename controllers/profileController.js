@@ -7,6 +7,7 @@ const ArticleModel = require('../models/Article');
 const ScrapModel = require('../models/Scrap');
 const smtpTransport = require('../email');
 const ArticleInteractionModel = require('../models/ArticleInteraction');
+const axios = require('axios');
 
 const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e"
 
@@ -605,9 +606,16 @@ exports.accountRemoval = async(req, res) => {
 
         // 비밀번호가 일치하면 탈퇴 처리
         if (loginRole === 'patient') {
+            const diaryData = await DiaryModel.findByPatientId(loginId);
+
             await UserModel.removePatient(loginId);
+            await axios.post('http://localhost:5000/delete_vector', { idx: 1, id: loginId });
+            await axios.post('http://localhost:5000/delete_vectors', { idx: 2, ids: diaryData });
         } else if (loginRole === 'counselor') {
+            const articleData = await ArticleModel.findByCounselorId(loginId);
+
             await UserModel.removeCounselor(loginId);
+            await axios.post('http://localhost:5000/delete_vectors', { idx: 0, ids: articleData });
         }
 
         req.session.destroy();  // 세션 파괴 처리
