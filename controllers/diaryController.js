@@ -184,30 +184,32 @@ exports.delete = async (req, res) => {
 }
 
 // 일기 리스트
+// 일기 리스트
 exports.list = async (req, res) => {
     try {
-        if (req.session.user) {
-            if (req.session.user.role == 'counselor') {
-                const option = req.query.option ? req.query.option : "all";
-                let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-        
-                const totalPages = Math.ceil( await DiaryModel.countOfFindAll(option, 1) / 9);
-                let Previews = await DiaryModel.PreviewfindAll(currentPage, option, req.session.user.id);
-        
-                if (Previews) {
-                    Previews.forEach(preview => {
-                        preview.image_url = setDefaultImage(preview.image_url);
-                    });
-                }
-                
-                res.render('main-counselor', {Previews, currentPage, totalPages});
-            }
-            else if (req.session.user.role == 'patient') {
-                const patient_userID = req.session.user.custom_id;
-                res.redirect(`/profile/patient/${patient_userID}/diaries`); 
-            }
+        if (!req.session.user) {
+            return res.render("login/login-required-diary");
         }
-        else return res.render("login/login");
+
+        if (req.session.user.role == 'counselor') {
+            const option = req.query.option ? req.query.option : "all";
+            let currentPage = req.query.page ? parseInt(req.query.page) : 1;
+    
+            const totalPages = Math.ceil( await DiaryModel.countOfFindAll(option, 1) / 9);
+            let Previews = await DiaryModel.PreviewfindAll(currentPage, option, req.session.user.id);
+    
+            if (Previews) {
+                Previews.forEach(preview => {
+                    preview.image_url = setDefaultImage(preview.image_url);
+                });
+            }
+            
+            res.render('main-counselor', {Previews, currentPage, totalPages});
+        }
+        else if (req.session.user.role == 'patient') {
+            const patient_userID = req.session.user.custom_id;
+            res.redirect(`/profile/patient/${patient_userID}/diaries`); 
+        }
     } catch (error) {
         console.error("listAllDiaries 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
