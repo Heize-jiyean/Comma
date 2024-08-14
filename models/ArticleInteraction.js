@@ -47,7 +47,7 @@ exports.deleteLike = async (articleId, patientId) => {
     }
 }
 
-// 특정 멤버의 좋아요 전체 조회
+// 특정 멤버의 좋아요 전체 조회 (추천 시스템에서 사용)
 exports.findLikeByPatient = async (patientId) => {
     try {
         const db = await require('../main').connection(); 
@@ -61,7 +61,7 @@ exports.findLikeByPatient = async (patientId) => {
         return articleIds.length > 0 ? articleIds : [];
 
     } catch (error) {
-        console.error("ArticleInteraction.createLike() 쿼리 실행 중 오류:", error);
+        console.error("ArticleInteraction.findLikeByPatient() 쿼리 실행 중 오류:", error);
     }
 };
 
