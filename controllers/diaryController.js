@@ -3,6 +3,8 @@ const UserModel = require('../models/User');
 const AccessCheck = require('../utils/authUtils');
 const EmotionData = require('../utils/emotionUtils');
 const ArticleModel = require('../models/Article');
+const ArticleInteractionModel = require('../models/ArticleInteraction');
+const axios = require('axios');
 
 function setDefaultImage(image_url) {
     if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
@@ -45,6 +47,10 @@ exports.register = async (req, res) => {
             const { diaryData } = req.body;
     
             const savedDiaryId = await DiaryModel.register(diaryData);
+
+            //추천 시스템 관련
+            await axios.post('http://localhost:5000/embedding', { idx: 2, id: savedDiaryId, sentence: diaryData.title+diaryData.content });
+
             res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
 
             // 감정분석 후 WebSocket을 통해 메시지 전송
@@ -87,7 +93,10 @@ exports.view = async (req, res) => {
             // 추천아티클 
             let RecommendPreviews = null;
             if (req.session.user && req.session.user.role == 'patient') {
-                RecommendPreviews = await ArticleModel.RecommendTop3(req.session.user.id);
+                const likeData = await ArticleInteractionModel.findLikeByPatient(req.session.user.id);
+                let response = await axios.post('http://localhost:5000/recommend', { likeId: likeData, idx: 2, id: diaryId });
+                let RecommendID = response.data;
+                RecommendPreviews = await ArticleModel.RecommendTop3(RecommendID);
     
                 if (RecommendPreviews) {
                     RecommendPreviews.forEach(preview => {
@@ -160,6 +169,9 @@ exports.delete = async (req, res) => {
             
             // DB diary 삭제
             await DiaryModel.delete(diaryId);
+
+            // vector 삭제
+            await axios.post('http://localhost:5000/delete_vector', { idx: 2, id: diaryId });
     
             // redirect
             return res.json({ success: true, redirect: `/profile/patient/${patient.id}/diaries` });

@@ -1,7 +1,9 @@
 flask
+waitress
 
 python-dotenv
-mysql-connector-python
+qdrant_client
+protobuf==4.21.4
 
 firebase_admin
 requests
