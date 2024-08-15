@@ -127,7 +127,7 @@
     <div class="main-content">
         <div class="panel content-container">
             <div class="profile-container">
-                <img src="<%= guestbook.author_profile_image %>" alt="Author Profile Image">
+                <img src="<%= guestbook.author_profile_image ? guestbook.author_profile_image : 'https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e' %>" alt="Author Profile Image">
                 <span><%= guestbook.author_name %></span>
             </div>
             <hr>
