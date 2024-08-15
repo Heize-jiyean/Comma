@@ -6,7 +6,7 @@ exports.loadingMainPage = async (req, res) => {
     try {
         const reviews = await ReviewModel.getLatestReviews();
         const hospitals = await hospitalModel.getAllHospitals();
-        console.log('Session user:', req.session.user);
+        
         res.render('hospital/hospital', { 
             reviews: reviews,
             hospitals: hospitals,
@@ -58,7 +58,7 @@ exports.getCommentByHospital = async (req, res) => {
 };
 
 exports.renderRegisterPage = (req, res) => {
-    console.log('Rendering register page with Naver Map Client ID:', process.env.NAVER_MAP_CLIENT_ID);
+    //console.log('Rendering register page with Naver Map Client ID:', process.env.NAVER_MAP_CLIENT_ID);
     if (!process.env.NAVER_MAP_CLIENT_ID) {
         console.error('NAVER_MAP_CLIENT_ID is not set in environment variables');
     }
