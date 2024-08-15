@@ -33,7 +33,7 @@ exports.main_patient = async (req, res) => {
         let RecommendPreviews = null;
         if (req.session.user && req.session.user.role == 'patient') {
             const likeData = await ArticleInteractionModel.findLikeByPatient(req.session.user.id);
-            let response = await axios.post('http://localhost:5000/recommend', { likeId: likeData, idx: 1, id: req.session.user.id });
+            let response = await axios.post('http://localhost:8000/recommend', { likeId: likeData, idx: 1, id: req.session.user.id });
             let RecommendID = response.data;
             RecommendPreviews = await ArticleModel.RecommendTop3(RecommendID);
 

@@ -85,7 +85,7 @@ exports.calculateMonthlyEmotionPercentages = async (patientUser) => {
 exports.analyzeAndNotify = async (content, title, diaryId) => {
     try {
         content = content + title;
-        const response = await axios.post('http://localhost:5000/classification', { sentence: content });
+        const response = await axios.post('http://localhost:8000/classification', { sentence: content });
         const emotionResult = response.data;
         DiaryModel.registerEmotion(diaryId, emotionResult);
     } catch (e) {
