@@ -5,6 +5,7 @@ python-dotenv
 qdrant_client
 protobuf==4.21.4
 
+google-api-core==1.26.0
 firebase_admin
 requests
 

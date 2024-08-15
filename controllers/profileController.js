@@ -162,7 +162,6 @@ exports.listAllDiaries = async (req, res) => {
         const patientUser = await UserModel.getPatientByUserId(patientId);
         if (!patientUser) {
             return res.status(404).render("error", { message: "해당 환자를 찾을 수 없습니다." });// TODO: 없는 환자인 경우 띄울 페이지
-            return;
         }
 
         const role = req.session.user.role;
@@ -182,8 +181,7 @@ exports.listAllDiaries = async (req, res) => {
             });
         }
 
-        //임의로 손댄부분
-        // `isCounselorScrapPatient` 변수 추가
+        // 관심 환자인지 여부 확인
         let isCounselorScrapPatient;
         if (role === 'counselor') {
             isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientId, loginId);
@@ -662,12 +660,19 @@ exports.charts = async (req, res) => {
             const monthlyPercentages = await EmotionData.calculateMonthlyEmotionPercentages(patientUser);
 
 
+            // 관심 환자인지 여부 확인
+            let isCounselorScrapPatient;
+            if (req.session.user.role === 'counselor') {
+                isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientUser.patient_id, req.session.user.id);
+            }
+
             res.render('profile/emotion-chart', 
                 {patientUser, type: 'patient',
                 lineChartEmotionData: Data, //꺾은선차트
                 doughnutChartEmotionData: Percentages, // 도넛차트
                 barChartData: monthlyPercentages, // 막대차트
-                descriptionEmotions
+                descriptionEmotions,
+                isCounselorScrapPatient
             });
         }
         else return res.render("login/login");
