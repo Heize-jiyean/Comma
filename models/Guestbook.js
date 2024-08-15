@@ -255,6 +255,52 @@ exports.countByCounselorId = async (counselorId) => {
     }
 }
 
+// 상담사 아이디와 환자 아이디로 상담사가 특정 환자에게 작성한 방명록의 총 개수 구하기
+exports.countByCounselorIdAndPatentId = async (patientId, counselorId) => {
+    try {
+        const db = await require("../main").connection();
+
+        let sql = `
+            SELECT COUNT(*) AS total
+            FROM guestbook
+            WHERE patient_id = ? AND counselor_id = ?`;
+
+        const [rows, fields] = await db.query(sql, [patientId, counselorId]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows[0].total;
+    } catch (error) {
+        console.log("Guestbook.countByCounselorIdAndPatentId() 쿼리 실행 중 오류", error);
+    }
+}
+
+// 상담사 아이디와 환자 아이디로 상담사가 특정 환자에게 작성한 방명록 찾기 (페이지네이션)
+exports.findAllByPatientIdAndCounselorIdWithPagination = async(patientId, counselorId, page, limit) => {
+    try {
+        const db = await require("../main").connection();
+
+        const offset = limit * (page - 1);
+
+        let sql = `
+            SELECT g.*, c.id as counselorId
+            FROM guestbook g
+            JOIN counselor c ON g.counselor_id = c.counselor_id
+            WHERE g.patient_id = ? AND g.counselor_id = ?
+            ORDER BY g.created_at DESC
+            LIMIT ? OFFSET ?`;
+
+        const [rows, fields] = await db.query(sql, [patientId, counselorId, limit, offset]);
+
+        if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
+
+        return rows;
+    } catch (error) {
+        console.log("Guestbook.findAllByPatientIdAndCounselorIdWithPagination() 쿼리 실행 중 오류", error);
+    }
+
+}
+
 // 방명록 수정,업데이트
 exports.update = async (guestbookId, guestbookData) => {
     try {

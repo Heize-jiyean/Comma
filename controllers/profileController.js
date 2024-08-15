@@ -308,37 +308,50 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
             return res.status(404).render("error", { message: "해당 상담사를 찾을 수 없습니다." });
         }
 
-        if (loginRole === 'counselor' && loginId === counselorUser.counselor_id) {
-            const limit = 10; // 한 페이지에 보여줄 방명록 수
-            const totalGuestbooks = await GuestbookModel.countByCounselorId(counselorUser.counselor_id);
-            const totalPages = Math.ceil(totalGuestbooks / limit);
+        const limit = 10; // 한 페이지에 보여줄 방명록 수
+        let totalGuestbooks;
+        let totalPages;
+        let guestbooks;
+        let currentPage;
+        
+        if (loginRole === 'counselor') {
+            totalGuestbooks = await GuestbookModel.countByCounselorId(counselorUser.counselor_id);
+            totalPages = Math.ceil(totalGuestbooks / limit);
 
-            let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-            const guestbooks = await GuestbookModel.findAllByCounselorIdWithPagination(counselorUser.counselor_id, currentPage, limit);
+            currentPage = req.query.page ? parseInt(req.query.page) : 1;
+            guestbooks = await GuestbookModel.findAllByCounselorIdWithPagination(counselorUser.counselor_id, currentPage, limit);
 
-            for (let guestbook of guestbooks) {
-                const patient = await UserModel.getPatientByPatientId(guestbook.patient_id);
-                guestbook.patientId = patient ? patient.id : "Unknown";
-                guestbook.patientNickname = patient ? patient.nickname : "Unknown";
-                guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
+        } else if (loginRole === 'patient') {
+            totalGuestbooks = await GuestbookModel.countByCounselorIdAndPatentId(counselorUser.counselor_id, loginId);
+            totalPages = Math.ceil(totalGuestbooks / limit);
 
-                // 추가: 방명록을 작성한 상담사의 프로필 사진이 제대로 설정되어 있는지 확인
-                guestbook.counselorProfilePicture = counselorUser.profile_picture ? counselorUser.profile_picture : DEFAULT_PROFILE_IMAGE;
-            }
+            currentPage = req.query.page ? parseInt(req.query.page) : 1;
+            guestbooks = await GuestbookModel.findAllByPatientIdAndCounselorIdWithPagination(counselorUser.counselor_id, loginId, currentPage, limit);
+        } 
 
-            res.render("profile/guestbook.ejs", { 
-                counselorUser: counselorUser, 
-                type: 'counselor',  // 현재 보고 있는 프로필이 상담사임을 표시
-                guestbooks: guestbooks,
-                currentPage: currentPage,
-                totalPages: totalPages,
-                loginRole: loginRole
-            });
-            
-        } else {
-            //res.status(403).send("접근 권한이 없습니다.");
-            return res.status(403).render('profile/forbidden.ejs');
+        for (let guestbook of guestbooks) {
+            const patient = await UserModel.getPatientByPatientId(guestbook.patient_id);
+            guestbook.patientId = patient ? patient.id : "Unknown";
+            guestbook.patientNickname = patient ? patient.nickname : "Unknown";
+            guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
+
+            // 추가: 방명록을 작성한 상담사의 프로필 사진이 제대로 설정되어 있는지 확인
+            guestbook.counselorProfilePicture = counselorUser.profile_picture ? counselorUser.profile_picture : DEFAULT_PROFILE_IMAGE;
         }
+
+        res.render("profile/guestbook.ejs", { 
+            counselorUser: counselorUser, 
+            type: 'counselor',  // 현재 보고 있는 프로필이 상담사임을 표시
+            guestbooks: guestbooks,
+            currentPage: currentPage,
+            totalPages: totalPages,
+            loginRole: loginRole
+        });
+        
+        // else {
+        //     //res.status(403).send("접근 권한이 없습니다.");
+        //     return res.status(403).render('profile/forbidden.ejs');
+        // }
 
     } catch (error) {
         console.error("listAllGuestbooksByCounselor 오류:", error);
