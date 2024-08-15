@@ -87,6 +87,8 @@
         </div>
     </div>
 
+    <input type="hidden" id="userRole" value='<%= userRole %>'/>
+    <input type="hidden" id="patientId" value='<%= patientId %>'/>
     <input type="hidden" id="hospitalsData" value='<%= JSON.stringify(hospitals) %>' />
     <script>
         const currentPatientId = '<%= patientId %>' || null;
