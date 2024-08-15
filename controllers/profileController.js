@@ -10,6 +10,10 @@ const ArticleInteractionModel = require('../models/ArticleInteraction');
 const axios = require('axios');
 
 const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e"
+function setDefaultImage(image_url) {
+    if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
+    return image_url;
+}
 
 // 환자 프로필 페이지 반환
 exports.patientProfilePage = async (req, res) => {
@@ -179,11 +183,6 @@ exports.listAllDiaries = async (req, res) => {
         console.error("listAllDiaries 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
-}
-
-function setDefaultImage(image_url) {
-    if (image_url == null) image_url = DEFAULT_PROFILE_IMAGE;
-    return image_url;
 }
 
 // 환자 방명록 모아보기 페이지 반환
