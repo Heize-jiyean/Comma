@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>Comma - 로그인 필요</title>
+    <style>
+        body {
+            font-family: 'Pretendard-Regular', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 60px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #4B8673;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        p {
+            margin-bottom: 30px;
+            font-size: 20px;
+            line-height: 1.6;
+        }
+        .btn-custom {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #5FD068;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            font-size: 20px;
+            margin-top: 30px;
+        }
+        .btn-custom:hover {
+            background-color: #4FBF58;
+        }
+        .logo {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>로그인 후 해당 페이지를 이용해 주세요</h1>
+        <p>로그인하시면 COMMA에서 제공하는 병원 정보를 볼 수 있습니다.</p>
+        <a href="/auth/login" class="btn-custom">로그인하러 가기</a>
+        <div class="logo">
+            <a class="navbar-brand" href="/">
+                <img src="/images/logo2.png" alt="WIMB Logo" width="80" height="100" style="background: white;">
+            </a>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

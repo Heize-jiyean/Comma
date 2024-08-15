@@ -2,7 +2,6 @@ const AccessCheck = require('../utils/authUtils');
 const ArticleModel = require('../models/Article');
 const ArticleInteractionModel = require('../models/ArticleInteraction');
 const UserModel = require('../models/User');
-const JsonUtils = require('../utils/jsonUtils');
 const fetch = require('node-fetch'); // node-fetch 모듈을 사용하여 fetch를 구현
 const axios = require('axios');
 
@@ -40,10 +39,7 @@ exports.register = async (req, res) => {
             const savedArticleId = await ArticleModel.register(articleData);
 
             //추천 시스템 관련
-            const response = await axios.post('http://localhost:5000/embedding', { sentence: articleData.title });
-            const vectorResult = response.data;
-            JsonUtils.addJson(0, savedArticleId, vectorResult)
-            await axios.post('http://localhost:5000/similarity_article', { aid: savedArticleId, vector: vectorResult});
+            await axios.post('http://localhost:5000/embedding', { idx: 0, id: savedArticleId, sentence: articleData.title });
 
             return res.json({ success: true, redirect: `/article/${savedArticleId}` });
         }
@@ -126,6 +122,9 @@ exports.delete = async (req, res) => {
             
             // DB diary 삭제
             await ArticleModel.delete(articleId);
+
+            // vector 삭제
+            await axios.post('http://localhost:5000/delete_vector', { idx: 0, id: articleId });
     
             // redirect
             return res.json({ success: true, redirect: `/article` });
@@ -140,11 +139,11 @@ exports.delete = async (req, res) => {
 // 아티클 리스트
 exports.list = async (req, res) => {
     try {
-        const sortBy = req.query.sort ? req.query.sort : "latest"; // 좋아순/최신순
+        const sortBy = req.query.sort ? req.query.sort : "latest";
         const currentPage = req.query.page ? parseInt(req.query.page) : 1;
 
-        const totalPages = Math.ceil( await ArticleModel.countOfFindAll(sortBy) / 9);
-        let Previews = await ArticleModel.PreviewFindAll(currentPage, sortBy); // 임시 상담사 설정
+        const totalPages = Math.ceil(await ArticleModel.countOfFindAll(sortBy) / 9);
+        let Previews = await ArticleModel.PreviewFindAll(currentPage, sortBy);
 
         if (Previews) {
             Previews.forEach(preview => {
@@ -154,7 +153,10 @@ exports.list = async (req, res) => {
 
         let RecommendPreviews = null;
         if (req.session.user && req.session.user.role == 'patient') {
-            RecommendPreviews = await ArticleModel.RecommendTop3(req.session.user.id);
+            const likeData = await ArticleInteractionModel.findLikeByPatient(req.session.user.id);
+            let response = await axios.post('http://localhost:5000/recommend', { likeId: likeData, idx: 1, id: req.session.user.id });
+            let RecommendID = response.data;
+            RecommendPreviews = await ArticleModel.RecommendTop3(RecommendID);
 
             if (RecommendPreviews) {
                 RecommendPreviews.forEach(preview => {
@@ -163,13 +165,44 @@ exports.list = async (req, res) => {
             }
         }
         
-        res.render('article/articles', {Previews, currentPage, totalPages, RecommendPreviews});
+        res.render('article/articles', { Previews, currentPage, totalPages, RecommendPreviews, isCounselorProfile: false });
     } catch (error) {
-        console.error("listAllDiaries 오류:", error);
+        console.error("list 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
 
+// 특정 상담사가 작성한 아티클 리스트
+exports.listByCounselor = async (req, res) => {
+    try {
+        const counselorUsername = req.params.counselorId; // URL에서 상담사의 사용자 이름가져오기
+        const currentPage = req.query.page ? parseInt(req.query.page) : 1;
+
+        // 사용자 이름 기반 상담사 정보 조회
+        const counselor = await UserModel.getCounselorByUserId(counselorUsername);
+        if (!counselor) {
+            // 상담사를 찾지 못한 경우
+            return res.status(404).send("상담사를 찾을 수 없습니다.");
+        }
+        const counselorId = counselor.counselor_id; // 상담사의 고유 식별자
+
+        const totalArticles = await ArticleModel.countByCounselorId(counselorId);
+        const totalPages = Math.ceil(totalArticles / 9);
+
+        let Previews = await ArticleModel.PreviewFindAllByCounselorId(counselorId, currentPage);
+
+        if (Previews) {
+            Previews.forEach(preview => {
+                preview.thumbnail_url = setDefaultImage(preview.thumbnail_url);
+            });
+        }
+
+        res.render('article/articles', { Previews, currentPage, totalPages, RecommendPreviews: null, isCounselorProfile: true });
+    } catch (error) {
+        console.error("listByCounselor 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
 
 // 좋아요 토글 
 exports.toggleLike = async (req, res) => { 
@@ -187,19 +220,17 @@ exports.toggleLike = async (req, res) => {
     
             let liked = true;
             if (await ArticleInteractionModel.findLikeByPatientAndArticle(articleId, patientId) == null) { // 좋아요 추가
-                ArticleInteractionModel.createLike(articleId, patientId);
+                await ArticleInteractionModel.createLike(articleId, patientId);
             }
             else { // 좋아요 삭제
-                ArticleInteractionModel.deleteLike(articleId, patientId);
+                await ArticleInteractionModel.deleteLike(articleId, patientId);
                 liked = false;
             }
 
             //추천 시스템 관련
             if (req.session.user.role=='patient') {
                 const likeData = await ArticleInteractionModel.findLikeByPatient(patientId);
-                const response = await axios.post('http://localhost:5000/similarity_like', { pid: patientId, likeId: likeData });
-                const vectorResult = response.data;
-                JsonUtils.addJson(1, patientId, vectorResult)
+                await axios.post('http://localhost:5000/similarity_like', { pid: patientId, likeId: likeData });
             }
 
             return res.json({ response: true, liked });

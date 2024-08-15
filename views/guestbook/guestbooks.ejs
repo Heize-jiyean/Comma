@@ -64,13 +64,15 @@
                 <p><%= guestbook.content.length > 130 ? guestbook.content.substring(0, 130) + '...' : guestbook.content %></p>
                 <!-- 방명록 작성자 -->
                 <% if (showCounselorInfo) { %>
-                <div class="counselor-info">
-                    <a href="/profile/counselor/<%= guestbook.counselorId %>" class="clickable" style="text-decoration: none; color: inherit;">
-                        <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
-                        <div class="counselor-nickname"><%= guestbook.counselorNickname %> 상담사</div>
-                    </a>
-                </div>
+                    <div class="counselor-info">
+                        <a href="/profile/counselor/<%= guestbook.counselorId %>" class="clickable" style="text-decoration: none; color: inherit;">
+                            <img src="<%= guestbook.counselorProfilePicture %>" alt="Counselor Profile Picture">
+                            <div class="counselor-nickname"><%= guestbook.counselorNickname %> 상담사</div>
+                        </a>
+                        
+                    </div>
                 <% } %>
+
             </a>
         </div>
         <% }) %>
