@@ -116,11 +116,12 @@ exports.counselorProfilePage = async (req, res) => {
 
         // 로그인한 사용자에 따라 다른 방명록 데이터 불러오기
         let guestbooks;
-        // 상담사가 작성한 최신 방명록 4개 가져오기
         if (loginRole === 'counselor') {
+            // 상담사가 작성한 최신 방명록 4개 가져오기
             guestbooks = await GuestbookModel.findLatestFourByCounselorId(counselorUser.counselor_id);
         } else if (loginRole === 'patient') {
-            guestbooks = await GuestbookModel.findLatestFourByPatientId(loginId);
+            // 상담사가 로그인한 환자에게 작성한 최신 방명록 4개 불러오기
+            guestbooks = await GuestbookModel.findLatestFourToPatient(loginId, counselorUser.counselor_id);
         }
 
         // 각 방명록 항목에 대해 환자의 닉네임과 이미지 가져오기

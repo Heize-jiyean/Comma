@@ -337,4 +337,23 @@ exports.findLatestFourByCounselorId = async (counselorId) => {
     }
 };
 
+// 상담사가 특정 환자에게 작성한 최신 4개믜 방명록 찾기
+exports.findLatestFourToPatient = async(patientId, counselorId) => {
+    try {
+        const db = await require('../main').connection(); 
+        
+        let sql = `
+            SELECT *
+            FROM guestbook
+            WHERE patient_id = ? AND counselor_id = ?
+            ORDER BY created_at DESC
+            LIMIT 4`;
 
+        const [rows] = await db.query(sql, [patientId, counselorId]);
+
+        if (db && db.end) db.end();
+        return rows;
+    } catch (error) {
+        console.error("Guestbook.findLatestFourToPatient() 쿼리 실행 중 오류:", error);
+    }
+}
