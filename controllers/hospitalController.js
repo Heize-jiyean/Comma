@@ -12,6 +12,7 @@ exports.loadingMainPage = async (req, res) => {
             hospitals: hospitals,
             naverMapClientId: process.env.NAVER_MAP_CLIENT_ID || '',
             hospitalName: '',
+            userRole: req.session.user ? req.session.user.role : null,
             patientId: req.session.user ? req.session.user.id : null  // patient_id 대신 id 사용
         });
     } catch (error) {
@@ -48,9 +49,8 @@ exports.getAutoComplete = async (req, res) => {
 exports.getCommentByHospital = async (req, res) => {
     try {
         const query = req.query.query;
-        const currentUserId = req.session.user.id;
         const reviews = await ReviewModel.getReviewsByHospital(query);
-        res.json({ reviews, currentUserId });
+        res.json({ reviews });
     } catch (error) {
         console.error('Error fetching hospital comments:', error);
         res.status(500).json({ error: 'Internal server error' });
