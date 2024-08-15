@@ -92,7 +92,7 @@ module.exports = {
 
     //login함수-로깅추가
     login: async (req, res) => {
-        console.log('Login attempt:', req.body);
+        
         const { email, password } = req.body;
         try {
             let user = await UserModel.loginPatient(email, password);

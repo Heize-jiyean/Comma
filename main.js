@@ -1,5 +1,4 @@
 require('dotenv').config();
-console.log('Loaded env vars:', process.env); //환경변수확인
 
 const express = require('express');
 const mysql = require('mysql2/promise');
@@ -15,7 +14,6 @@ const cors = require('cors');
 
 // 로깅 미들웨어 추가
 app.use((req, res, next) => {
-  console.log('Incoming request:', req.method, req.url);
   next();
 });
 
@@ -39,7 +37,7 @@ exports.connection = async () => {
           connectionLimit: 30,
           queueLimit: 10
       });
-      console.log('Database connected successfully');
+  
       return db; // 연결된 데이터베이스 객체 반환
   } catch (error) {
       console.error("데이터베이스 연결 오류:", error);
@@ -138,7 +136,7 @@ app.get('/', (req, res) => {
 // 라우트 설정
 const authRouter = require('./routers/authRouters');
 app.use("/auth", (req, res, next) => {
-  console.log("Auth route accessed:", req.method, req.url);
+  
   next();
 }, authRouter);
 
@@ -159,7 +157,7 @@ app.use("/article", articleRouter);
 
 // 404 에러 핸들러
 app.use((req, res, next) => {
-  console.log('404 Not Found:', req.method, req.url);
+
   res.status(404).json({ error: 'Not Found', message: 'The requested resource was not found.' });
 });
 
@@ -170,7 +168,7 @@ app.use((req, res, next) => {
 //});
 
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  
   res.status(err.status || 500).json({ 
     error: err.name || 'Internal Server Error', 
     message: err.message || 'An unexpected error occurred',

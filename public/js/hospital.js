@@ -1,3 +1,6 @@
+const userRole = document.getElementById('userRole').value;
+const patientId = document.getElementById('patientId').value;
+
 // 네이버 지도 초기화 (실제 좌표로 대체 필요)
 const map = new naver.maps.Map('map', {
     center: new naver.maps.LatLng(37.5665, 126.9780),
@@ -139,14 +142,12 @@ const stopCheckingInput = () => {
 
 // 병원 관련 자동검색어 완성 함수
 const loadData = async (input) => {
-    console.log('Fetching data for:', input); // 요청 로그
     try {
         const response = await fetch(`/hospital/autocomplete?query=${encodeURIComponent(input)}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log('Data received:', data); // 응답 데이터 로그
         updateAutocompleteList(data.suggestions);
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -237,15 +238,15 @@ function updateMapLocation(data) {
 function updateHospitalInfo(hospital) {
     const hospitalInfoDiv = document.getElementById('hospitalInfo');
     hospitalInfoDiv.innerHTML = `
-        <h3>${hospital.name}</h3>
-        <p>주소: ${hospital.address || '정보 없음'}</p>
-        <p>전화번호: ${hospital.phone ? `${hospital.phone}` : '정보 없음'}</p>
-        <p>웹사이트: ${hospital.website ? `<a href="https://${hospital.website}" target="_blank">${hospital.website}</a>` : '정보 없음'}</p>
-        <button onclick="writeReview('${hospital.name}', ${hospital.hospital_id})" 
-                data-hospital-name="${hospital.name}" 
-                data-hospital-id="${hospital.hospital_id}" 
-                class="btn btn-primary">리뷰 쓰기</button>
-    `;
+            <h3>${hospital.name}</h3>
+            <p>주소: ${hospital.address || '정보 없음'}</p>
+            <p>전화번호: ${hospital.phone ? `${hospital.phone}` : '정보 없음'}</p>
+            <p>웹사이트: ${hospital.website ? `<a href="https://${hospital.website}" target="_blank">${hospital.website}</a>` : '정보 없음'}</p>
+            ${userRole === 'patient' ? `<button onclick="writeReview('${hospital.name}', ${hospital.hospital_id})" 
+                    data-hospital-name="${hospital.name}" 
+                    data-hospital-id="${hospital.hospital_id}" 
+                    class="btn btn-primary">리뷰 쓰기</button>` : ''}
+        `;
 }
 
 function writeReview(hospitalName, hospitalId) {
@@ -269,15 +270,15 @@ async function collectCommentHospital(hospital_id) {
             throw new Error('Network response was not ok');
         }
 
-        const { reviews, currentUserId } = await response.json();
-        updateReviewList(reviews, currentUserId);
+        const { reviews } = await response.json();
+        updateReviewList(reviews);
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
 // 리뷰 목록을 업데이트하는 함수
-function updateReviewList(reviews, currentUserId) {
+function updateReviewList(reviews) {
     const commentList = document.querySelector('.comment-list');
     commentList.innerHTML = ''; // 기존 내용을 비웁니다.
 
@@ -285,9 +286,9 @@ function updateReviewList(reviews, currentUserId) {
         reviews.forEach(review => {
             const comment = document.createElement('div');
             comment.className = 'comment card mb-3';
-            console.log(review, currentUserId)
+
             // 조건부로 삭제 버튼을 추가합니다.
-            const deleteButtonHtml = review.patient_id == currentUserId 
+            const deleteButtonHtml = (userRole == 'patient' && review.patient_id == patientId)
                 ? `<p class="delete-review" onclick="deleteReview(${review.review_id})" style="cursor: pointer;">x</p>`
                 : '';
 

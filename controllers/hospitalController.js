@@ -6,12 +6,13 @@ exports.loadingMainPage = async (req, res) => {
     try {
         const reviews = await ReviewModel.getLatestReviews();
         const hospitals = await hospitalModel.getAllHospitals();
-        console.log('Session user:', req.session.user);
+        
         res.render('hospital/hospital', { 
             reviews: reviews,
             hospitals: hospitals,
             naverMapClientId: process.env.NAVER_MAP_CLIENT_ID || '',
             hospitalName: '',
+            userRole: req.session.user ? req.session.user.role : null,
             patientId: req.session.user ? req.session.user.id : null  // patient_id 대신 id 사용
         });
     } catch (error) {
@@ -48,9 +49,8 @@ exports.getAutoComplete = async (req, res) => {
 exports.getCommentByHospital = async (req, res) => {
     try {
         const query = req.query.query;
-        const currentUserId = req.session.user.id;
         const reviews = await ReviewModel.getReviewsByHospital(query);
-        res.json({ reviews, currentUserId });
+        res.json({ reviews });
     } catch (error) {
         console.error('Error fetching hospital comments:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -58,7 +58,7 @@ exports.getCommentByHospital = async (req, res) => {
 };
 
 exports.renderRegisterPage = (req, res) => {
-    console.log('Rendering register page with Naver Map Client ID:', process.env.NAVER_MAP_CLIENT_ID);
+    //console.log('Rendering register page with Naver Map Client ID:', process.env.NAVER_MAP_CLIENT_ID);
     if (!process.env.NAVER_MAP_CLIENT_ID) {
         console.error('NAVER_MAP_CLIENT_ID is not set in environment variables');
     }
