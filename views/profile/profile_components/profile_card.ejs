@@ -97,9 +97,9 @@
 <div class="profile-card">
     <div class="profile-image">
         <% if (type === 'patient') { %>
-            <img src="<%= patientUser.profile_picture %>" alt="Patient Profile Picture">
+            <img src="<%= patientUser.profile_picture ? patientUser.profile_picture : 'https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e'%>" alt="Patient Profile Picture">
         <% } else { %>
-            <img src="<%= counselorUser.profile_picture %>" alt="Counselor Profile Picture">
+            <img src="<%= counselorUser.profile_picture ? counselorUser.profile_picture : 'https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e' %>" alt="Counselor Profile Picture">
         <% } %>
     </div>
     <div class="profile-details">

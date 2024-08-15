@@ -50,7 +50,7 @@
       </div>
       <a href="/profile/counselor/<%= counselor.id %>" class="profile-link">
           <div class="profile-container">
-              <img id="profile-image" src="<%= counselor.profile_picture %>" alt="프로필 이미지">
+              <img id="profile-image" src="<%= counselor.profile_picture ? counselor.profile_picture : 'https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e' %>" alt="프로필 이미지">
               <div class="profile-info">
                   <p><%= counselor.nickname %></p>
                   <p id="profile-small"><%= counselor.specialty %></p>
