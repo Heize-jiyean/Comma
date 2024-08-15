@@ -315,7 +315,7 @@ exports.getCommentsByGuestbookId = async (guestbookId) => {
     }
 };
 
-//프로필에 사용
+// 상담사의 아이디로 상담사가 작성한 최신 4개의 방명록 찾기
 exports.findLatestFourByCounselorId = async (counselorId) => {
     try {
         const db = await require('../main').connection(); 
