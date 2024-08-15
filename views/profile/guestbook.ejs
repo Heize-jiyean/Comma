@@ -48,10 +48,10 @@
                 <!-- 방명록 헤더 -->
                 <div class="guestbook-container-header">
                     <h2>방명록 전체보기</h2>
-                    <% if (loginRole === 'counselor') { %>
+                    <% if (loginRole === 'counselor' && type === 'patient') { %>
                         <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
                     <% } %>
-                </div>
+                </div>                
                 <!-- 방명록 목록 + 페이지네이션 -->
                 <div class="guestbook-list">
                     <%- include('../guestbook/guestbooks', { guestbooks: guestbooks, showCounselorInfo: true, currentPage: currentPage }) %>
@@ -64,7 +64,15 @@
 
 <script>
     document.getElementById('writeGuestbookButton')?.addEventListener('click', function() {
-        const patientId = '<%= patientUser.id %>';
-        window.location.href = `/guestbook/new/${patientId}`;
+    const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
+    window.location.href = `/guestbook/new/${userId}`;
     });
+
+    document.getElementById('viewAllGuestbooksButton')?.addEventListener('click', function() {
+        const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
+        const profilePath = '<%= typeof patientUser !== "undefined" ? "patient" : "counselor" %>';
+        window.location.href = `/profile/${profilePath}/${userId}/guestbooks`;
+    });
+
 </script>
+

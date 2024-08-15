@@ -139,11 +139,11 @@ exports.delete = async (req, res) => {
 // 아티클 리스트
 exports.list = async (req, res) => {
     try {
-        const sortBy = req.query.sort ? req.query.sort : "latest"; // 좋아순/최신순
+        const sortBy = req.query.sort ? req.query.sort : "latest";
         const currentPage = req.query.page ? parseInt(req.query.page) : 1;
 
-        const totalPages = Math.ceil( await ArticleModel.countOfFindAll(sortBy) / 9);
-        let Previews = await ArticleModel.PreviewFindAll(currentPage, sortBy); // 임시 상담사 설정
+        const totalPages = Math.ceil(await ArticleModel.countOfFindAll(sortBy) / 9);
+        let Previews = await ArticleModel.PreviewFindAll(currentPage, sortBy);
 
         if (Previews) {
             Previews.forEach(preview => {
@@ -165,13 +165,44 @@ exports.list = async (req, res) => {
             }
         }
         
-        res.render('article/articles', {Previews, currentPage, totalPages, RecommendPreviews});
+        res.render('article/articles', { Previews, currentPage, totalPages, RecommendPreviews, isCounselorProfile: false });
     } catch (error) {
-        console.error("listAllDiaries 오류:", error);
+        console.error("list 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 }
 
+// 특정 상담사가 작성한 아티클 리스트
+exports.listByCounselor = async (req, res) => {
+    try {
+        const counselorUsername = req.params.counselorId; // URL에서 상담사의 사용자 이름가져오기
+        const currentPage = req.query.page ? parseInt(req.query.page) : 1;
+
+        // 사용자 이름 기반 상담사 정보 조회
+        const counselor = await UserModel.getCounselorByUserId(counselorUsername);
+        if (!counselor) {
+            // 상담사를 찾지 못한 경우
+            return res.status(404).send("상담사를 찾을 수 없습니다.");
+        }
+        const counselorId = counselor.counselor_id; // 상담사의 고유 식별자
+
+        const totalArticles = await ArticleModel.countByCounselorId(counselorId);
+        const totalPages = Math.ceil(totalArticles / 9);
+
+        let Previews = await ArticleModel.PreviewFindAllByCounselorId(counselorId, currentPage);
+
+        if (Previews) {
+            Previews.forEach(preview => {
+                preview.thumbnail_url = setDefaultImage(preview.thumbnail_url);
+            });
+        }
+
+        res.render('article/articles', { Previews, currentPage, totalPages, RecommendPreviews: null, isCounselorProfile: true });
+    } catch (error) {
+        console.error("listByCounselor 오류:", error);
+        res.status(500).send("서버 오류가 발생했습니다.");
+    }
+}
 
 // 좋아요 토글 
 exports.toggleLike = async (req, res) => { 

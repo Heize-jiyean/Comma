@@ -22,6 +22,7 @@
     .article-item {
         margin-top: 10px;
         border-bottom: 1px solid #D6D7DA;
+        height: 83.73px;
     }
     .article-title {
         display: flex;
@@ -36,9 +37,6 @@
     .article-title span {
         font-size: 18px;
         color: #888;
-    }
-    .article-item p {
-        font-size: 18px;
     }
     .write-article-button {
         padding: 10px 20px;
@@ -86,7 +84,6 @@
                     </h3>
                     <span><%= new Date(article.created_at).toLocaleDateString() %></span>
                 </div>
-                <p><%= article.content.length > 60 ? article.content.substring(0, 60) + '...' : article.content %></p>
             </a>
         </div>
         <% }) %>
@@ -104,5 +101,5 @@
     document.getElementById('viewAllArticlesButton').addEventListener('click', function() {
         const counselorId = '<%= counselorUser.id %>';
         window.location.href = `/profile/counselor/${counselorId}/articles`;
-    })
+    });
 </script>

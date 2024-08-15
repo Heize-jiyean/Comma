@@ -92,7 +92,9 @@
     <!-- 방명록 헤더 -->
     <div class="guestbook-container-header">
         <h2>방명록</h2>
-        
+        <% if (loginRole === 'counselor' && type === 'patient') { %>
+            <button class="write-guestbook-button" id="writeGuestbookButton">방명록 작성</button>
+        <% } %>
     </div>
     <!-- 방명록 목록 -->
     <div class="guestbook-list">
@@ -113,13 +115,13 @@
                 <% if (showCounselorInfo) { %>
                     <div class="counselor-info">
                         <a href="/profile/counselor/<%= guestbook.counselorId %>" class="clickable" style="text-decoration: none; color: inherit;">
-                            <img src="<%= guestbook.counselor_profile_picture %>" alt="Counselor Profile Picture">
+                            <img src="<%= guestbook.counselorProfilePicture %>" alt="Counselor Profile Picture">
                             <div class="counselor-nickname"><%= guestbook.counselorNickname %> 상담사</div>
                         </a>
                     </div>
                 <% } %>
                 </a>
-            </div>
+            </div>            
         <% }) %>
     <% } else { %>
         <p>방명록이 없습니다.</p>
@@ -131,11 +133,11 @@
 
 <script>
     document.getElementById('writeGuestbookButton')?.addEventListener('click', function() {
-        const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
-        window.location.href = `/guestbook/new/${userId}`;
+    const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
+    window.location.href = `/guestbook/new/${userId}`;
     });
 
-    document.getElementById('viewAllGuestbooksButton').addEventListener('click', function() {
+    document.getElementById('viewAllGuestbooksButton')?.addEventListener('click', function() {
         const userId = '<%= typeof patientUser !== "undefined" ? patientUser.id : counselorUser.id %>';
         const profilePath = '<%= typeof patientUser !== "undefined" ? "patient" : "counselor" %>';
         window.location.href = `/profile/${profilePath}/${userId}/guestbooks`;
