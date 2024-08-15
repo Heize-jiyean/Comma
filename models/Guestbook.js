@@ -256,7 +256,7 @@ exports.countByCounselorId = async (counselorId) => {
 }
 
 // 상담사 아이디와 환자 아이디로 상담사가 특정 환자에게 작성한 방명록의 총 개수 구하기
-exports.countByCounselorIdAndPatentId = async (patientId, counselorId) => {
+exports.countByPatientIdAndCounselorId = async (patientId, counselorId) => {
     try {
         const db = await require("../main").connection();
 
@@ -271,7 +271,7 @@ exports.countByCounselorIdAndPatentId = async (patientId, counselorId) => {
 
         return rows[0].total;
     } catch (error) {
-        console.log("Guestbook.countByCounselorIdAndPatentId() 쿼리 실행 중 오류", error);
+        console.log("Guestbook.countByPatientIdAndCounselorId() 쿼리 실행 중 오류", error);
     }
 }
 

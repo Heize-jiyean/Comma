@@ -322,11 +322,11 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
             guestbooks = await GuestbookModel.findAllByCounselorIdWithPagination(counselorUser.counselor_id, currentPage, limit);
 
         } else if (loginRole === 'patient') {
-            totalGuestbooks = await GuestbookModel.countByCounselorIdAndPatentId(counselorUser.counselor_id, loginId);
+            totalGuestbooks = await GuestbookModel.countByPatientIdAndCounselorId(loginId, counselorUser.counselor_id,);
             totalPages = Math.ceil(totalGuestbooks / limit);
 
             currentPage = req.query.page ? parseInt(req.query.page) : 1;
-            guestbooks = await GuestbookModel.findAllByPatientIdAndCounselorIdWithPagination(counselorUser.counselor_id, loginId, currentPage, limit);
+            guestbooks = await GuestbookModel.findAllByPatientIdAndCounselorIdWithPagination(loginId, counselorUser.counselor_id, currentPage, limit);
         } 
 
         for (let guestbook of guestbooks) {
@@ -339,20 +339,21 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
             guestbook.counselorProfilePicture = counselorUser.profile_picture ? counselorUser.profile_picture : DEFAULT_PROFILE_IMAGE;
         }
 
+        let isPatientScrapCounselor;
+        if (loginRole === 'patient') {
+            isPatientScrapCounselor = await ScrapModel.checkPatientScrapCounselor(loginId, counselorUser.counselor_id);
+        }
+
         res.render("profile/guestbook.ejs", { 
             counselorUser: counselorUser, 
             type: 'counselor',  // 현재 보고 있는 프로필이 상담사임을 표시
             guestbooks: guestbooks,
             currentPage: currentPage,
             totalPages: totalPages,
-            loginRole: loginRole
+            loginRole: loginRole,
+            isPatientScrapCounselor: isPatientScrapCounselor
         });
         
-        // else {
-        //     //res.status(403).send("접근 권한이 없습니다.");
-        //     return res.status(403).render('profile/forbidden.ejs');
-        // }
-
     } catch (error) {
         console.error("listAllGuestbooksByCounselor 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
