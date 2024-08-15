@@ -1,16 +1,25 @@
 //방명록 등록
+// models/Guestbook.js
+
 exports.register = async (guestbook) => {
     try {
-        const db = await require('../main').connection(); 
+        const db = await require('../main').connection();
+
+        // KST 시간 생성
+        const now = new Date();
+        const offset = 9 * 60 * 60 * 1000; // 9시간 (한국 시간대)
+        const kstTime = new Date(now.getTime() + offset);
+        const createdAtKST = kstTime.toISOString().slice(0, 19).replace('T', ' ');
 
         let sql = `
-            INSERT INTO guestbook (patient_id, counselor_id, title, content) 
-            VALUES (?, ?, ?, ?)`;
+            INSERT INTO guestbook (patient_id, counselor_id, title, content, created_at) 
+            VALUES (?, ?, ?, ?, ?)`;
         const [result] = await db.query(sql, [
             guestbook.patient_id,
             guestbook.counselor_id,
             guestbook.title,
             guestbook.content,
+            createdAtKST
         ]);
 
         if (db && db.end) db.end();
@@ -19,7 +28,9 @@ exports.register = async (guestbook) => {
     } catch (error) {
         console.error("Guestbook.register() 쿼리 실행 중 오류:", error);
     }
-}
+};
+
+
 
 //방명록 상세조회
 exports.findById = async (guestbookId) => {
@@ -196,28 +207,33 @@ exports.findAllByCounselorId = async (counselorId) => {
 }
 
 // 상담사 아이디로 상담사가 작성한 방명록 찾기 (페이지네이션)
-exports.findAllByCounselorIdWithPagination = async(counselorId, page, limit) => {
+exports.findAllByCounselorIdWithPagination = async (counselorId, page, limit) => {
     try {
         const db = await require('../main').connection();
 
         const offset = limit * (page - 1);
 
         let sql = `
-            SELECT *
-            FROM guestbook
-            WHERE counselor_id = ?
-            ORDER BY created_at DESC
-            LIMIT ? OFFSET ?`;  // LIMIT은 한 번에 가져올 최대 행, OFFSET은 몇 개의 행을 건너뛸지
+            SELECT g.*, c.id as counselorId
+            FROM guestbook g
+            JOIN counselor c ON g.counselor_id = c.counselor_id
+            WHERE g.counselor_id = ?
+            ORDER BY g.created_at DESC
+            LIMIT ? OFFSET ?`;
 
         const [rows, fields] = await db.query(sql, [counselorId, limit, offset]);
+
+        // 여기서 rows에는 counselor의 id가 포함됩니다.
+        console.log('findAllByCounselorIdWithPagination 반환 데이터:', rows);
 
         if (db && db.end) { db.end().catch(err => { console.error('DB 연결 종료 중 오류:', err); }); }
 
         return rows;
     } catch (error) {
-        console.log("Guestbook.findAllByPatientIdWithPagination() 쿼리 실행 중 오류: ", error)
+        console.log("Guestbook.findAllByCounselorIdWithPagination() 쿼리 실행 중 오류: ", error);
     }
-}
+};
+
 
 // 상담사 아이디로 상담사가 작성한 방명록의 총 개수 구하기
 exports.countByCounselorId = async (counselorId) => {
