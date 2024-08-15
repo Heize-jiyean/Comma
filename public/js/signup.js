@@ -287,7 +287,7 @@ function checkPassword() {
     }
     // 비밀번호 형식 확인
     else if (!(hasMinLength && hasNumber && hasLetter)) {
-        passwordError.textContent = '8~16자의 영문 대/소문자, 숫자, 특수문자를 사용해 주세요.'
+        passwordError.textContent = '8~16자의 영문 대/소문자, 숫자를 사용해 주세요.'
         passwordError.style.display = 'inline';
         return false;
     }
