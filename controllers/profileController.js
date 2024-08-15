@@ -788,7 +788,7 @@ exports.listMyScraps = async(req, res) => {
                 }
             }
         } else if (loginRole === 'counselor') {
-            const scrappedPatients = await ScrapModel.getScrappedCounselorsByPatientId(loginId);
+            const scrappedPatients = await ScrapModel.getScrappedPatientsByCounselorId(loginId);
             for (patient of scrappedPatients) {
                 const patientUser = await UserModel.getPatientByPatientId(patient.patient_id);
                 if (patientUser) {
