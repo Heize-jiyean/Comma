@@ -39,7 +39,7 @@ exports.register = async (req, res) => {
             const savedArticleId = await ArticleModel.register(articleData);
 
             //추천 시스템 관련
-            await axios.post('http://localhost:5000/embedding', { idx: 0, id: savedArticleId, sentence: articleData.title });
+            await axios.post('http://localhost:8000/embedding', { idx: 0, id: savedArticleId, sentence: articleData.title });
 
             return res.json({ success: true, redirect: `/article/${savedArticleId}` });
         }
@@ -124,7 +124,7 @@ exports.delete = async (req, res) => {
             await ArticleModel.delete(articleId);
 
             // vector 삭제
-            await axios.post('http://localhost:5000/delete_vector', { idx: 0, id: articleId });
+            await axios.post('http://localhost:8000/delete_vector', { idx: 0, id: articleId });
     
             // redirect
             return res.json({ success: true, redirect: `/article` });
@@ -154,7 +154,7 @@ exports.list = async (req, res) => {
         let RecommendPreviews = null;
         if (req.session.user && req.session.user.role == 'patient') {
             const likeData = await ArticleInteractionModel.findLikeByPatient(req.session.user.id);
-            let response = await axios.post('http://localhost:5000/recommend', { likeId: likeData, idx: 1, id: req.session.user.id });
+            let response = await axios.post('http://localhost:8000/recommend', { likeId: likeData, idx: 1, id: req.session.user.id });
             let RecommendID = response.data;
             RecommendPreviews = await ArticleModel.RecommendTop3(RecommendID);
 
@@ -230,7 +230,7 @@ exports.toggleLike = async (req, res) => {
             //추천 시스템 관련
             if (req.session.user.role=='patient') {
                 const likeData = await ArticleInteractionModel.findLikeByPatient(patientId);
-                await axios.post('http://localhost:5000/similarity_like', { pid: patientId, likeId: likeData });
+                await axios.post('http://localhost:8000/similarity_like', { pid: patientId, likeId: likeData });
             }
 
             return res.json({ response: true, liked });

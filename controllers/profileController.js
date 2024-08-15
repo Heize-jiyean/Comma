@@ -608,13 +608,13 @@ exports.accountRemoval = async(req, res) => {
             const diaryData = await DiaryModel.findByPatientId(loginId);
 
             await UserModel.removePatient(loginId);
-            await axios.post('http://localhost:5000/delete_vector', { idx: 1, id: loginId });
-            await axios.post('http://localhost:5000/delete_vectors', { idx: 2, ids: diaryData });
+            await axios.post('http://localhost:8000/delete_vector', { idx: 1, id: loginId });
+            await axios.post('http://localhost:8000/delete_vectors', { idx: 2, ids: diaryData });
         } else if (loginRole === 'counselor') {
             const articleData = await ArticleModel.findByCounselorId(loginId);
 
             await UserModel.removeCounselor(loginId);
-            await axios.post('http://localhost:5000/delete_vectors', { idx: 0, ids: articleData });
+            await axios.post('http://localhost:8000/delete_vectors', { idx: 0, ids: articleData });
         }
 
         req.session.destroy();  // 세션 파괴 처리
