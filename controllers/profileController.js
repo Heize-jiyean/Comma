@@ -114,11 +114,15 @@ exports.counselorProfilePage = async (req, res) => {
         // 상담사가 작성한 최신 아티클 4개 가져오기
         const articles = await ArticleModel.findLatestFourByCounselorId(counselorUser.counselor_id);
 
-        // 상담사가 작성한 최신 방명록 4개 가져오기
-        const guestbooks = await GuestbookModel.findLatestFourByCounselorId(counselorUser.counselor_id);
-
-         // 추가된 코드: guestbooks 데이터를 콘솔에 출력
-         console.log('counselorProfilePage에서 받은 guestbooks:', guestbooks);
+        // 로그인한 사용자에 따라 다른 방명록 데이터 불러오기
+        let guestbooks;
+        if (loginRole === 'counselor') {
+            // 상담사가 작성한 최신 방명록 4개 가져오기
+            guestbooks = await GuestbookModel.findLatestFourByCounselorId(counselorUser.counselor_id);
+        } else if (loginRole === 'patient') {
+            // 상담사가 로그인한 환자에게 작성한 최신 방명록 4개 불러오기
+            guestbooks = await GuestbookModel.findLatestFourToPatient(loginId, counselorUser.counselor_id);
+        }
 
         // 각 방명록 항목에 대해 환자의 닉네임과 이미지 가져오기
         for (let guestbook of guestbooks) {
@@ -153,7 +157,6 @@ exports.counselorProfilePage = async (req, res) => {
     }
 };
 
-
 // 환자 일기 모아보기 페이지 반환
 exports.listAllDiaries = async (req, res) => {
     try {
@@ -162,7 +165,6 @@ exports.listAllDiaries = async (req, res) => {
         const patientUser = await UserModel.getPatientByUserId(patientId);
         if (!patientUser) {
             return res.status(404).render("error", { message: "해당 환자를 찾을 수 없습니다." });// TODO: 없는 환자인 경우 띄울 페이지
-            return;
         }
 
         const role = req.session.user.role;
@@ -182,8 +184,7 @@ exports.listAllDiaries = async (req, res) => {
             });
         }
 
-        //임의로 손댄부분
-        // `isCounselorScrapPatient` 변수 추가
+        // 관심 환자인지 여부 확인
         let isCounselorScrapPatient;
         if (role === 'counselor') {
             isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientId, loginId);
@@ -307,38 +308,52 @@ exports.listAllGuestbooksByCounselor = async (req, res) => {
             return res.status(404).render("error", { message: "해당 상담사를 찾을 수 없습니다." });
         }
 
-        if (loginRole === 'counselor' && loginId === counselorUser.counselor_id) {
-            const limit = 10; // 한 페이지에 보여줄 방명록 수
-            const totalGuestbooks = await GuestbookModel.countByCounselorId(counselorUser.counselor_id);
-            const totalPages = Math.ceil(totalGuestbooks / limit);
+        const limit = 10; // 한 페이지에 보여줄 방명록 수
+        let totalGuestbooks;
+        let totalPages;
+        let guestbooks;
+        let currentPage;
+        
+        if (loginRole === 'counselor') {
+            totalGuestbooks = await GuestbookModel.countByCounselorId(counselorUser.counselor_id);
+            totalPages = Math.ceil(totalGuestbooks / limit);
 
-            let currentPage = req.query.page ? parseInt(req.query.page) : 1;
-            const guestbooks = await GuestbookModel.findAllByCounselorIdWithPagination(counselorUser.counselor_id, currentPage, limit);
+            currentPage = req.query.page ? parseInt(req.query.page) : 1;
+            guestbooks = await GuestbookModel.findAllByCounselorIdWithPagination(counselorUser.counselor_id, currentPage, limit);
 
-            for (let guestbook of guestbooks) {
-                const patient = await UserModel.getPatientByPatientId(guestbook.patient_id);
-                guestbook.patientId = patient ? patient.id : "Unknown";
-                guestbook.patientNickname = patient ? patient.nickname : "Unknown";
-                guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
+        } else if (loginRole === 'patient') {
+            totalGuestbooks = await GuestbookModel.countByPatientIdAndCounselorId(loginId, counselorUser.counselor_id,);
+            totalPages = Math.ceil(totalGuestbooks / limit);
 
-                // 추가: 방명록을 작성한 상담사의 프로필 사진이 제대로 설정되어 있는지 확인
-                guestbook.counselorProfilePicture = counselorUser.profile_picture ? counselorUser.profile_picture : DEFAULT_PROFILE_IMAGE;
-            }
+            currentPage = req.query.page ? parseInt(req.query.page) : 1;
+            guestbooks = await GuestbookModel.findAllByPatientIdAndCounselorIdWithPagination(loginId, counselorUser.counselor_id, currentPage, limit);
+        } 
 
-            res.render("profile/guestbook.ejs", { 
-                counselorUser: counselorUser, 
-                type: 'counselor',  // 현재 보고 있는 프로필이 상담사임을 표시
-                guestbooks: guestbooks,
-                currentPage: currentPage,
-                totalPages: totalPages,
-                loginRole: loginRole
-            });
-            
-        } else {
-            //res.status(403).send("접근 권한이 없습니다.");
-            return res.status(403).render('profile/forbidden.ejs');
+        for (let guestbook of guestbooks) {
+            const patient = await UserModel.getPatientByPatientId(guestbook.patient_id);
+            guestbook.patientId = patient ? patient.id : "Unknown";
+            guestbook.patientNickname = patient ? patient.nickname : "Unknown";
+            guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
+
+            // 추가: 방명록을 작성한 상담사의 프로필 사진이 제대로 설정되어 있는지 확인
+            guestbook.counselorProfilePicture = counselorUser.profile_picture ? counselorUser.profile_picture : DEFAULT_PROFILE_IMAGE;
         }
 
+        let isPatientScrapCounselor;
+        if (loginRole === 'patient') {
+            isPatientScrapCounselor = await ScrapModel.checkPatientScrapCounselor(loginId, counselorUser.counselor_id);
+        }
+
+        res.render("profile/guestbook.ejs", { 
+            counselorUser: counselorUser, 
+            type: 'counselor',  // 현재 보고 있는 프로필이 상담사임을 표시
+            guestbooks: guestbooks,
+            currentPage: currentPage,
+            totalPages: totalPages,
+            loginRole: loginRole,
+            isPatientScrapCounselor: isPatientScrapCounselor
+        });
+        
     } catch (error) {
         console.error("listAllGuestbooksByCounselor 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -662,12 +677,19 @@ exports.charts = async (req, res) => {
             const monthlyPercentages = await EmotionData.calculateMonthlyEmotionPercentages(patientUser);
 
 
+            // 관심 환자인지 여부 확인
+            let isCounselorScrapPatient;
+            if (req.session.user.role === 'counselor') {
+                isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientUser.patient_id, req.session.user.id);
+            }
+
             res.render('profile/emotion-chart', 
                 {patientUser, type: 'patient',
                 lineChartEmotionData: Data, //꺾은선차트
                 doughnutChartEmotionData: Percentages, // 도넛차트
                 barChartData: monthlyPercentages, // 막대차트
-                descriptionEmotions
+                descriptionEmotions,
+                isCounselorScrapPatient
             });
         }
         else return res.render("login/login");
@@ -788,7 +810,7 @@ exports.listMyScraps = async(req, res) => {
                 }
             }
         } else if (loginRole === 'counselor') {
-            const scrappedPatients = await ScrapModel.getScrappedCounselorsByPatientId(loginId);
+            const scrappedPatients = await ScrapModel.getScrappedPatientsByCounselorId(loginId);
             for (patient of scrappedPatients) {
                 const patientUser = await UserModel.getPatientByPatientId(patient.patient_id);
                 if (patientUser) {
@@ -817,6 +839,7 @@ exports.listScrapsOnMe = async(req, res) => {
             for (const counselor of scrappingCounselors) {
                 const counselorUser = await UserModel.getCounselorByCounselorId(counselor.counselor_id);
                 if (counselorUser) {
+                    counselorUser.role = 'counselor';
                     scrapUserList.push(counselorUser);
                 }
             }
@@ -825,6 +848,7 @@ exports.listScrapsOnMe = async(req, res) => {
             for (const patient of scrappingPatients) {
                 const patientUser = await UserModel.getPatientByPatientId(patient.patient_id);
                 if (patientUser) {
+                    patientUser.role = 'patient';
                     scrapUserList.push(patientUser);
                 }
             }

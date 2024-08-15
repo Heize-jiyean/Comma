@@ -5,6 +5,7 @@ const UserModel = require('../models/User');
 const fetch = require('node-fetch'); // node-fetch 모듈을 사용하여 fetch를 구현
 const axios = require('axios');
 
+const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e"
 function setDefaultImage(image_url) {
     if (image_url == null) image_url = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/images%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-07-10%20171637.png?alt=media&token=d979b5b3-0d0b-47da-a72c-2975caf52acd";
     return image_url;
@@ -58,7 +59,8 @@ exports.view = async (req, res) => {
 
 
         const article = await ArticleModel.findById(articleId);
-        const counselor = await UserModel.getCounselorByCounselorId(article.counselor_id); 
+        let counselor = await UserModel.getCounselorByCounselorId(article.counselor_id); 
+        counselor.profile_picture = counselor.profile_picture ? counselor.profile_picture : DEFAULT_PROFILE_IMAGE;
 
         let htmlContent = '';
         if (article.content) {
