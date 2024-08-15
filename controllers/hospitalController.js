@@ -112,6 +112,6 @@ exports.checkLoginAndLoadPage = (req, res) => {
         this.loadingMainPage(req, res);
     } else {
         // 사용자가 로그인하지 않은 경우
-        res.render('login/login-required');
+        res.render('login/login-required-hospital');
     }
 };
