@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
             const savedDiaryId = await DiaryModel.register(diaryData);
 
             //추천 시스템 관련
-            await axios.post('http://localhost:5000/embedding', { idx: 2, id: savedDiaryId, sentence: diaryData.title+diaryData.content });
+            await axios.post('http://localhost:8000/embedding', { idx: 2, id: savedDiaryId, sentence: diaryData.title+diaryData.content });
 
             res.json({ success: true, redirect: `/diary/${savedDiaryId}` }); // 응답반환
 
@@ -94,7 +94,7 @@ exports.view = async (req, res) => {
             let RecommendPreviews = null;
             if (req.session.user && req.session.user.role == 'patient') {
                 const likeData = await ArticleInteractionModel.findLikeByPatient(req.session.user.id);
-                let response = await axios.post('http://localhost:5000/recommend', { likeId: likeData, idx: 2, id: diaryId });
+                let response = await axios.post('http://localhost:8000/recommend', { likeId: likeData, idx: 2, id: diaryId });
                 let RecommendID = response.data;
                 RecommendPreviews = await ArticleModel.RecommendTop3(RecommendID);
     
@@ -171,7 +171,7 @@ exports.delete = async (req, res) => {
             await DiaryModel.delete(diaryId);
 
             // vector 삭제
-            await axios.post('http://localhost:5000/delete_vector', { idx: 2, id: diaryId });
+            await axios.post('http://localhost:8000/delete_vector', { idx: 2, id: diaryId });
     
             // redirect
             return res.json({ success: true, redirect: `/profile/patient/${patient.id}/diaries` });
