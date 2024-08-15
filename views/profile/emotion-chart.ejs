@@ -116,11 +116,16 @@
         const urlParams = new URLSearchParams(window.location.search);
         const queryYear = urlParams.get('year');
         const queryMonth = urlParams.get('month');
-
+        let currSelected;
         // 쿼리 파라미터가 존재하면 해당 값을 기본 선택값으로 설정
         if (queryYear && queryMonth) {
             currentYear = parseInt(queryYear);
             currentMonth = parseInt(queryMonth);
+
+            currSelected = `${currentYear}년 ${currentMonth}월`;
+        }
+        else {
+            currSelected = '최근 30일';
         }
 
         const months = [];
@@ -131,6 +136,7 @@
             for (let month = startMonth; month <= endMonth; month++) {
                 months.push(`${year}년 ${month}월`);
             }
+            months.push(`최근 30일`);
         }
 
         // 옵션을 콤보박스에 추가하고 현재 연도와 월로 기본값 설정
@@ -141,7 +147,7 @@
             select.appendChild(option);
 
             // 쿼리 파라미터 값 또는 현재 날짜로 기본 선택값 설정
-            if (month === `${currentYear}년 ${currentMonth}월`) {
+            if (month === currSelected) {
                 option.selected = true;
             }
         });
@@ -151,18 +157,14 @@
         const select = document.getElementById('month-select');
         const patient_id = "<%= patientUser.id %>";
         const selected = select.value;
+
+        if (selected == '최근 30일') {
+            window.location.href = `/profile/patient/${patient_id}/emotion-chart`;
+        }
+
         const [selectedYear, selectedMonthPart] = selected.split('년 ');
         const selectedMonth = selectedMonthPart.replace('월', '').trim();
 
         window.location.href = `/profile/patient/${patient_id}/emotion-chart?year=${selectedYear}&month=${selectedMonth}`;
-
-        // fetch(`/profile/patient/${patient_id}/line-chart-partial?year=${selectedYear}&month=${selectedMonth}`)
-        //     .then(response => response.text())
-        //     .then(html => {
-        //         document.getElementById('line-chart-container').innerHTML = html;
-        //     })
-        //     .catch(error => {
-        //         console.error('Error fetching emotion data:', error);
-        //     });
     }
 </script>
