@@ -764,14 +764,8 @@ exports.article = async (req, res) => {
                     preview.thumbnail_url = setDefaultImage(preview.thumbnail_url);
                 });
             }
-
-            // 관심 환자인지 여부 확인
-            let isCounselorScrapPatient;
-            if (req.session.user.role === 'counselor') {
-                isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patient_id, req.session.user.id);
-            }
             
-            res.render('profile/article', {patientUser, type: 'patient', Previews, currentPage, totalPages, isCounselorScrapPatient});
+            res.render('profile/article', {patientUser, type: 'patient', Previews, currentPage, totalPages});
         }
         else return res.render("login/login");
     } catch (error) {
