@@ -1,7 +1,7 @@
 const DiaryModel = require('../models/Diary');
 const axios = require('axios');
 
-// 여러날자의 일기의 감정을 분류
+// 여러날짜의 일기의 감정을 분류
 exports.calculateEmotionPercentages = (Data) => {
     const total = { joy: 0, surprise: 0, anger: 0, anxiety: 0, hurt: 0, sadness: 0 };
     Data.forEach(entry => {
