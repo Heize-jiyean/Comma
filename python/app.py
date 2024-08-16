@@ -197,11 +197,13 @@ def delete_vectors():
         idx = data['idx']
         ids = data['ids']
         
-        qdrant.delete(
-            collection_name=collection_name[idx],
-            points_selector=ids,
-            wait=True
-        )
+        if len(ids) > 0:
+        
+            qdrant.delete(
+                collection_name=collection_name[idx],
+                points_selector=ids,
+                wait=True
+            )
 
         return jsonify({'message': 'Success'}), 200
     else:
