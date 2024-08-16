@@ -177,15 +177,14 @@ exports.delete = async (req, res) => {
             return;
         }
 
-        const patientUserId = await GuestbookModel.getPatientIdByGuestbookId(guestbookId);  // 방명록에서 patient_id 추출
+        // 상담사의 id를 가져오기 위해 counselor_id로 조회
+        const counselor = await GuestbookModel.getCounselorID(guestbook.counselor_id);
+        const counselorId = counselor.id;  // 한글/영문 상담사 id
+
         const deletionResult = await GuestbookModel.delete(guestbookId);
         
         if (deletionResult > 0) {
-            if (patientUserId) {
-                return res.json({success: true, redirect: `/profile/patient/${patientUserId}/guestbooks`});
-            } else {
-                res.status(404).send("환자 정보를 찾을 수 없습니다.");
-            }
+            return res.json({success: true, redirect: `/profile/counselor/${counselorId}/guestbooks`});
         } else {
             res.status(404).send("삭제할 방명록을 찾을 수 없습니다.");
         }
@@ -194,6 +193,7 @@ exports.delete = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 };
+
 
 // 댓글작성
 exports.addComment = async (req, res) => {
