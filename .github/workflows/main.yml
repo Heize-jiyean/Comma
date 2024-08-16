@@ -8,73 +8,33 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-   
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies
-        run: npm ci
-
-      # Authenticate to Google Cloud
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      # Setup Google Cloud SDK
-      - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          version: '416.0.0'
           project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
 
-      # Configure Docker to use the gcloud command-line tool as a credential helper
-      - run: |
-          gcloud --quiet auth configure-docker
+      - name: Configure Docker
+        run: gcloud auth configure-docker --quiet
 
-      # Build the Docker image
-      - name: Build
+      - name: Build Docker image
+        run: docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_INSTANCE_NAME }}-image:${{ github.sha }} .
+
+      - name: Push Docker image to GCR
+        run: docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_INSTANCE_NAME }}-image:${{ github.sha }}
+
+      - name: Deploy to GCE
         run: |
-          docker build --tag "gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_INSTANCE_NAME }}-image:${{ github.sha }}" .
+          gcloud compute instances update-container ${{ secrets.GCP_INSTANCE_NAME }} \
+            --zone ${{ secrets.GCP_INSTANCE_ZONE }} \
+            --container-image gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_INSTANCE_NAME }}-image:${{ github.sha }}
 
-      # Push the Docker image to Google Container Registry
-      - name: Publish
+      - name: Verify deployment
         run: |
-          docker push "gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_INSTANCE_NAME }}-image:${{ github.sha }}"
-
-      # Create JSON file for metadata
-      - name: Create metadata file
-        run: |
-          echo '{
-            "spec": {
-              "containers": [
-                {
-                  "name": "my-container",
-                  "image": "gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_INSTANCE_NAME }}-image:${{ github.sha }}"
-                }
-              ]
-            }
-          }' > gce-container-declaration.json
-
-      # Add or update container metadata
-      - name: Add or update container metadata
-        run: |
-          gcloud compute instances add-metadata "${{ secrets.GCP_INSTANCE_NAME }}" \
-            --zone "${{ secrets.GCP_INSTANCE_ZONE }}" \
-            --metadata-from-file gce-container-declaration=gce-container-declaration.json
-
-      # Update the container
-      - name: Update container
-        run: |
-          gcloud compute instances update-container "${{ secrets.GCP_INSTANCE_NAME }}" \
-            --zone "${{ secrets.GCP_INSTANCE_ZONE }}" \
-            --container-image "gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_INSTANCE_NAME }}-image:${{ github.sha }}"
+          gcloud compute ssh --zone ${{ secrets.GCP_INSTANCE_ZONE }} ${{ secrets.GCP_INSTANCE_NAME }} -- \
+            'docker ps'
