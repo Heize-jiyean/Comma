@@ -131,8 +131,6 @@ exports.counselorProfilePage = async (req, res) => {
             guestbook.patientNickname = patient ? patient.nickname : "Unknown";
             guestbook.patientProfilePicture = patient ? patient.profile_picture : null;
         }
-        // 추천 아티클 가져오기
-        //const RecommendPreviews = await ArticleModel.getRecommendPreviewsByPatientId(loginId);  // 이 함수는 실제 데이터베이스 모델에 따라 다름
 
         // 관심 상담사인지 여부 확인
         let isPatientScrapCounselor;
@@ -148,7 +146,6 @@ exports.counselorProfilePage = async (req, res) => {
             guestbooks: guestbooks,
             loginRole: loginRole,
             isPatientScrapCounselor: isPatientScrapCounselor,
-            //RecommendPreviews: RecommendPreviews // 추가된 변수
         });
 
     } catch (error) {
@@ -198,19 +195,8 @@ exports.listAllDiaries = async (req, res) => {
             currentPage, 
             totalPages,
             loginRole: role,
-            isCounselorScrapPatient: isCounselorScrapPatient // 추가
+            isCounselorScrapPatient: isCounselorScrapPatient 
         });
-
-
-        // res.render('profile/diary', { 
-        //     patientUser, 
-        //     type: 'patient', 
-        //     Previews, 
-        //     currentPage, 
-        //     totalPages, 
-        //     loginRole: role
-        // });
-
     } catch (error) {
         console.error("listAllDiaries 오류:", error);
         res.status(500).send("서버 오류가 발생했습니다.");
@@ -259,7 +245,6 @@ exports.listAllGuestbooks = async (req, res) => {
                 isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
             }
 
-            //임의로 손댄부분(원본주석,아래코드임의작성)
             // 렌더링 부분에서 변수 전달
             res.render("profile/guestbook.ejs", { 
                 patientUser: patientUser, 
@@ -270,16 +255,6 @@ exports.listAllGuestbooks = async (req, res) => {
                 loginRole: loginRole,
                 isCounselorScrapPatient: isCounselorScrapPatient // 추가
             });
-
-            // res.render("profile/guestbook.ejs", { 
-            //     patientUser: patientUser, 
-            //     type: 'patient', 
-            //     guestbooks: guestbooks,
-            //     currentPage: currentPage,
-            //     totalPages: totalPages,
-            //     loginRole: loginRole 
-            // });
-
         } else {
             res.status(403).send("접근 권한이 없습니다.");
         }
