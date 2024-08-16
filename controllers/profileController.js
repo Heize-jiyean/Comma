@@ -187,7 +187,7 @@ exports.listAllDiaries = async (req, res) => {
         // 관심 환자인지 여부 확인
         let isCounselorScrapPatient;
         if (role === 'counselor') {
-            isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientId, loginId);
+            isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
         }
 
         // 렌더링 부분에서 변수 전달
@@ -256,7 +256,7 @@ exports.listAllGuestbooks = async (req, res) => {
             // `isCounselorScrapPatient` 변수 추가
             let isCounselorScrapPatient;
             if (loginRole === 'counselor') {
-                isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientId, loginId);
+                isCounselorScrapPatient = await ScrapModel.checkCounselorScrapPatient(patientUser.patient_id, loginId);
             }
 
             //임의로 손댄부분(원본주석,아래코드임의작성)
