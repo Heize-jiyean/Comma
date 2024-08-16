@@ -150,7 +150,7 @@
                 <% comments.forEach(comment => { %>
                     <div class="comment">
                         <div class="comment-author">
-                            <img src="<%= comment.author_image %>" alt="Author Image">
+                            <img src="<%= comment.author_image ? comment.author_image : 'https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e' %>" alt="Author Image">
                             <span><%= comment.author_name %></span>
                             <span class="comment-date"><%= new Date(comment.created_at).toLocaleString('ko-KR') %></span>
                         </div>

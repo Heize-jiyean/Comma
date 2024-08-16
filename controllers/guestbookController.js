@@ -3,6 +3,16 @@ const UserModel = require('../models/User');
 const CommentModel = require('../models/Comment');
 const AccessCheck = require('../utils/authUtils');
 
+const DEFAULT_PROFILE_IMAGE = "https://firebasestorage.googleapis.com/v0/b/comma-5a85c.appspot.com/o/profile%2Fdefault_profile_photo.png?alt=media&token=7f2397c8-76f4-49b8-9c16-52b9ab242a9e";
+
+function setDefaultImage(image_url) {
+    if (!image_url || image_url.trim() === '') {
+        return DEFAULT_PROFILE_IMAGE;
+    }
+    return image_url;
+}
+
+
 // 방명록 작성 페이지 반환
 exports.new = async (req, res) => {
     // 로그인하지 않은 사용자가 접근할 경우
@@ -85,7 +95,18 @@ exports.view = async (req, res) => {
 
         let counselor = await GuestbookModel.getCounselorID(guestbook.counselor_id);
         guestbook.author_name = counselor.nickname + ' 상담사';
-        guestbook.author_profile_image = counselor.profile_picture;
+        guestbook.author_profile_image = setDefaultImage(counselor.profile_picture);  // 기본 이미지 설정
+
+        // 댓글 작성자의 프로필 이미지 설정
+        for (let comment of comments) {
+            if (comment.author_role === 'counselor') {
+                let counselor = await UserModel.getCounselorByCounselorId(comment.author_id);
+                comment.author_image = setDefaultImage(counselor.profile_picture);
+            } else if (comment.author_role === 'patient') {
+                let patient = await UserModel.getPatientByPatientId(comment.author_id);
+                comment.author_image = setDefaultImage(patient.profile_picture);
+            }
+        }
 
         const loggedInUser = req.session.user;
         const isOwner = loggedInUser && (loggedInUser.role === 'counselor' && loggedInUser.id === guestbook.counselor_id);
@@ -104,6 +125,7 @@ exports.view = async (req, res) => {
         res.status(500).send("서버 오류가 발생했습니다.");
     }
 };
+
 
 // 방명록 수정 페이지 반환
 exports.edit = async (req, res) => {
